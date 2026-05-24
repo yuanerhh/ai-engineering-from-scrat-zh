@@ -1,37 +1,37 @@
 [
   {
-    "question": "Why is neural network debugging harder than traditional software debugging?",
-    "options": ["Neural networks use different programming languages", "Networks can produce wrong outputs without any error messages or crashes -- the code runs but the results are silently incorrect", "Neural networks can't be tested", "There are no debugging tools for neural networks"],
+    "question": "为什么神经网络调试比传统软件调试更难？",
+    "options": ["神经网络使用不同的编程语言", "网络可以在没有任何错误消息或崩溃的情况下产生错误输出——代码运行但结果悄悄地是错误的", "神经网络无法被测试", "没有用于神经网络的调试工具"],
     "correct": 1,
-    "explanation": "Traditional bugs crash or throw exceptions. Neural network bugs produce a number that's just wrong -- a loss that doesn't decrease, accuracy that plateaus, or outputs that are subtly incorrect. No error message tells you what went wrong.",
+    "explanation": "传统 bug 会崩溃或抛出异常。神经网络 bug 产生一个只是错误的数字——损失不下降、准确率停滞，或者输出细微地不正确。没有错误消息告诉你什么出了问题。",
     "stage": "pre"
   },
   {
-    "question": "What is the 'overfit one batch' debugging technique?",
-    "options": ["Training on the full dataset until it overfits", "Training on a single small batch until the loss reaches near-zero, verifying the model can memorize at least a few examples", "Using a very large batch size", "Overfitting the validation set"],
+    "question": "什么是"用一个批次过拟合"调试技术？",
+    "options": ["在完整数据集上训练直到过拟合", "在单个小批次上训练直到损失接近零，验证模型至少能记忆几个样本", "使用非常大的批量大小", "对验证集进行过拟合"],
     "correct": 1,
-    "explanation": "If your model can't memorize a tiny batch (e.g., 4-8 samples) to near-zero loss, something is fundamentally broken: wrong architecture, broken loss function, or incorrect training loop. This is the first diagnostic to run.",
+    "explanation": "如果你的模型不能将一个微小批次（例如 4-8 个样本）记忆到接近零损失，说明有根本性的问题：错误的架构、损坏的损失函数或不正确的训练循环。这是首先要运行的诊断测试。",
     "stage": "pre"
   },
   {
-    "question": "Your loss is NaN after a few training steps. What is the most likely cause?",
-    "options": ["The dataset is too small", "Exploding gradients or numerical overflow, often from a learning rate that's too high or missing gradient clipping", "The model has too few parameters", "The activation function is wrong"],
+    "question": "几步训练后损失变成 NaN。最可能的原因是什么？",
+    "options": ["数据集太小", "梯度爆炸或数值溢出，通常来自学习率太高或缺少梯度裁剪", "模型参数太少", "激活函数选择错误"],
     "correct": 1,
-    "explanation": "NaN loss typically comes from numerical overflow: gradients explode, weights grow unbounded, and operations like log(0) or exp(1000) produce infinity/NaN. Lower the learning rate or add gradient clipping.",
+    "explanation": "NaN 损失通常来自数值溢出：梯度爆炸、权重无界增长，以及 log(0) 或 exp(1000) 等操作产生无穷大/NaN。降低学习率或添加梯度裁剪。",
     "stage": "post"
   },
   {
-    "question": "Your training loss decreases but validation loss stays flat from the start. What does this indicate?",
-    "options": ["The model is overfitting", "The model is learning training data patterns but they don't generalize -- likely a data pipeline issue (train/val data mismatch) or severe overfitting", "The learning rate is too low", "The model needs more layers"],
+    "question": "你的训练损失在下降，但验证损失从一开始就保持不动。这说明什么？",
+    "options": ["模型在过拟合", "模型在学习训练数据模式，但它们不能泛化——可能是数据流程问题（训练/验证数据不匹配）或严重过拟合", "学习率太低", "模型需要更多层"],
     "correct": 1,
-    "explanation": "If validation loss never improves, the model is either memorizing training noise (overfitting), or there's a data pipeline bug where train and validation distributions are fundamentally different.",
+    "explanation": "如果验证损失从未改善，模型要么在记忆训练噪声（过拟合），要么存在数据流程 bug，训练和验证分布从根本上不同。",
     "stage": "post"
   },
   {
-    "question": "What should you check first when your loss curve is completely flat (loss doesn't decrease at all)?",
-    "options": ["Try a different architecture", "Verify gradients are nonzero, the learning rate is high enough, and the loss function actually depends on the model's predictions", "Add more training data", "Switch to a different optimizer"],
+    "question": "当损失曲线完全平坦（损失完全不下降）时，你首先应该检查什么？",
+    "options": ["尝试不同的架构", "验证梯度非零、学习率足够高，以及损失函数实际上依赖于模型的预测", "添加更多训练数据", "切换到不同的优化器"],
     "correct": 1,
-    "explanation": "A flat loss means the model isn't updating. Common causes: zero gradients (dead neurons, detached tensors), learning rate too small, or a loss function that doesn't flow gradients to the model (e.g., using .item() before .backward()).",
+    "explanation": "平坦的损失意味着模型没有在更新。常见原因：零梯度（死亡神经元、分离的张量）、学习率太小，或损失函数不向模型流传梯度（例如，在 .backward() 之前使用 .item()）。",
     "stage": "post"
   }
 ]

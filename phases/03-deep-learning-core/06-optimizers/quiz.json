@@ -1,37 +1,37 @@
 [
   {
-    "question": "What problem does momentum solve in gradient descent?",
-    "options": ["It reduces memory usage", "It dampens oscillation by accumulating past gradients, accelerating movement in consistent directions", "It eliminates the need for a learning rate", "It prevents overfitting"],
+    "question": "动量解决了梯度下降中的什么问题？",
+    "options": ["它减少了内存使用", "它通过积累过去的梯度来抑制振荡，在一致方向上加速运动", "它消除了对学习率的需求", "它防止过拟合"],
     "correct": 1,
-    "explanation": "In narrow valleys, gradients oscillate across the valley while making slow progress along it. Momentum accumulates past gradients: consistent directions amplify while oscillating directions cancel, giving smoother, faster convergence.",
+    "explanation": "在细长山谷中，梯度横向振荡，沿途进展缓慢。动量积累过去的梯度：一致方向放大，振荡方向抵消，给出更平滑、更快的收敛。",
     "stage": "pre"
   },
   {
-    "question": "What is the key difference between Adam and AdamW?",
-    "options": ["AdamW uses a higher learning rate", "AdamW applies weight decay directly to weights instead of through the gradient, giving proper regularization", "AdamW doesn't use momentum", "AdamW only works with transformers"],
+    "question": "Adam 和 AdamW 之间的关键区别是什么？",
+    "options": ["AdamW 使用更高的学习率", "AdamW 直接将权重衰减应用于权重而非通过梯度，提供正确的正则化", "AdamW 不使用动量", "AdamW 只适用于 transformer"],
     "correct": 1,
-    "explanation": "In Adam + L2, the adaptive learning rate scales the regularization term differently per parameter. AdamW decouples weight decay from the gradient update, applying uniform shrinkage regardless of gradient statistics.",
+    "explanation": "在 Adam + L2 中，自适应学习率对每个参数的正则化项缩放程度不同。AdamW 将权重衰减与梯度更新解耦，无论梯度统计如何，都应用均匀缩减。",
     "stage": "pre"
   },
   {
-    "question": "Why does Adam use bias correction in early training steps?",
-    "options": ["To prevent overfitting", "The moment estimates are initialized to zero, so early values are biased toward zero; correction compensates for this cold start", "To clip large gradients", "To speed up convergence"],
+    "question": "为什么 Adam 在早期训练步骤中使用偏置校正？",
+    "options": ["防止过拟合", "矩估计被初始化为零，因此早期值偏向零；校正补偿了这种冷启动", "裁剪大梯度", "加速收敛"],
     "correct": 1,
-    "explanation": "At step 1 with beta1=0.9, m_1 = 0.1 * gradient (10x too small). Dividing by (1 - 0.9^1) = 0.1 corrects this to the actual gradient. The correction becomes negligible after ~50 steps.",
+    "explanation": "第 1 步，beta1=0.9 时，m_1 = 0.1 * gradient（小了 10 倍）。除以 (1 - 0.9^1) = 0.1 将其校正为实际梯度。约 50 步后校正变得可以忽略不计。",
     "stage": "post"
   },
   {
-    "question": "What are the standard default hyperparameters for Adam?",
+    "question": "Adam 的标准默认超参数是什么？",
     "options": ["lr=0.1, beta1=0.5, beta2=0.5", "lr=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8", "lr=0.01, beta1=0.99, beta2=0.99", "lr=0.0001, beta1=0.8, beta2=0.9"],
     "correct": 1,
-    "explanation": "The original Adam paper (Kingma & Ba, 2014) recommended lr=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8. These defaults work well for most problems.",
+    "explanation": "原始 Adam 论文（Kingma & Ba，2014）推荐 lr=0.001，beta1=0.9，beta2=0.999，epsilon=1e-8。这些默认值对大多数问题有效。",
     "stage": "post"
   },
   {
-    "question": "Which optimizer is the modern default for training transformers and LLMs?",
-    "options": ["Vanilla SGD", "SGD with momentum", "RMSProp", "AdamW"],
+    "question": "哪种优化器是训练 transformer 和大语言模型的现代默认选择？",
+    "options": ["普通 SGD", "带动量的 SGD", "RMSProp", "AdamW"],
     "correct": 3,
-    "explanation": "AdamW (Adam with decoupled weight decay) is used to train BERT, GPT, LLaMA, and virtually all modern transformers. It combines adaptive learning rates with proper weight decay regularization.",
+    "explanation": "AdamW（带解耦权重衰减的 Adam）用于训练 BERT、GPT、LLaMA 和几乎所有现代 transformer。它将自适应学习率与正确的权重衰减正则化相结合。",
     "stage": "post"
   }
 ]

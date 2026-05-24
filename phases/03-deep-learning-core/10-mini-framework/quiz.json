@@ -1,37 +1,37 @@
 [
   {
-    "question": "What three responsibilities does the Module abstraction have in a deep learning framework?",
-    "options": ["Load data, preprocess data, augment data", "forward() for computation, backward() for gradients, parameters() for trainable weights", "Compile, optimize, deploy", "Tokenize, embed, decode"],
+    "question": "深度学习框架中的 Module 抽象有哪三个职责？",
+    "options": ["加载数据、预处理数据、增强数据", "forward() 用于计算，backward() 用于梯度，parameters() 用于可训练权重", "编译、优化、部署", "分词、嵌入、解码"],
     "correct": 1,
-    "explanation": "Every Module implements forward() to compute output, backward() to propagate gradients, and parameters() to expose trainable weights. This uniform interface lets any module be composed with any other.",
+    "explanation": "每个 Module 实现 forward() 来计算输出，backward() 来传播梯度，parameters() 来暴露可训练权重。这种统一接口让任何模块都可以与任何其他模块组合。",
     "stage": "pre"
   },
   {
-    "question": "Why does Sequential process modules in reverse order during the backward pass?",
-    "options": ["It's arbitrary -- either direction works", "Gradients flow from the loss backward through the network, so the last layer computes gradients first", "Reverse order uses less memory", "It prevents gradient explosion"],
+    "question": "为什么 Sequential 在反向传播时以逆序处理模块？",
+    "options": ["这是任意的——任意方向都可以", "梯度从损失向网络反向流动，所以最后一层先计算梯度", "逆序使用更少内存", "它防止梯度爆炸"],
     "correct": 1,
-    "explanation": "The backward pass starts at the loss and propagates gradients toward the input. The last layer receives the loss gradient first, computes its local gradients, and passes them to the previous layer.",
+    "explanation": "反向传播从损失开始，将梯度向输入传播。最后一层首先接收损失梯度，计算其局部梯度，然后将其传递给前一层。",
     "stage": "pre"
   },
   {
-    "question": "Why is optimizer.zero_grad() a separate call instead of being done automatically?",
-    "options": ["It's a PyTorch design mistake", "It allows gradient accumulation across multiple batches before taking a single optimizer step", "It saves memory", "It makes debugging easier"],
+    "question": "为什么 optimizer.zero_grad() 是一个单独的调用而不是自动完成？",
+    "options": ["这是 PyTorch 的设计失误", "它允许在执行一次优化器步骤前跨多个批次累积梯度", "它节省内存", "它使调试更容易"],
     "correct": 1,
-    "explanation": "Separating zero_grad from step enables gradient accumulation: you can run backward() multiple times (across mini-batches) and sum the gradients before calling step(). This simulates larger batch sizes.",
+    "explanation": "将 zero_grad 与 step 分离可以实现梯度累积：你可以多次运行 backward()（跨小批次）并在调用 step() 前累加梯度。这模拟了更大的批量。",
     "stage": "post"
   },
   {
-    "question": "What is the correct order of operations in a training loop?",
-    "options": ["backward, forward, zero_grad, step", "forward, loss, zero_grad, backward, step", "zero_grad, forward, loss, backward, step", "forward, zero_grad, backward, loss, step"],
+    "question": "训练循环中操作的正确顺序是什么？",
+    "options": ["backward、forward、zero_grad、step", "forward、loss、zero_grad、backward、step", "zero_grad、forward、loss、backward、step", "forward、zero_grad、backward、loss、step"],
     "correct": 2,
-    "explanation": "The standard pattern: zero_grad (clear old gradients), forward (compute predictions), loss (compute scalar loss), backward (compute gradients), step (update parameters). Getting this order wrong causes subtle bugs.",
+    "explanation": "标准模式：zero_grad（清除旧梯度）、forward（计算预测值）、loss（计算标量损失）、backward（计算梯度）、step（更新参数）。顺序错误会导致细微的 bug。",
     "stage": "post"
   },
   {
-    "question": "What is the role of the DataLoader in the framework?",
-    "options": ["It trains the model", "It splits data into batches and optionally shuffles between epochs for mini-batch gradient descent", "It computes the loss function", "It initializes the weights"],
+    "question": "DataLoader 在框架中的作用是什么？",
+    "options": ["它训练模型", "它将数据分成批次，并可以在轮次之间随机打乱，用于小批量梯度下降", "它计算损失函数", "它初始化权重"],
     "correct": 1,
-    "explanation": "The DataLoader handles two practical concerns: batching (you can't fit all data in memory) and shuffling (random order prevents the model from memorizing data sequence).",
+    "explanation": "DataLoader 处理两个实际问题：批处理（你无法将所有数据放入内存）和打乱（随机顺序防止模型记忆数据序列）。",
     "stage": "post"
   }
 ]
