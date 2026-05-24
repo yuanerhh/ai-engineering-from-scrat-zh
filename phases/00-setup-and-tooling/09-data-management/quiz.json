@@ -2,38 +2,38 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "Why is it important to have separate train, validation, and test splits in machine learning?",
-      "options": ["To make the dataset smaller so training is faster", "To evaluate model performance on unseen data and prevent overfitting", "To ensure each split uses a different file format", "To distribute data across multiple GPUs"],
+      "question": "为什么在机器学习中要将数据划分为训练集、验证集和测试集？",
+      "options": ["为了让数据集更小，从而加快训练速度", "为了在未见过的数据上评估模型性能并防止过拟合", "为了确保每个划分使用不同的文件格式", "为了将数据分布到多个 GPU 上"],
       "correct": 1,
-      "explanation": "The training set teaches the model, the validation set tunes hyperparameters during training, and the test set provides a final unbiased evaluation on data the model has never seen."
+      "explanation": "训练集用于模型学习，验证集在训练过程中调整超参数，测试集提供最终的无偏评估，评估的是模型从未见过的数据。"
     },
     {
       "stage": "pre",
-      "question": "What is the Hugging Face Hub primarily used for in AI/ML workflows?",
-      "options": ["Hosting and sharing datasets, models, and ML artifacts", "Running GPU training jobs in the cloud", "Managing Python virtual environments", "Version controlling source code like GitHub"],
+      "question": "Hugging Face Hub 在 AI/ML 工作流中主要用来做什么？",
+      "options": ["托管和共享数据集、模型及 ML 产出", "在云端运行 GPU 训练任务", "管理 Python 虚拟环境", "像 GitHub 一样进行源代码版本控制"],
       "correct": 0,
-      "explanation": "Hugging Face Hub is a platform for hosting and sharing pre-trained models, datasets, and ML demos. The 'datasets' library provides a standard way to load data from it."
+      "explanation": "Hugging Face Hub 是托管和共享预训练模型、数据集和 ML 演示的平台，'datasets' 库提供了从中加载数据的标准方式。"
     },
     {
       "stage": "post",
-      "question": "What advantage does the Parquet format have over CSV for storing ML datasets?",
-      "options": ["Parquet files are human-readable in any text editor", "Parquet uses columnar storage for smaller file sizes and faster read speeds", "Parquet supports more data types than CSV", "Parquet files can be edited in spreadsheet applications"],
+      "question": "Parquet 格式相比 CSV 存储机器学习数据集有什么优势？",
+      "options": ["Parquet 文件可以在任意文本编辑器中以人类可读格式打开", "Parquet 采用列式存储，文件更小，读取更快", "Parquet 支持比 CSV 更多的数据类型", "Parquet 文件可以在电子表格应用中编辑"],
       "correct": 1,
-      "explanation": "Parquet is a columnar binary format that compresses better than CSV and enables fast column-level reads. It is the preferred storage format for ML datasets."
+      "explanation": "Parquet 是列式二进制格式，比 CSV 压缩效果更好，支持快速的列级读取，是机器学习数据集的首选存储格式。"
     },
     {
       "stage": "post",
-      "question": "What does 'streaming=True' do when loading a dataset with the Hugging Face datasets library?",
-      "options": ["Downloads the dataset faster using parallel connections", "Loads data row by row without downloading the full dataset to disk", "Converts the dataset to a streaming video format", "Enables real-time updates as new data is added to the Hub"],
+      "question": "使用 Hugging Face datasets 库加载数据集时，'streaming=True' 有什么作用？",
+      "options": ["使用并行连接更快地下载数据集", "逐行加载数据，无需将完整数据集下载到磁盘", "将数据集转换为流媒体视频格式", "当 Hub 上有新数据添加时启用实时更新"],
       "correct": 1,
-      "explanation": "Streaming mode creates an IterableDataset that fetches rows on demand. Memory usage stays constant regardless of dataset size, which is essential for datasets too large to fit on disk."
+      "explanation": "流式模式创建一个按需获取行数据的 IterableDataset，无论数据集大小内存使用量保持不变，这对于太大无法存入磁盘的数据集至关重要。"
     },
     {
       "stage": "post",
-      "question": "When should you use DVC (Data Version Control) instead of just .gitignore for large files?",
-      "options": ["When your dataset is smaller than 1 MB", "When you need to reproduce exact experiments across machines with versioned data", "When you are working alone on a personal project", "When you only have CSV files in your project"],
+      "question": "什么情况下应该使用 DVC（数据版本控制）而不是仅用 .gitignore 来处理大文件？",
+      "options": ["当数据集小于 1 MB 时", "当需要跨机器使用版本化数据复现精确实验时", "当你独立进行个人项目时", "当项目中只有 CSV 文件时"],
       "correct": 1,
-      "explanation": "DVC tracks data versions with small pointer files in git while storing the actual data in remote storage (S3, GCS). It ensures anyone can reproduce your exact experiment with the same data."
+      "explanation": "DVC 在 git 中用小型指针文件追踪数据版本，同时将实际数据存储在远程存储（S3、GCS）中，确保任何人都能用相同的数据复现你的精确实验。"
     }
   ]
 }

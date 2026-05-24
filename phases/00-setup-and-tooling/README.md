@@ -1,5 +1,5 @@
-# Phase 0: Setup & Tooling
+# 阶段 0：环境与工具
 
-> Get your environment ready for everything that follows.
+> 为后续一切内容做好环境准备。
 
-See [ROADMAP.md](../../ROADMAP.md) for the full lesson plan.
+完整课程计划见 [ROADMAP.md](../../ROADMAP.md)。

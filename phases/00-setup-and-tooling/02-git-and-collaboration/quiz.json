@@ -2,38 +2,38 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "What does 'version control' primarily help you do?",
-      "options": ["Speed up code execution", "Track changes to files over time and collaborate with others", "Compress files to save disk space", "Automatically fix bugs in your code"],
+      "question": "版本控制主要帮助你做什么？",
+      "options": ["加快代码执行速度", "追踪文件随时间的变更并与他人协作", "压缩文件以节省磁盘空间", "自动修复代码中的 Bug"],
       "correct": 1,
-      "explanation": "Version control systems like git track every change made to files, allowing you to revert to previous states and collaborate with others on the same codebase."
+      "explanation": "git 等版本控制系统追踪对文件的每一次更改，让你可以回退到之前的状态，并与他人在同一代码库上协作。"
     },
     {
       "stage": "pre",
-      "question": "What is a 'repository' in the context of software development?",
-      "options": ["A cloud storage service like Google Drive", "A collection of files and their complete change history managed by version control", "A database for storing user data", "A package manager for installing libraries"],
+      "question": "在软件开发语境中，"仓库"（repository）是什么？",
+      "options": ["像 Google Drive 这样的云存储服务", "由版本控制管理的文件集合及其完整变更历史", "用于存储用户数据的数据库", "用于安装库的包管理器"],
       "correct": 1,
-      "explanation": "A repository (repo) is a directory tracked by git that contains all project files along with the full history of changes made to those files."
+      "explanation": "仓库（repo）是被 git 追踪的目录，包含所有项目文件以及对这些文件所做更改的完整历史记录。"
     },
     {
       "stage": "post",
-      "question": "What is the correct sequence for saving and backing up your work in git?",
+      "question": "在 git 中保存和备份工作的正确顺序是什么？",
       "options": ["git push, git add, git commit", "git commit, git add, git push", "git add, git commit, git push", "git clone, git add, git push"],
       "correct": 2,
-      "explanation": "First you stage changes with 'git add', then save a snapshot with 'git commit', then upload to the remote with 'git push'. This is the daily workflow."
+      "explanation": "首先用 'git add' 暂存更改，然后用 'git commit' 保存快照，再用 'git push' 上传到远程仓库。这是日常工作流。"
     },
     {
       "stage": "post",
-      "question": "What does 'git checkout -b experiment/new-optimizer' do?",
-      "options": ["Downloads a branch from GitHub called experiment/new-optimizer", "Creates a new branch named experiment/new-optimizer and switches to it", "Deletes the branch experiment/new-optimizer", "Reverts all files to match the experiment/new-optimizer branch"],
+      "question": "'git checkout -b experiment/new-optimizer' 的作用是什么？",
+      "options": ["从 GitHub 下载名为 experiment/new-optimizer 的分支", "创建一个名为 experiment/new-optimizer 的新分支并切换到它", "删除 experiment/new-optimizer 分支", "将所有文件回退到与 experiment/new-optimizer 分支一致的状态"],
       "correct": 1,
-      "explanation": "The '-b' flag creates a new branch with the given name and immediately switches to it, allowing you to experiment without affecting the main branch."
+      "explanation": "'-b' 标志创建一个指定名称的新分支并立即切换到它，让你可以在不影响 main 分支的情况下进行实验。"
     },
     {
       "stage": "post",
-      "question": "Why should you add '.pt', '.pth', and '.safetensors' to your .gitignore?",
-      "options": ["They are Python test files that should not be committed", "They are model checkpoint files that are too large for git and can be re-generated", "They contain sensitive API keys", "Git cannot track binary files of any kind"],
+      "question": "为什么应该将 '.pt'、'.pth' 和 '.safetensors' 添加到 .gitignore？",
+      "options": ["它们是不应提交的 Python 测试文件", "它们是对 git 来说太大的模型检查点文件，可以重新生成", "它们包含敏感的 API 密钥", "git 无法追踪任何类型的二进制文件"],
       "correct": 1,
-      "explanation": "Model checkpoint files (.pt, .pth, .safetensors) are often gigabytes in size. Git is not designed for large binary files, so these should be excluded and re-generated or stored separately."
+      "explanation": "模型检查点文件（.pt、.pth、.safetensors）通常有几 GB 大小。git 不适合处理大型二进制文件，因此这些文件应该被排除，重新生成或单独存储。"
     }
   ]
 }
