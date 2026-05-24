@@ -2,63 +2,63 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "What does it mean geometrically when a system Ax = b has no exact solution?",
+      "question": "当线性方程组 Ax = b 没有精确解时，几何上意味着什么？",
       "options": [
-        "The matrix A has all zero entries",
-        "The vector b does not lie in the column space of A",
-        "The system has more unknowns than equations",
-        "The matrix A is symmetric"
+        "矩阵 A 所有元素都为零",
+        "向量 b 不在 A 的列空间中",
+        "方程组的未知量多于方程",
+        "矩阵 A 是对称的"
       ],
       "correct": 1,
-      "explanation": "In the column picture, Ax = b asks: what linear combination of A's columns produces b? If b is not in the column space (span of A's columns), no exact solution exists. This happens when the system is overdetermined (more equations than unknowns)."
+      "explanation": "在列图像中，Ax = b 问的是：A 的列的什么线性组合可以产生 b？如果 b 不在列空间（A 的列的张成空间）中，则不存在精确解。这发生在方程组超定（方程多于未知量）时。"
     },
     {
       "stage": "pre",
-      "question": "Why is partial pivoting used in Gaussian elimination?",
+      "question": "为什么在高斯消元法中使用部分主元选取？",
       "options": [
-        "It reduces the time complexity from O(n^3) to O(n^2)",
-        "It selects the largest available pivot to minimize error amplification from dividing by small numbers",
-        "It ensures the result is always an integer",
-        "It eliminates the need for back substitution"
+        "它将时间复杂度从 O(n^3) 降低到 O(n^2)",
+        "它选择最大的可用主元，以最小化除以小数时的误差放大",
+        "它确保结果始终是整数",
+        "它消除了回代的需要"
       ],
       "correct": 1,
-      "explanation": "Without pivoting, dividing by a small pivot amplifies rounding errors. Partial pivoting swaps rows to place the largest absolute value in the pivot position, keeping the multipliers small and the computation numerically stable."
+      "explanation": "不用主元选取时，除以小主元会放大舍入误差。部分主元选取通过交换行，将列中绝对值最大的元素放到主元位置，保持乘数小，使计算数值稳定。"
     },
     {
       "stage": "post",
-      "question": "Why is Cholesky decomposition preferred over LU for solving (X^T X + lambda I) w = X^T y in ridge regression?",
+      "question": "为什么在岭回归中求解 (X^T X + lambda I) w = X^T y 时，Cholesky 分解比 LU 更受欢迎？",
       "options": [
-        "Cholesky works on any matrix while LU requires square matrices",
-        "The matrix X^T X + lambda I is symmetric positive definite, so Cholesky is twice as fast as LU and requires half the storage",
-        "Cholesky gives a more accurate answer than LU",
-        "LU decomposition cannot handle regularization terms"
+        "Cholesky 适用于任何矩阵，而 LU 需要方阵",
+        "矩阵 X^T X + lambda I 是对称正定的，所以 Cholesky 比 LU 快两倍且只需一半存储空间",
+        "Cholesky 比 LU 给出更精确的答案",
+        "LU 分解无法处理正则化项"
       ],
       "correct": 1,
-      "explanation": "When lambda > 0, X^T X + lambda I is always symmetric positive definite. Cholesky factors A = LL^T in O(n^3/3) operations — roughly half the O(2n^3/3) of LU — and needs only the lower triangle. It exploits the symmetry that LU does not."
+      "explanation": "当 lambda > 0 时，X^T X + lambda I 始终是对称正定的。Cholesky 分解 A = LL^T 的运算量约为 O(n^3/3)——大约是 LU 的 O(2n^3/3) 的一半——且只需存储下三角部分。它利用了 LU 不利用的对称性。"
     },
     {
       "stage": "post",
-      "question": "A matrix has condition number kappa = 10^8. You are using float64 (~15 digits of precision). How many digits of the solution can you trust?",
+      "question": "一个矩阵的条件数 kappa = 10^8。你在使用 float64（约 15 位精度）。解中能信任多少位数字？",
       "options": [
-        "About 15 digits",
-        "About 7 digits (15 - log10(10^8) = 15 - 8)",
-        "About 8 digits",
-        "Zero digits — the solution is meaningless"
+        "约 15 位",
+        "约 7 位（15 - log10(10^8) = 15 - 8）",
+        "约 8 位",
+        "零位——解毫无意义"
       ],
       "correct": 1,
-      "explanation": "You lose approximately log10(kappa) digits of precision. With kappa = 10^8, you lose about 8 digits from float64's ~15 digits, leaving about 7 trustworthy digits. If kappa approaches 10^16, the solution becomes meaningless in float64."
+      "explanation": "你损失约 log10(kappa) 位精度。当 kappa = 10^8 时，从 float64 的约 15 位中损失约 8 位，剩余约 7 位可信数字。如果 kappa 接近 10^16，则 float64 中的解变得毫无意义。"
     },
     {
       "stage": "post",
-      "question": "What is the main advantage of LU decomposition over Gaussian elimination when you need to solve Ax = b for many different b vectors?",
+      "question": "当需要对许多不同的 b 向量求解 Ax = b 时，LU 分解相比高斯消元法的主要优势是什么？",
       "options": [
-        "LU decomposition is more numerically stable",
-        "The O(n^3) factorization is done once; each subsequent solve with a new b costs only O(n^2)",
-        "LU decomposition works on rectangular matrices",
-        "LU always produces a unique solution"
+        "LU 分解数值更稳定",
+        "O(n^3) 的分解只做一次；之后对新的 b 的每次求解只需 O(n^2)",
+        "LU 分解适用于矩形矩阵",
+        "LU 始终产生唯一解"
       ],
       "correct": 1,
-      "explanation": "LU factors A = LU once in O(n^3). Then for each new b, you solve Ly = b (forward substitution) and Ux = y (back substitution), each O(n^2). Gaussian elimination would redo the full O(n^3) for every new b."
+      "explanation": "LU 分解一次性将 A 分解为 LU，代价 O(n^3)。然后对每个新的 b，求解 Ly = b（前代，O(n^2)）和 Ux = y（回代，O(n^2)）。高斯消元法对每个新的 b 都要重新做完整的 O(n^3) 运算。"
     }
   ]
 }

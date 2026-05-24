@@ -2,7 +2,7 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "What is the imaginary unit i defined by?",
+      "question": "虚数单位 i 是如何定义的？",
       "options": [
         "i = sqrt(2)",
         "i^2 = -1",
@@ -10,11 +10,11 @@
         "i^2 = 1"
       ],
       "correct": 1,
-      "explanation": "The imaginary unit i is defined by the property i^2 = -1. It extends the real number line into a 2D plane. Geometrically, multiplying by i is a 90-degree rotation — two multiplications (i^2) give a 180-degree rotation, which is -1."
+      "explanation": "虚数单位 i 由性质 i^2 = -1 定义。它将实数轴扩展到二维平面。几何上，乘以 i 是旋转 90 度——两次乘法（i^2）给出 180 度旋转，即 -1。"
     },
     {
       "stage": "pre",
-      "question": "What does Euler's formula e^(i*theta) equal?",
+      "question": "欧拉公式 e^(i*theta) 等于什么？",
       "options": [
         "theta + i",
         "cos(theta) + i*sin(theta)",
@@ -22,11 +22,11 @@
         "i^theta"
       ],
       "correct": 1,
-      "explanation": "Euler's formula states e^(i*theta) = cos(theta) + i*sin(theta). This connects complex exponentials to trigonometry and shows that e^(i*theta) traces the unit circle as theta varies."
+      "explanation": "欧拉公式表明 e^(i*theta) = cos(theta) + i*sin(theta)。这将复指数与三角学联系起来，并表明 e^(i*theta) 随 theta 变化在单位圆上画出轨迹。"
     },
     {
       "stage": "post",
-      "question": "What is the result of (3 + 2i)(1 + 4i)?",
+      "question": "(3 + 2i)(1 + 4i) 的结果是什么？",
       "options": [
         "3 + 8i",
         "4 + 6i",
@@ -34,23 +34,23 @@
         "5 + 14i"
       ],
       "correct": 2,
-      "explanation": "Using FOIL: (3)(1) + (3)(4i) + (2i)(1) + (2i)(4i) = 3 + 12i + 2i + 8i^2 = 3 + 14i + 8(-1) = 3 + 14i - 8 = -5 + 14i."
+      "explanation": "使用 FOIL 法：(3)(1) + (3)(4i) + (2i)(1) + (2i)(4i) = 3 + 12i + 2i + 8i^2 = 3 + 14i + 8(-1) = 3 + 14i - 8 = -5 + 14i。"
     },
     {
       "stage": "post",
-      "question": "Why are complex numbers used in Rotary Position Embedding (RoPE) for transformers?",
+      "question": "为什么复数用于 Transformer 的旋转位置编码（RoPE）？",
       "options": [
-        "Complex numbers compress the position encoding to use less memory",
-        "Multiplying query/key vectors by complex rotations encodes relative position as a rotation angle",
-        "Complex numbers are required by the attention softmax function",
-        "RoPE uses imaginary numbers to handle negative positions"
+        "复数压缩位置编码以使用更少内存",
+        "将查询/键向量乘以复数旋转将相对位置编码为旋转角度",
+        "注意力 softmax 函数需要复数",
+        "RoPE 使用虚数来处理负位置"
       ],
       "correct": 1,
-      "explanation": "RoPE multiplies query and key vectors by complex rotation matrices e^(i*m*theta) where m is the position. The relative position between two tokens becomes a rotation angle, and attention naturally becomes sensitive to relative (not absolute) position through complex multiplication."
+      "explanation": "RoPE 将查询和键向量乘以复数旋转矩阵 e^(i*m*theta)，其中 m 是位置。两个词元之间的相对位置变为旋转角度，通过复数乘法，注意力自然地对相对位置（而非绝对位置）敏感。"
     },
     {
       "stage": "post",
-      "question": "The N-th roots of unity are N equally spaced points on the unit circle. What is their sum?",
+      "question": "N 次单位根是单位圆上的 N 个等间距点。它们的和是多少？",
       "options": [
         "N",
         "1",
@@ -58,7 +58,7 @@
         "N/2"
       ],
       "correct": 2,
-      "explanation": "The N roots of unity are e^(2*pi*i*k/N) for k = 0, ..., N-1. They are symmetrically distributed around the unit circle, so their vector sum cancels out to zero. This symmetry property is what makes the DFT invertible."
+      "explanation": "N 次单位根是 e^(2*pi*i*k/N)，k = 0, ..., N-1。它们对称分布在单位圆上，因此其向量和相互抵消为零。这种对称性使得 DFT 可逆。"
     }
   ]
 }

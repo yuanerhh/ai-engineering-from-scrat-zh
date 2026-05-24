@@ -2,38 +2,38 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "For matrix multiplication (m x n) @ (n x p), what must be true about the dimensions?",
-      "options": ["m must equal p", "The inner dimensions n must match", "All dimensions must be equal", "m must be greater than p"],
+      "question": "矩阵乘法 (m×n) @ (n×p) 对维度有什么要求？",
+      "options": ["m 必须等于 p", "内维度 n 必须匹配", "所有维度必须相等", "m 必须大于 p"],
       "correct": 1,
-      "explanation": "Matrix multiplication requires the number of columns in the first matrix (n) to equal the number of rows in the second matrix (n). The result has shape (m x p)."
+      "explanation": "矩阵乘法要求第一矩阵的列数（n）等于第二矩阵的行数（n），结果形状为 (m×p)。"
     },
     {
       "stage": "pre",
-      "question": "What is the identity matrix?",
-      "options": ["A matrix of all ones", "A square matrix with ones on the diagonal and zeros elsewhere that acts as the multiplicative identity", "A matrix where every element is unique", "The transpose of any given matrix"],
+      "question": "什么是单位矩阵？",
+      "options": ["全为 1 的矩阵", "对角线为 1、其余为 0 的方阵，充当乘法单位元", "每个元素都唯一的矩阵", "任意给定矩阵的转置"],
       "correct": 1,
-      "explanation": "The identity matrix I has ones on the diagonal and zeros everywhere else. Multiplying any matrix by I returns the original matrix unchanged, like multiplying a number by 1."
+      "explanation": "单位矩阵 I 的对角线为 1，其余位置为 0。任何矩阵乘以 I 都返回原矩阵不变，就像数字乘以 1 一样。"
     },
     {
       "stage": "post",
-      "question": "What is the key difference between element-wise multiplication and matrix multiplication?",
-      "options": ["Element-wise is faster while matrix multiplication is more accurate", "Element-wise multiplies matching positions (same shape required), matrix multiplication takes dot products of rows and columns (inner dimensions must match)", "They produce the same result but use different notation", "Element-wise only works on vectors while matrix multiplication works on matrices"],
+      "question": "逐元素乘法和矩阵乘法的关键区别是什么？",
+      "options": ["逐元素乘法更快，矩阵乘法更精确", "逐元素乘法对应位置相乘（需要相同形状），矩阵乘法计算行与列的点积（内维度必须匹配）", "两者产生相同结果但使用不同符号", "逐元素乘法只适用于向量，矩阵乘法适用于矩阵"],
       "correct": 1,
-      "explanation": "Element-wise (Hadamard) product multiplies corresponding elements and requires identical shapes. Matrix multiplication computes dot products between rows and columns with the rule (m,n)@(n,p)=(m,p)."
+      "explanation": "逐元素（Hadamard）乘积对应元素相乘，需要形状相同。矩阵乘法计算行与列的点积，规则为 (m,n)@(n,p)=(m,p)。"
     },
     {
       "stage": "post",
-      "question": "In the expression 'output = relu(W @ x + b)', what role does broadcasting play?",
-      "options": ["It broadcasts the computation across multiple GPUs", "It automatically stretches the bias vector b to match the shape of W @ x so they can be added", "It converts the data types of W and x to match", "It repeats the relu activation across all elements"],
+      "question": "在表达式 'output = relu(W @ x + b)' 中，广播发挥了什么作用？",
+      "options": ["将计算广播到多个 GPU 上", "自动将偏置向量 b 拉伸以匹配 W @ x 的形状，从而能够相加", "将 W 和 x 的数据类型转换为一致", "在所有元素上重复 relu 激活"],
       "correct": 1,
-      "explanation": "W @ x produces a column vector, and b is also a vector. Broadcasting stretches b across the batch dimension if needed, allowing element-wise addition without explicit shape matching."
+      "explanation": "W @ x 产生一个列向量，b 也是向量。如有需要，广播会沿批次维度拉伸 b，无需显式匹配形状即可进行逐元素加法。"
     },
     {
       "stage": "post",
-      "question": "What does a determinant of zero for a matrix indicate?",
-      "options": ["The matrix has all zero entries", "The matrix is singular: it crushes at least one dimension, cannot be inverted, and has no unique solution", "The matrix is the identity matrix", "The matrix performs a rotation"],
+      "question": "矩阵的行列式为零意味着什么？",
+      "options": ["矩阵中所有元素都为零", "矩阵是奇异的：它压缩了至少一个维度，不可逆，且没有唯一解", "矩阵是单位矩阵", "矩阵执行旋转操作"],
       "correct": 1,
-      "explanation": "A zero determinant means the transformation collapses space by at least one dimension (e.g., mapping 2D to a line). The matrix has no inverse, and linear systems using it have either no solution or infinitely many."
+      "explanation": "行列式为零意味着变换至少折叠了一个维度（例如将二维映射到一条线）。矩阵没有逆矩阵，使用它的线性方程组要么无解要么有无穷多解。"
     }
   ]
 }

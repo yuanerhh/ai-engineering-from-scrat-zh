@@ -2,31 +2,31 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "What does a p-value of 0.03 mean in a hypothesis test?",
+      "question": "假设检验中 p 值 0.03 意味着什么？",
       "options": [
-        "There is a 3% probability the null hypothesis is true",
-        "There is a 3% probability of seeing data this extreme if the null hypothesis were true",
-        "The model improved by 3%",
-        "97% of the data supports the alternative hypothesis"
+        "零假设为真的概率是 3%",
+        "假设零假设为真，看到数据如此极端的概率是 3%",
+        "模型改善了 3%",
+        "97% 的数据支持备择假设"
       ],
       "correct": 1,
-      "explanation": "The p-value is the probability of observing data as extreme as what you got, assuming the null hypothesis is true. It is NOT the probability that H0 is true — this is the single most common misunderstanding in statistics."
+      "explanation": "p 值是假设零假设为真时，观察到与你所见数据一样极端的数据的概率。它不是 H0 为真的概率——这是统计学中最常见的单一误解。"
     },
     {
       "stage": "pre",
-      "question": "Why do you divide by (n-1) instead of n when computing sample variance?",
+      "question": "计算样本方差时，为什么除以 (n-1) 而不是 n？",
       "options": [
-        "It makes the computation faster",
-        "It accounts for the fact that the sample mean is not the true population mean (Bessel's correction)",
-        "It converts the variance to standard deviation",
-        "It only applies when the sample size is odd"
+        "这使计算更快",
+        "这考虑了样本均值不是真实总体均值这一事实（贝塞尔修正）",
+        "这将方差转换为标准差",
+        "这只适用于样本量为奇数的情况"
       ],
       "correct": 1,
-      "explanation": "Bessel's correction (dividing by n-1) compensates for the bias introduced by using the sample mean instead of the true population mean. Without it, sample variance systematically underestimates the true population variance."
+      "explanation": "贝塞尔修正（除以 n-1）弥补了使用样本均值代替真实总体均值引入的偏差。没有它，样本方差会系统性地低估真实总体方差。"
     },
     {
       "stage": "post",
-      "question": "You test 20 different model configurations at alpha = 0.05. What is the approximate probability of at least one false positive?",
+      "question": "你以 alpha = 0.05 测试 20 种不同的模型配置。至少出现一个假阳性的近似概率是多少？",
       "options": [
         "5%",
         "25%",
@@ -34,31 +34,31 @@
         "95%"
       ],
       "correct": 2,
-      "explanation": "P(at least one false positive) = 1 - (1 - 0.05)^20 = 1 - 0.95^20 ≈ 0.64 (64%). This is the multiple comparison problem. Bonferroni correction addresses it by testing each at alpha/20 = 0.0025."
+      "explanation": "P(至少一个假阳性) = 1 - (1 - 0.05)^20 = 1 - 0.95^20 ≈ 0.64 (64%)。这是多重比较问题。Bonferroni 修正通过对每个假设以 alpha/20 = 0.0025 进行检验来解决它。"
     },
     {
       "stage": "post",
-      "question": "Model A scores 0.9234 and Model B scores 0.9237 on 1 million test samples with p-value = 0.001. What should you conclude?",
+      "question": "模型 A 在 100 万个测试样本上得分 0.9234，模型 B 得分 0.9237，p 值 = 0.001。你应该得出什么结论？",
       "options": [
-        "Model B is significantly better and should be deployed immediately",
-        "The difference is statistically significant but a 0.03% improvement may not be practically significant",
-        "The test is invalid because the sample size is too large",
-        "Model A is better because it was tested first"
+        "模型 B 明显更好，应该立即部署",
+        "差异在统计上显著，但 0.03% 的提升在实际中可能并不显著",
+        "测试无效，因为样本量太大",
+        "模型 A 更好，因为它先被测试"
       ],
       "correct": 1,
-      "explanation": "With 1 million samples, even trivially small differences become statistically significant. The p-value confirms the difference is real, but the effect size (0.03% accuracy gain) may not justify the engineering cost of deployment. Always report both p-value and effect size."
+      "explanation": "有 100 万个样本时，即使微不足道的差异也会变得统计显著。p 值确认了差异是真实的，但效应量（0.03% 准确率提升）可能不足以证明部署新模型的工程成本是合理的。始终同时报告 p 值和效应量。"
     },
     {
       "stage": "post",
-      "question": "What advantage does bootstrap have over the paired t-test for comparing two ML models?",
+      "question": "与配对 t 检验相比，自举方法在比较两个 ML 模型时有什么优势？",
       "options": [
-        "Bootstrap always produces smaller p-values",
-        "Bootstrap requires no distributional assumptions and works for any metric (AUC, F1, median)",
-        "Bootstrap needs fewer samples to reach significance",
-        "Bootstrap can only be used with neural networks"
+        "自举方法总是产生更小的 p 值",
+        "自举方法不需要分布假设，适用于任何指标（AUC、F1、中位数）",
+        "自举方法需要更少的样本就能达到显著性",
+        "自举方法只能用于神经网络"
       ],
       "correct": 1,
-      "explanation": "Bootstrap resampling estimates the sampling distribution of any statistic by resampling with replacement. Unlike the t-test, it does not assume normality. It works for any metric — AUC, F1, precision@k, median — without needing a closed-form formula."
+      "explanation": "自举重采样通过有放回地重采样来估计任何统计量的抽样分布。与 t 检验不同，它不假设正态性。它适用于任何指标——AUC、F1、前 k 精度、中位数——不需要封闭形式的公式。"
     }
   ]
 }
