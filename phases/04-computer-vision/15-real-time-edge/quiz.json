@@ -2,38 +2,38 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "You benchmark a model and report 'average 12ms per image on a 4090'. What is missing?",
-      "options": ["Nothing; that is a complete benchmark", "Percentiles (p50/p95/p99), warmup discipline, and CUDA synchronisation; a mean alone hides tail latency and may measure kernel dispatch instead of kernel execution", "The model size", "The dataset name"],
+      "question": "你对一个模型做了基准测试，报告"在 4090 上平均每张图像 12ms"。缺少什么？",
+      "options": ["什么都不缺；这是一个完整的基准", "百分位数（p50/p95/p99）、预热规范和 CUDA 同步；仅均值会隐藏尾部延迟，且可能测量的是内核分发而非内核执行", "模型大小", "数据集名称"],
       "correct": 1,
-      "explanation": "Production latency is measured in percentiles because real-time systems fail on tails, not averages. Without warmup, JIT compilation inflates the first few measurements. Without torch.cuda.synchronize, GPU kernel launches return before the kernel finishes, so you measure dispatch, not execution. All three have to be right for the number to be meaningful."
+      "explanation": "生产延迟用百分位数衡量，因为实时系统在尾部而非均值处失败。不预热，JIT 编译会虚高前几次测量。不使用 torch.cuda.synchronize，GPU 内核启动在内核完成前就返回，测量的是分发而非执行。三者都必须正确，数字才有意义。"
     },
     {
       "stage": "pre",
-      "question": "FLOPs and on-device latency do not correlate perfectly. Why?",
-      "options": ["FLOPs counters are broken", "Different operations have different hardware friendliness; depthwise convolutions may have lower FLOPs but are memory-bound on GPUs, while dense convolutions use Tensor Cores efficiently. Memory bandwidth, kernel launch overhead, and cache behaviour also shape latency beyond raw FLOPs", "FLOPs ignore batch size", "PyTorch counts FLOPs incorrectly"],
+      "question": "FLOPs 和设备上的延迟不完全相关。为什么？",
+      "options": ["FLOPs 计数器有缺陷", "不同操作对硬件的友好程度不同；深度卷积可能 FLOPs 更少但在 GPU 上受内存带宽限制，而密集卷积高效利用 Tensor Core。内存带宽、内核启动开销和缓存行为也在原始 FLOPs 之外影响延迟", "FLOPs 忽略了批量大小", "PyTorch 计算 FLOPs 有误"],
       "correct": 1,
-      "explanation": "FLOPs is a cheap proxy. Wall-clock latency depends on how well an operation matches the hardware's strengths: dense matmuls pin Tensor Cores; depthwise convs stall on memory bandwidth; attention stalls on sequence-length^2 memory reads. For architecture search FLOPs is useful; for deployment decisions measure on the target device."
+      "explanation": "FLOPs 是一个廉价的代理指标。挂钟延迟取决于操作与硬件优势的匹配程度：密集矩阵乘法钉牢 Tensor Core；深度卷积在内存带宽上卡顿；注意力在序列长度² 的内存读取上卡顿。架构搜索用 FLOPs；部署决策在目标设备上测量。"
     },
     {
       "stage": "post",
-      "question": "Post-training static INT8 quantisation typically loses how much accuracy on ImageNet-class vision models?",
-      "options": ["5-10 percentage points", "0.1-1 percentage points when properly calibrated; batch-norm-fused conv models are particularly well-behaved under INT8", "Always 0; it is lossless", "20+ points; unusable"],
+      "question": "训练后静态 INT8 量化在 ImageNet 级视觉模型上通常会损失多少精度？",
+      "options": ["5-10 个百分点", "正确校准后损失 0.1-1 个百分点；批归一化融合的卷积模型在 INT8 下表现尤其良好", "始终为 0；无损", "超过 20 个点；不可用"],
       "correct": 1,
-      "explanation": "Static PTQ on well-calibrated vision models loses a fraction of a point to about 1 point. The bigger loss modes are (a) insufficient calibration data, (b) quantising activations with extreme outliers (fix with per-channel quantisation or clipping), (c) un-fused BatchNorm layers. When those are handled, INT8 is essentially free."
+      "explanation": "校准良好的视觉模型的静态 PTQ 损失在零点几到约 1 个百分点。较大损失的原因有：(a) 校准数据不足，(b) 量化具有极端离群值的激活（通过逐通道量化或截断修复），(c) 未融合的 BatchNorm 层。处理好这些后，INT8 几乎是免费的。"
     },
     {
       "stage": "post",
-      "question": "Your mobile app needs a vision model under 10MB with sub-10ms latency. Which backbone do you pick?",
-      "options": ["ResNet-50", "MobileNetV3-Small or EfficientNet-Lite-B0 quantised to INT8; both target this budget and compile cleanly to TFLite / Core ML", "ViT-Base", "ConvNeXt-Large"],
+      "question": "你的移动应用需要一个 10MB 以下、延迟低于 10ms 的视觉模型。选哪个骨干？",
+      "options": ["ResNet-50", "量化到 INT8 的 MobileNetV3-Small 或 EfficientNet-Lite-B0；两者都针对此预算设计，且能干净地编译到 TFLite/Core ML", "ViT-Base", "ConvNeXt-Large"],
       "correct": 1,
-      "explanation": "Mobile vision shipping in 2026 is still dominated by MobileNetV3 and EfficientNet-Lite variants because they were designed for this budget: depthwise convs, h-swish, squeeze-excite, quantisation-aware from day one. ResNet-50 and ViT-Base are 100MB+ in FP32 and 25MB+ in INT8, blowing the size budget before latency is even measured."
+      "explanation": "2026 年移动视觉出货仍由 MobileNetV3 和 EfficientNet-Lite 变体主导，因为它们就是为此预算设计的：深度卷积、h-swish、squeeze-excite、从一开始就支持量化感知训练。ResNet-50 和 ViT-Base 在 FP32 下超过 100MB，INT8 下超过 25MB，在测量延迟之前就已超出大小预算。"
     },
     {
       "stage": "post",
-      "question": "You export a PyTorch model to ONNX with opset 17 and it fails with 'Unsupported operator'. What are the most likely causes?",
-      "options": ["The ONNX library is outdated", "(1) A custom op that has no ONNX mapping; (2) a non-deterministic control-flow path that tracing cannot capture; (3) a tensor-scalar interaction that is implicit in Python but has no ONNX equivalent. Fixes: replace the op, use `torch.jit.script` for control flow, or upgrade opset", "The model has too many parameters", "The input shape is wrong"],
+      "question": "你用 opset 17 将 PyTorch 模型导出到 ONNX 时失败，报错"Unsupported operator"。最可能的原因是什么？",
+      "options": ["ONNX 库过时了", "(1) 没有 ONNX 映射的自定义算子；(2) 追踪无法捕获的非确定性控制流路径；(3) Python 中隐式但在 ONNX 中没有等价物的 tensor-scalar 交互。修复方法：替换算子、对控制流使用 `torch.jit.script`，或升级 opset", "模型参数太多", "输入形状有误"],
       "correct": 1,
-      "explanation": "ONNX export is tracing by default, so anything that tracing cannot capture — runtime control flow, Python-level branches, custom CUDA ops — fails. Most failures are a single node that has no ONNX equivalent (often a tiny custom op or a call to torch.special.*). The fix is either replacing the op, switching to `torch.jit.script`, or moving to a newer opset where the op exists."
+      "explanation": "ONNX 导出默认是追踪，所以任何追踪无法捕获的东西——运行时控制流、Python 级分支、自定义 CUDA 算子——都会失败。大多数失败是单个没有 ONNX 等价物的节点（通常是一个小型自定义算子或对 torch.special.* 的调用）。修复方法是替换算子、切换到 `torch.jit.script`，或升级到该算子已存在的更新 opset。"
     }
   ]
 }

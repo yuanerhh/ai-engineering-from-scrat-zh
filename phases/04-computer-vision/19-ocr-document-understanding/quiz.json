@@ -2,38 +2,38 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "Why does OCR use CTC loss instead of plain cross-entropy?",
-      "options": ["CTC is faster", "OCR maps a fixed-length feature sequence to a variable-length character sequence without per-timestep alignment; CTC loss marginalises over all alignments that reduce to the target after removing repeats and blanks, so you can train without character-level timing labels", "CTC is required by PyTorch", "Cross-entropy overflows for long sequences"],
+      "question": "为什么 OCR 使用 CTC 损失而非普通的交叉熵？",
+      "options": ["CTC 更快", "OCR 将固定长度的特征序列映射到可变长度的字符序列，且没有逐时间步对齐；CTC 损失对所有在删除重复项和空白符后归约为目标的对齐方式进行边缘化，因此可以在没有字符级时序标签的情况下训练", "PyTorch 要求 CTC", "对长序列交叉熵会溢出"],
       "correct": 1,
-      "explanation": "Recognition produces one distribution per time step, but the target text has no per-step alignment. CTC handles that by summing over every alignment that reduces to the target via the merge-repeats-and-remove-blanks operation. This is why CRNNs can be trained on just (image, text) pairs without knowing where each character starts and ends in the image."
+      "explanation": "识别每个时间步产生一个分布，但目标文本没有逐步对齐。CTC 通过对所有通过合并重复项和删除空白符操作归约为目标的对齐方式求和来处理这个问题。这就是为什么 CRNN 可以仅用（图像, 文本）对进行训练，而无需知道每个字符在图像中开始和结束的位置。"
     },
     {
       "stage": "pre",
-      "question": "In CTC decoding, what does the blank token do?",
-      "options": ["Pads the sequence to a fixed length", "Separates adjacent identical characters so that outputs like 'hello' with a double L can be produced by the model emitting 'h e l _ l o' — without the blank, 'l l' would collapse to one 'l'", "Masks noisy regions", "Indicates end of sequence"],
+      "question": "在 CTC 解码中，空白符（blank token）的作用是什么？",
+      "options": ["将序列填充到固定长度", "分隔相邻的相同字符，使得含有双写字母的输出如"hello"可以通过模型输出"h e l _ l o"来产生——没有空白符，"l l"会折叠为一个"l"", "遮蔽有噪声的区域", "表示序列结束"],
       "correct": 1,
-      "explanation": "The blank is the mechanism that lets CTC encode double characters. 'll' needs a blank between the two l's so the 'merge repeats' step keeps them distinct: 'l _ l' survives merging, 'l l' does not. Without the blank, CTC cannot represent any word containing adjacent identical characters."
+      "explanation": "空白符是让 CTC 能编码双写字符的机制。"ll"需要两个 l 之间有一个空白符，这样"合并重复项"步骤才能保持它们的区别：'l _ l' 在合并后保持为两个字符，'l l' 则不行。没有空白符，CTC 无法表示任何包含相邻相同字符的单词。"
     },
     {
       "stage": "post",
-      "question": "Why is greedy CTC decoding sometimes better than beam search on simple datasets?",
-      "options": ["Greedy is always better", "When the model is confident at every step (clean handwriting, printed fonts), greedy's argmax is usually the beam winner; beam search adds latency with no accuracy gain. On noisy or ambiguous inputs, beam search helps", "Beam search requires a language model", "Greedy is easier to implement"],
+      "question": "为什么贪心 CTC 解码在简单数据集上有时优于束搜索？",
+      "options": ["贪心总是更好", "当模型在每一步都很自信时（清晰的手写体、印刷字体），贪心的 argmax 通常就是束搜索的赢家；束搜索增加延迟但无精度提升。在嘈杂或模糊的输入上，束搜索才有帮助", "束搜索需要语言模型", "贪心更容易实现"],
       "correct": 1,
-      "explanation": "Beam search only wins when the per-step argmax is unreliable — ambiguous characters, overlapping letters, degraded scans. For clean printed text, the model is confident at each step and greedy is within 1% CER of beam. Always benchmark both; the latency trade is real."
+      "explanation": "束搜索只在逐步 argmax 不可靠时才能获胜——模糊字符、重叠字母、退化扫描。对于清晰的印刷文本，模型在每一步都很自信，贪心解码的 CER 在束搜索 1% 以内。始终对两者进行基准测试；延迟权衡是真实存在的。"
     },
     {
       "stage": "post",
-      "question": "Donut skips explicit text detection and character recognition. How?",
-      "options": ["It uses an external OCR engine internally", "It is a ViT encoder + text decoder trained to produce the final output string (often JSON) directly from the image; the model learns both localisation and recognition implicitly through the training objective", "It is limited to document categories with fixed layouts", "It preprocesses images with a CNN text detector"],
+      "question": "Donut 跳过了显式文本检测和字符识别。它是如何做到的？",
+      "options": ["它内部使用外部 OCR 引擎", "它是一个 ViT 编码器 + 文本解码器，经过训练直接从图像产生最终输出字符串（通常是 JSON）；模型通过训练目标隐式地学习定位和识别", "它仅限于具有固定布局的文档类别", "它用 CNN 文本检测器预处理图像"],
       "correct": 1,
-      "explanation": "Donut is an end-to-end model: the ViT encoder sees the whole document, the transformer decoder emits the target text or JSON auto-regressively. No pipeline of detector + recogniser + layout module. This skips error accumulation across stages but requires large labelled training sets for the specific document types you care about."
+      "explanation": "Donut 是一个端到端模型：ViT 编码器看到整个文档，Transformer 解码器自回归地输出目标文本或 JSON。没有检测器 + 识别器 + 布局模块的流程。这跳过了各阶段的错误累积，但需要针对你所关心的特定文档类型有大型标注训练集。"
     },
     {
       "stage": "post",
-      "question": "For extracting `invoice_total` from receipts, which approach is typically best in 2026?",
-      "options": ["A hand-crafted regex on Tesseract output", "Fine-tuned Donut or a VLM on a small labelled set of the target receipts; both handle layout and semantic extraction in one model and generalise across receipt variants better than pipeline-based approaches", "Only classical OCR is reliable enough", "A separate CNN for each field"],
+      "question": "在 2026 年，从收据中提取 `invoice_total` 通常哪种方法最好？",
+      "options": ["对 Tesseract 输出使用手工编写的正则表达式", "在小型目标收据标注集上微调 Donut 或 VLM；两者都在单一模型中处理布局和语义提取，比基于流程的方法更好地泛化到不同收据变体", "只有经典 OCR 足够可靠", "为每个字段训练单独的 CNN"],
       "correct": 1,
-      "explanation": "Structured-field extraction used to be the domain of LayoutLM + heuristics. End-to-end models (Donut, Qwen-VL-OCR) have overtaken that path: they accept an image and produce the JSON directly. For a small set of labelled receipts (100-1000), fine-tuning Donut reaches higher F1 than any pipeline of OCR + rules."
+      "explanation": "结构化字段提取曾经是 LayoutLM + 启发式规则的领域。端到端模型（Donut、Qwen-VL-OCR）已经超越了这条路径：它们接受图像并直接产生 JSON。对于少量标注收据（100-1000 张），微调 Donut 达到的 F1 高于任何 OCR + 规则的流程。"
     }
   ]
 }

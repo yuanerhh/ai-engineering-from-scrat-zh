@@ -2,38 +2,38 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "Why did 3D Gaussian Splatting largely replace NeRF as the production default for photorealistic scene reconstruction by 2026?",
-      "options": ["Gaussian Splatting produces higher image quality than NeRF in every case", "3DGS is explicit (no MLP per pixel): rendering is GPU rasterisation at 100+ fps, training takes minutes instead of hours, scenes are editable, and Khronos + OpenUSD both standardised it in 2026", "NeRF was retracted from the research record", "PyTorch stopped supporting NeRF operators"],
+      "question": "为什么 3D 高斯溅射（3DGS）在 2026 年基本取代 NeRF 成为逼真场景重建的生产默认方案？",
+      "options": ["高斯溅射在所有情况下都比 NeRF 产生更高的图像质量", "3DGS 是显式的（无需逐像素 MLP）：渲染是 100+fps 的 GPU 光栅化，训练只需几分钟而非数小时，场景可编辑，且 Khronos 和 OpenUSD 在 2026 年都将其标准化", "NeRF 已从研究记录中撤回", "PyTorch 停止支持 NeRF 算子"],
       "correct": 1,
-      "explanation": "3DGS swaps an implicit MLP for millions of explicit 3D Gaussians. Rendering becomes sorted alpha compositing that GPUs run at 100+ fps on consumer hardware. Training runs in minutes. Every Gaussian is editable. By 2026 Khronos ratified a glTF extension for 3DGS and OpenUSD 26.03 shipped a native schema, turning 3DGS into a portable production format."
+      "explanation": "3DGS 用数百万个显式 3D 高斯替换了隐式 MLP。渲染变成排序 alpha 合成，消费级 GPU 可以 100+fps 运行。训练在几分钟内完成。每个高斯都可编辑。到 2026 年，Khronos 批准了 3DGS 的 glTF 扩展，OpenUSD 26.03 推出了原生格式，将 3DGS 变成可移植的生产格式。"
     },
     {
       "stage": "pre",
-      "question": "A 3D Gaussian in a scene carries position, rotation, scale, opacity, and what additional representation to handle view-dependent colour (like specular highlights)?",
-      "options": ["A second RGB texture", "A small MLP per Gaussian", "Spherical harmonics coefficients: up to degree 3 gives 16 coefficients per colour channel, evaluated against the viewing direction at render time", "A light probe cubemap"],
+      "question": "场景中的 3D 高斯携带位置、旋转、尺度、不透明度，以及用于处理视角相关颜色（如镜面高光）的哪种额外表示？",
+      "options": ["第二张 RGB 纹理", "每个高斯一个小型 MLP", "球谐系数：最高 3 阶得到每颜色通道 16 个系数，在渲染时对观察方向求值", "光照探针立方体贴图"],
       "correct": 2,
-      "explanation": "Spherical harmonics are the Fourier basis on the sphere. Each Gaussian stores learned SH coefficients that encode how its colour varies with viewing direction. At render time you evaluate the coefficients against the unit vector from pixel to Gaussian centre, giving specular highlights, mild reflections, and view-dependent shading without textures or MLPs."
+      "explanation": "球谐函数是球面上的傅里叶基。每个高斯存储学到的球谐系数，编码其颜色随观察方向的变化。在渲染时，对从像素到高斯中心的单位向量求值系数，得到镜面高光、轻微反射和视角相关着色，无需纹理或 MLP。"
     },
     {
       "stage": "post",
-      "question": "During 3DGS training, densification includes 'clone' and 'split' operations. What triggers each?",
-      "options": ["Nothing — Gaussians are fixed after initialisation", "High gradient magnitude with small scale triggers clone (more local detail needed); high gradient with large scale triggers split (one Gaussian too smooth to fit the region). Opacity-below-threshold triggers pruning", "Time since last checkpoint", "Random sampling during every epoch"],
+      "question": "在 3DGS 训练中，致密化包括"克隆"和"分裂"操作。各自的触发条件是什么？",
+      "options": ["无——高斯在初始化后固定不变", "梯度幅度高且尺度小触发克隆（此处需要更多局部细节）；梯度高且尺度大触发分裂（一个高斯太平滑无法拟合该区域）。不透明度低于阈值触发剪枝", "距上次检查点的时间", "每个 epoch 随机采样"],
       "correct": 1,
-      "explanation": "Adaptive densification is what lets 3DGS grow from ~100k SfM-seeded Gaussians to 1-5M at convergence. Clone duplicates under-resolved small Gaussians; split breaks up over-large Gaussians into two smaller ones; prune drops Gaussians whose sigmoid opacity has decayed below the threshold. These three operations plus gradient descent on parameters are the whole training dynamics."
+      "explanation": "自适应致密化使 3DGS 能从约 10 万个 SfM 播种的高斯增长到收敛时的 100 万到 500 万个。克隆复制欠分辨率的小高斯；分裂将过大的高斯拆分为两个较小的高斯；剪枝删除 sigmoid 不透明度衰减到阈值以下的高斯。这三种操作加上参数的梯度下降构成了整个训练动态。"
     },
     {
       "stage": "post",
-      "question": "The colour equation for one pixel in both NeRF and 3DGS is `C = sum_i alpha_i * T_i * c_i` where `T_i = prod_{j<i}(1 - alpha_j)`. What does this shared equation say about the two methods?",
-      "options": ["They are mathematically identical in every way", "Both integrate the same volumetric rendering equation; the difference is only in the representation (implicit MLP samples vs explicit sparse Gaussians) and the rendering procedure (ray marching vs rasterisation) — which is why their image quality is comparable", "NeRF is strictly better", "3DGS is strictly better"],
+      "question": "NeRF 和 3DGS 中一个像素的颜色公式均为 `C = sum_i alpha_i * T_i * c_i`，其中 `T_i = prod_{j<i}(1 - alpha_j)`。这个共享公式说明了两种方法的什么？",
+      "options": ["它们在各方面数学上完全相同", "两者都积分相同的体积渲染方程；区别仅在于表示（隐式 MLP 采样 vs 显式稀疏高斯）和渲染过程（光线行进 vs 光栅化）——这就是为什么它们的图像质量相当", "NeRF 严格更好", "3DGS 严格更好"],
       "correct": 1,
-      "explanation": "The shared equation is the classical volumetric render. NeRF evaluates it by sampling along rays and querying an MLP. 3DGS evaluates it by projecting Gaussians to 2D and alpha-compositing sorted primitives per pixel. Same physics, same loss, different data structures and rendering algorithms. That identity is why they land at similar final PSNR / LPIPS; the practical gap is speed and editability."
+      "explanation": "共享公式是经典体积渲染。NeRF 通过沿光线采样并查询 MLP 来评估它。3DGS 通过将高斯投影到 2D 并逐像素对排序图元进行 alpha 合成来评估它。相同的物理，相同的损失，不同的数据结构和渲染算法。这一等价性解释了为何它们的最终 PSNR / LPIPS 相当；实际差距在速度和可编辑性上。"
     },
     {
       "stage": "post",
-      "question": "You want to ship a 3DGS scene across Unreal Engine, Vision Pro, Blender, and a Three.js web viewer in 2026. Which export format is the safest bet?",
-      "options": ["Raw `.ply` alone", "glTF with the `KHR_gaussian_splatting` extension (Khronos RC Feb 2026) and/or OpenUSD 26.03 with `UsdVolParticleField3DGaussianSplat`; these are the two ratified/standardised formats in 2026", "A custom binary blob per viewer", "PNG strips of the 3D Gaussians"],
+      "question": "你希望在 2026 年将一个 3DGS 场景跨 Unreal Engine、Vision Pro、Blender 和 Three.js web 查看器分发。哪种导出格式最安全？",
+      "options": ["仅原始 `.ply`", "带 `KHR_gaussian_splatting` 扩展的 glTF（Khronos RC 2026 年 2 月）和/或 OpenUSD 26.03 的 `UsdVolParticleField3DGaussianSplat`；这是 2026 年两种经批准/标准化的格式", "每个查看器一个自定义二进制块", "3D 高斯的 PNG 条带"],
       "correct": 1,
-      "explanation": "Up to 2024, every viewer had its own format. Khronos ratified KHR_gaussian_splatting for glTF in Feb 2026 and OpenUSD 26.03 added a native 3DGS schema in April 2026. Exporting to either gives you portability across engines, viewers, and pipelines. `.ply` remains the interchange lingua franca for research but is less structured. For cross-tool production, glTF + USD is the 2026 answer."
+      "explanation": "到 2024 年，每个查看器都有自己的格式。Khronos 在 2026 年 2 月为 glTF 批准了 KHR_gaussian_splatting，OpenUSD 26.03 在 2026 年 4 月添加了原生 3DGS 格式。导出到其中之一可在引擎、查看器和管线间实现可移植性。`.ply` 仍是研究的通用交换格式，但结构性较差。对于跨工具生产，glTF + USD 是 2026 年的答案。"
     }
   ]
 }

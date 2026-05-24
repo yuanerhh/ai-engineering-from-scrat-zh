@@ -2,63 +2,63 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "Why does a 2D+pool video model fail on the Something-Something V2 dataset?",
+      "question": "为什么 2D+池化的视频模型在 Something-Something V2 数据集上会失败？",
       "options": [
-        "The images are too small",
-        "The model architecture is incompatible",
-        "The dataset's labels are defined by motion direction ('pushing something from left to right'), not appearance; order-invariant average pooling over per-frame features cannot distinguish motion direction",
-        "There are too many classes"
+        "图像太小",
+        "模型架构不兼容",
+        "该数据集的标签由运动方向定义（"把某物从左推到右"），而非外观；对每帧特征进行顺序无关的平均池化无法区分运动方向",
+        "类别太多"
       ],
       "correct": 2,
-      "explanation": "Something-Something labels are literally 'X moved left to right' vs 'X moved right to left'. The two look identical in any single frame, and averaging frame embeddings is order-invariant so pool(f1, f2, ..., fT) == pool(fT, ..., f2, f1). Motion-defined labels require a model that attends to temporal order."
+      "explanation": "Something-Something 的标签字面上就是"X 向左移动"vs"X 向右移动"。这两者在任意单帧中看起来完全相同，而对帧嵌入取平均是顺序无关的，即 pool(f1, f2, ..., fT) == pool(fT, ..., f2, f1)。运动定义的标签需要能够关注时序顺序的模型。"
     },
     {
       "stage": "pre",
-      "question": "What is I3D's inflation trick?",
+      "question": "I3D 的膨胀技巧是什么？",
       "options": [
-        "A way to pretrain on more images",
-        "Take a 2D CNN's pretrained kernels, copy each along a new time axis (dividing by kernel_T to preserve activation scale), and use them to initialise a 3D CNN \u2014 giving the 3D model strong weights without 3D pretraining",
-        "A scheduler for learning rates",
-        "A method for compressing videos"
+        "一种在更多图像上预训练的方法",
+        "取一个 2D CNN 的预训练卷积核，沿新的时间轴复制（除以 kernel_T 以保持激活尺度），用于初始化 3D CNN——使 3D 模型无需 3D 预训练即可拥有强大权重",
+        "一种学习率调度器",
+        "一种压缩视频的方法"
       ],
       "correct": 1,
-      "explanation": "Inflation bootstraps 3D video models from strong 2D ImageNet weights. A 3x3 2D kernel becomes a 3x3x3 3D kernel by replicating along T with a 1/kernel_T rescale. It transfers object and texture features learnt on ImageNet directly into the video model, which is why I3D was the first 3D model to seriously beat 2D+pool baselines."
+      "explanation": "膨胀技术用强大的 2D ImageNet 权重来初始化 3D 视频模型。3×3 的 2D 卷积核通过沿 T 轴复制（并乘以 1/kernel_T 缩放）变成 3×3×3 的 3D 卷积核。它将从 ImageNet 学到的物体和纹理特征直接迁移到视频模型，这也是为什么 I3D 是第一个真正超越 2D+池化基线的 3D 模型。"
     },
     {
       "stage": "post",
-      "question": "A (2+1)D factorised convolution splits a 3D conv into which two operations?",
+      "question": "(2+1)D 分解卷积将 3D 卷积拆分为哪两种操作？",
       "options": [
-        "One temporal conv followed by one depthwise conv",
-        "A grouped conv and a 1x1 conv",
-        "Two 3D convs with different strides",
-        "A spatial 1x3x3 conv followed by a temporal 3x1x1 conv, with a BN+ReLU in between to add a non-linearity that full 3D convs do not have"
+        "一个时间卷积后接一个深度卷积",
+        "一个分组卷积和一个 1×1 卷积",
+        "两个不同步长的 3D 卷积",
+        "一个空间 1×3×3 卷积后接一个时间 3×1×1 卷积，中间有 BN+ReLU 添加额外的非线性（完整 3D 卷积所没有的）"
       ],
       "correct": 3,
-      "explanation": "(2+1)D factorises the 3x3x3 kernel into (1x3x3) then (3x1x1). The two convs have a non-linearity between them (BN+ReLU), which increases expressive power per parameter. On Kinetics, R(2+1)D-34 outperforms an equivalent R3D-34 with fewer params \u2014 the extra non-linearity is doing real work."
+      "explanation": "(2+1)D 将 3×3×3 卷积核分解为 (1×3×3) 再到 (3×1×1)。两个卷积之间有一个非线性（BN+ReLU），增加了单位参数的表达能力。在 Kinetics 上，R(2+1)D-34 以更少的参数超越了等价的 R3D-34——额外的非线性确实起了作用。"
     },
     {
       "stage": "post",
-      "question": "In a video transformer, what does 'divided attention' mean?",
+      "question": "在视频 Transformer 中，"分治注意力（divided attention）"是什么意思？",
       "options": [
-        "Attention over half the tokens",
-        "Each transformer block has two attention modules: one over tokens at the same spatial position across time (temporal attention), then one over tokens at the same timestep across space (spatial attention) \u2014 breaking the O((T*H*W)^2) full attention into O(T^2) + O((H*W)^2)",
-        "Attention applied only during training",
-        "Attention that skips some layers"
+        "只对一半 token 做注意力",
+        "每个 Transformer 块有两个注意力模块：一个跨时间对同一空间位置的 token 做注意力（时间注意力），再对同一时间步的不同空间 token 做注意力（空间注意力）——将 O((T×H×W)²) 的完整注意力分解为 O(T²) + O((H×W)²)",
+        "只在训练期间应用的注意力",
+        "跳过某些层的注意力"
       ],
       "correct": 1,
-      "explanation": "Full joint spatio-temporal attention is O((T*H*W)^2), which is infeasible for long videos. Divided attention (TimeSformer) alternates temporal and spatial attention within each block, bringing cost to O(T^2 + (H*W)^2). It trades off a theoretical loss in expressivity for tractable training; in practice divided attention matches or beats joint on most benchmarks."
+      "explanation": "完整的时空联合注意力复杂度为 O((T×H×W)²)，对长视频不可行。分治注意力（TimeSformer）在每个块内交替进行时间注意力和空间注意力，将成本降至 O(T² + (H×W)²)。理论上牺牲了一些表达能力，换来了可行的训练；实践中分治注意力在大多数基准上与联合注意力相当甚至更好。"
     },
     {
       "stage": "post",
-      "question": "Your Kinetics-400 model reports 76% clip accuracy and 82% video accuracy. What does the gap tell you?",
+      "question": "你的 Kinetics-400 模型报告片段准确率 76%，视频准确率 82%。这个差距说明了什么？",
       "options": [
-        "Per-clip predictions are noisy; averaging predictions across multiple sampled clips per video (test-time augmentation) stabilises the result. A large gap suggests the model's features are sensitive to which 8-frame window was sampled, and longer clips or stronger spatial augmentation during training would shrink the gap",
-        "The model is broken",
-        "The test set is too small",
-        "Clip accuracy is always lower than video accuracy by definition"
+        "逐片段预测有噪声；对每个视频多个采样片段的预测取平均（测试时数据增强）可以稳定结果。差距较大说明模型的特征对采样的 8 帧窗口很敏感，训练时使用更长的片段或更强的空间增强会缩小这个差距",
+        "模型出故障了",
+        "测试集太小",
+        "片段准确率定义上总是低于视频准确率"
       ],
       "correct": 0,
-      "explanation": "Clip accuracy evaluates the model on a single sampled window; video accuracy averages predictions across multiple windows. A 6-point gap means the model is sensitive to which window you sampled. Closing the gap means the model has generalised better across the temporal distribution of each video \u2014 which is what you want in deployment. Report both numbers always."
+      "explanation": "片段准确率在单个采样窗口上评估模型；视频准确率对多个窗口的预测取平均。6 个百分点的差距意味着模型对采样的窗口很敏感。缩小这个差距意味着模型在每个视频的时序分布上泛化更好——这正是部署中你所需要的。永远同时报告两个数字。"
     }
   ]
 }
