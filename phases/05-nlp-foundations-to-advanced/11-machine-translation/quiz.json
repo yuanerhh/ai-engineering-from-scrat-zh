@@ -4,99 +4,99 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "What does BLEU measure?",
+      "question": "BLEU 测量什么？",
       "options": [
-        "Language identification accuracy",
-        "N-gram precision (typically 1-4) between hypothesis and reference, with a brevity penalty",
-        "Character-level F-score",
-        "Embedding cosine similarity"
+        "语言识别准确率",
+        "假设与参考之间的 n-gram 精确率（通常 1-4），带简洁惩罚",
+        "字符级 F 分数",
+        "嵌入余弦相似度"
       ],
       "correct": 1,
-      "explanation": "BLEU is the geometric mean of 1-4-gram precision against references, plus a brevity penalty."
+      "explanation": "BLEU 是对参考的 1-4 gram 精确率的几何平均，加上简洁惩罚。"
     },
     {
       "stage": "pre",
-      "question": "Why use sacrebleu instead of rolling your own BLEU?",
+      "question": "为什么使用 sacrebleu 而非自己实现 BLEU？",
       "options": [
-        "It is more accurate",
-        "It runs on GPU",
-        "It normalizes tokenization so scores are comparable across papers and runs",
-        "It supports streaming"
+        "它更准确",
+        "它在 GPU 上运行",
+        "它标准化了分词，使分数可以在不同论文和运行之间比较",
+        "它支持流式处理"
       ],
       "correct": 2,
-      "explanation": "sacrebleu freezes tokenization, removing a common source of incomparable BLEU numbers."
+      "explanation": "sacrebleu 固定了分词，消除了 BLEU 数字不可比较的常见来源。"
     },
     {
       "stage": "check",
-      "question": "Which NLLB-specific setting controls the target language during decoding?",
+      "question": "NLLB 中哪个特定设置在解码过程中控制目标语言？",
       "options": [
         "length_penalty",
-        "forced_bos_token_id set to the target language code's token id",
+        "forced_bos_token_id 设置为目标语言代码的 token id",
         "num_beams",
         "src_lang"
       ],
       "correct": 1,
-      "explanation": "NLLB forces the first decoded token to a target-language code via forced_bos_token_id."
+      "explanation": "NLLB 通过 forced_bos_token_id 强制第一个解码 token 为目标语言代码。"
     },
     {
       "stage": "check",
-      "question": "Which metric family is the 2026 default for production MT quality where labeled data exists?",
+      "question": "在有标注数据的情况下，2026 年生产 MT 质量的默认指标族是哪个？",
       "options": [
-        "BLEU alone",
-        "Token edit distance",
-        "Learned metrics such as COMET (and BERTScore/BLEURT) trained on human judgment",
-        "Latency"
+        "仅 BLEU",
+        "Token 编辑距离",
+        "在人工判断上训练的学习式指标，如 COMET（和 BERTScore/BLEURT）",
+        "延迟"
       ],
       "correct": 2,
-      "explanation": "Learned metrics like COMET correlate more strongly with human judgment than BLEU/chrF alone."
+      "explanation": "COMET 等学习式指标与人工判断的相关性比单独的 BLEU/chrF 更强。"
     },
     {
       "stage": "check",
-      "question": "When does chrF tend to be more informative than BLEU?",
+      "question": "chrF 在什么情况下比 BLEU 更有参考价值？",
       "options": [
-        "For morphologically rich languages where character-level matches catch inflectional variants BLEU misses",
-        "When using beam search",
-        "On very short sentences",
-        "Whenever a reference exists"
+        "对于形态丰富的语言，字符级匹配能捕捉 BLEU 遗漏的曲变形式",
+        "使用束搜索时",
+        "对于非常短的句子",
+        "只要有参考存在时"
       ],
       "correct": 0,
-      "explanation": "Character F-score captures partial morphological matches that word-level BLEU undercounts."
+      "explanation": "字符 F 分数捕捉部分形态匹配，而词级 BLEU 低估了这类匹配。"
     },
     {
       "stage": "post",
-      "question": "What is off-target generation in multilingual MT?",
+      "question": "多语言 MT 中的偏离目标生成是什么？",
       "options": [
-        "Output that drops named entities",
-        "Output that misses punctuation",
-        "The model decodes into the wrong target language (e.g. NLLB outputting Spanish when French was requested)",
-        "Output that is too short"
+        "丢失命名实体的输出",
+        "遗漏标点的输出",
+        "模型解码到错误的目标语言（如请求法语但 NLLB 输出西班牙语）",
+        "过短的输出"
       ],
       "correct": 2,
-      "explanation": "Off-target generation is common on rare language pairs; a post-translation language-ID check catches it."
+      "explanation": "偏离目标生成在罕见语言对上很常见；翻译后的语言识别检查可以捕获这一问题。"
     },
     {
       "stage": "post",
-      "question": "Why does fine-tuning on a few thousand high-quality domain pairs often beat much larger noisy web data?",
+      "question": "为什么在少量高质量领域数据对上微调通常优于更大量的嘈杂网络数据？",
       "options": [
-        "Larger data overflows GPU memory",
-        "Smaller datasets train faster",
-        "Web data is illegal to use",
-        "Quality and domain match dominate volume; noisy parallel data introduces drift and hallucination"
+        "更大的数据会溢出 GPU 内存",
+        "更小的数据集训练更快",
+        "网络数据在法律上不允许使用",
+        "质量和领域匹配优先于数量；嘈杂的平行数据引入漂移和幻觉"
       ],
       "correct": 3,
-      "explanation": "Clean domain-aligned pairs are the largest production lever; noisy data degrades adaptation."
+      "explanation": "干净的领域对齐数据对是单个最大的生产杠杆；嘈杂数据会降低适应效果。"
     },
     {
       "stage": "post",
-      "question": "When is an LLM (e.g. GPT-4) likely to outperform a specialized MT model in 2026?",
+      "question": "2026 年什么情况下 LLM（如 GPT-4）可能优于专业 MT 模型？",
       "options": [
-        "Highest throughput batch translation",
-        "Latency-critical browser translation",
-        "Idiomatic content, long context, stylistic adaptation via prompting, or content requiring tone control",
-        "Small-language pairs with millions of parallel sentences"
+        "最高吞吐量的批量翻译",
+        "延迟敏感的浏览器翻译",
+        "习语内容、长上下文、通过提示进行的风格适应，或需要语气控制的内容",
+        "有数百万平行句子的小语言对"
       ],
       "correct": 2,
-      "explanation": "LLMs win on idiomatic, long-context, or style-controlled translation; specialized MT wins on throughput and latency."
+      "explanation": "LLM 在习语、长上下文或风格控制翻译上胜出；专业 MT 在吞吐量和延迟上胜出。"
     }
   ]
 }

@@ -4,99 +4,99 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "What is the goal of POS tagging?",
+      "question": "词性标注的目标是什么？",
       "options": [
-        "Detect sentiment",
-        "Translate the sentence",
-        "Extract named entities",
-        "Assign a grammatical category (noun, verb, etc.) to each token"
+        "检测情感",
+        "翻译句子",
+        "提取命名实体",
+        "为每个 token 分配语法类别（名词、动词等）"
       ],
       "correct": 3,
-      "explanation": "POS tagging labels each token with its part of speech."
+      "explanation": "词性标注为每个 token 标注其词性。"
     },
     {
       "stage": "pre",
-      "question": "Which tagset is the default for cross-lingual work?",
+      "question": "哪个标注集是跨语言工作的默认标准？",
       "options": [
         "Penn Treebank",
         "Stanford Dependencies",
-        "Universal Dependencies",
+        "通用依存（Universal Dependencies）",
         "CoNLL-2003"
       ],
       "correct": 2,
-      "explanation": "Universal Dependencies provides a coarser, language-agnostic 17-tag set."
+      "explanation": "通用依存提供了一个更粗粒度、与语言无关的 17 标签集。"
     },
     {
       "stage": "check",
-      "question": "What does a bigram HMM POS tagger model?",
+      "question": "二元组 HMM 词性标注器建模什么？",
       "options": [
-        "P(tags) only",
-        "Dependency parses",
-        "Embedding similarities",
-        "P(tag | previous tag) transitions plus P(word | tag) emissions, decoded with Viterbi"
+        "仅 P(tags)",
+        "依存分析",
+        "嵌入相似度",
+        "P(tag | 前一个 tag) 转移概率加 P(word | tag) 发射概率，用 Viterbi 解码"
       ],
       "correct": 3,
-      "explanation": "Bigram HMM uses tag transitions and word emissions; Viterbi finds the highest-probability sequence."
+      "explanation": "二元组 HMM 使用标签转移和词语发射；Viterbi 找到概率最高的序列。"
     },
     {
       "stage": "check",
-      "question": "What does the Viterbi algorithm compute for an HMM tagger?",
+      "question": "Viterbi 算法为 HMM 标注器计算什么？",
       "options": [
-        "The single highest-probability tag sequence via dynamic programming over the tag lattice",
-        "The transition matrix",
-        "The marginal probability of each tag",
-        "The forward probabilities only"
+        "通过在标签格上动态规划找到概率最高的单一标签序列",
+        "转移矩阵",
+        "每个标签的边际概率",
+        "仅前向概率"
       ],
       "correct": 0,
-      "explanation": "Viterbi finds the argmax sequence with O(n * |T|^2) dynamic programming."
+      "explanation": "Viterbi 以 O(n * |T|^2) 的动态规划找到 argmax 序列。"
     },
     {
       "stage": "check",
-      "question": "What does dependency parsing produce?",
+      "question": "依存分析产生什么？",
       "options": [
-        "A tree where each word has one head word and a labeled grammatical relation",
-        "A flat BIO sequence",
-        "A constituency tree of NP/VP/PP labels",
-        "A coreference chain"
+        "每个词有一个中心词和一个标注了语法关系的树",
+        "平面 BIO 序列",
+        "NP/VP/PP 标签的成分树",
+        "共指链"
       ],
       "correct": 0,
-      "explanation": "Dependency parses give per-word (head, relation) edges; constituency parses give nested phrase structures."
+      "explanation": "依存分析给出每词（中心词，关系）边；成分分析给出嵌套短语结构。"
     },
     {
       "stage": "post",
-      "question": "Why is the accuracy ceiling on PTB POS tagging around 97-98%?",
+      "question": "为什么 PTB 词性标注的准确率上限约为 97-98%？",
       "options": [
-        "Models cannot exceed 98% in any task",
-        "Universal Dependencies caps at 98%",
-        "Human annotators only agree about 97% of the time, so models above ~98% may be overfitting test data",
-        "Hardware limitations"
+        "模型在任何任务上都无法超过 98%",
+        "通用依存上限为 98%",
+        "人工标注者约 97% 的时间达成一致，因此超过 ~98% 的模型可能在过拟合测试数据",
+        "硬件限制"
       ],
       "correct": 2,
-      "explanation": "Annotator disagreement bounds the achievable accuracy; very high numbers often signal overfitting."
+      "explanation": "标注者分歧限制了可达到的准确率；非常高的数字通常表明过拟合。"
     },
     {
       "stage": "post",
-      "question": "Why does POS tagging still matter in 2026 LLM pipelines?",
+      "question": "2026 年为什么词性标注在 LLM 管线中仍然重要？",
       "options": [
-        "LLMs cannot run without it",
-        "Lemmatization, aspect-based sentiment, query decomposition, structured-output validation, and cross-lingual transfer all still consume POS or dependency parses",
-        "Required for tokenization",
-        "Replaces transformers"
+        "LLM 没有它无法运行",
+        "词形还原、基于方面的情感分析、查询分解、结构化输出验证和跨语言迁移仍然需要词性或依存分析",
+        "分词所需",
+        "替代 Transformer"
       ],
       "correct": 1,
-      "explanation": "POS and dependency parses feed many structured downstream tasks even when LLMs generate the prose."
+      "explanation": "即使 LLM 生成散文，词性和依存分析仍为许多结构化下游任务提供输入。"
     },
     {
       "stage": "post",
-      "question": "Which library should you reach for in most production POS / parse tasks?",
+      "question": "大多数生产词性/分析任务应该使用哪个库？",
       "options": [
         "scikit-learn",
         "NumPy",
-        "spaCy (or stanza/trankit for top accuracy or wider language coverage)",
-        "Roll your own parser"
+        "spaCy（或 stanza/trankit 以获得更高准确率或更广语言覆盖）",
+        "自己实现分析器"
       ],
       "correct": 2,
-      "explanation": "spaCy ships fast production-grade POS + dependency parsers; stanza/trankit cover broader languages."
+      "explanation": "spaCy 提供快速的生产级词性和依存分析器；stanza/trankit 覆盖更广泛的语言。"
     }
   ]
 }

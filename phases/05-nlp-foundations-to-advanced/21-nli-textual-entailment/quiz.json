@@ -4,99 +4,99 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "What three labels does NLI assign to a (premise, hypothesis) pair?",
+      "question": "NLI 对（前提、假设）对分配哪三个标签？",
       "options": [
-        "Positive / negative / neutral",
-        "True / false / unknown",
-        "Entailment / contradiction / neutral",
-        "Cause / effect / unrelated"
+        "正面/负面/中性",
+        "真/假/未知",
+        "蕴含/矛盾/中性",
+        "原因/结果/无关"
       ],
       "correct": 2,
-      "explanation": "NLI is a 3-way classification over entailment, contradiction, and neutral."
+      "explanation": "NLI 是对蕴含、矛盾和中性的三路分类。"
     },
     {
       "stage": "pre",
-      "question": "How is NLI used as a zero-shot text classifier?",
+      "question": "NLI 如何用作零样本文本分类器？",
       "options": [
-        "Verbalize each candidate label as a hypothesis (e.g. 'This text is about sports') and pick the label with the highest entailment score",
-        "By averaging embeddings",
-        "By computing TF-IDF",
-        "By prompting an LLM"
+        "将每个候选标签语言化为假设（如"这段文字关于体育"），选取蕴含分最高的标签",
+        "通过对嵌入求平均",
+        "通过计算 TF-IDF",
+        "通过提示 LLM"
       ],
       "correct": 0,
-      "explanation": "NLI-as-classifier turns labels into hypotheses; the model picks the max-entailment label."
+      "explanation": "NLI 作为分类器将标签转化为假设；模型选取蕴含分最高的标签。"
     },
     {
       "stage": "check",
-      "question": "Why is NLI a faithfulness check for RAG outputs?",
+      "question": "为什么 NLI 是 RAG 输出的忠实度检查工具？",
       "options": [
-        "It uses tokenizers",
-        "Checking whether the retrieved context entails each answer claim is exactly the formulation NLI was trained on",
-        "It is cheap",
-        "It is multilingual"
+        "它使用分词器",
+        "检查检索上下文是否蕴含每条答案声明，正是 NLI 训练任务的公式化",
+        "它很便宜",
+        "它是多语言的"
       ],
       "correct": 1,
-      "explanation": "Hallucination = answer claims not entailed by retrieved context; NLI directly measures entailment."
+      "explanation": "幻觉 = 检索上下文未蕴含的答案声明；NLI 直接测量蕴含关系。"
     },
     {
       "stage": "check",
-      "question": "What does the hypothesis-only baseline expose?",
+      "question": "仅假设的基准线揭示了什么？",
       "options": [
-        "Multilingual gaps",
-        "Slow inference",
-        "Datasets where the hypothesis alone (without the premise) is predictive of the label, signalling label leakage",
-        "Tokenizer drift"
+        "多语言差距",
+        "推断速度慢",
+        "仅从假设（不看前提）就能预测标签的数据集，暴露了标签泄露问题",
+        "分词器漂移"
       ],
       "correct": 2,
-      "explanation": "A high hypothesis-only score on SNLI revealed annotation artifacts; useful for debugging your data."
+      "explanation": "SNLI 上高仅假设分数揭示了标注伪迹；对调试数据很有用。"
     },
     {
       "stage": "check",
-      "question": "Which NLI model family tops 2026 leaderboards as the standard workhorse?",
+      "question": "2026 年排行榜上哪个 NLI 模型族是标准主力？",
       "options": [
         "fastText",
-        "Plain Word2Vec",
-        "DeBERTa-v3 variants fine-tuned on MNLI/FEVER/ANLI",
+        "普通 Word2Vec",
+        "在 MNLI/FEVER/ANLI 上微调的 DeBERTa-v3 变体",
         "GPT-2"
       ],
       "correct": 2,
-      "explanation": "DeBERTa-v3 fine-tuned on MNLI and related corpora is the open NLI workhorse in 2026."
+      "explanation": "在 MNLI 和相关语料库上微调的 DeBERTa-v3 是 2026 年开源 NLI 主力。"
     },
     {
       "stage": "post",
-      "question": "Why do sentence-level NLI models drop accuracy on document-length premises?",
+      "question": "为什么句子级 NLI 模型在文档级前提上准确率下降？",
       "options": [
-        "They were trained on short premises and fail at multi-sentence and multi-hop inference; DocNLI-tuned models handle longer inputs",
-        "Larger inputs run slower",
-        "Documents trigger tokenizer drift",
-        "Cosine similarity decays"
+        "它们在短前提上训练，在多句和多跳推断上失败；DocNLI 调优的模型能处理更长输入",
+        "更大的输入运行更慢",
+        "文档触发分词器漂移",
+        "余弦相似度衰减"
       ],
       "correct": 0,
-      "explanation": "Training distribution mismatch: single-sentence NLI models lose 20+ F1 on document-length inputs."
+      "explanation": "训练分布不匹配：句子级 NLI 模型在文档级输入上 F1 下降 20 分以上。"
     },
     {
       "stage": "post",
-      "question": "Why can zero-shot accuracy swing 10+ points based on the hypothesis template?",
+      "question": "为什么零样本准确率会因假设模板不同而相差 10 分以上？",
       "options": [
-        "Models are sensitive to phrasing; e.g. 'This text is about {label}' vs '{label}' alone shifts entailment probabilities",
-        "Templates change tokenizer behavior",
-        "Templates affect model weights",
-        "Templates change the label set"
+        "模型对措辞敏感；例如"This text is about {label}"与单独的"{label}"会改变蕴含概率",
+        "模板改变分词器行为",
+        "模板影响模型权重",
+        "模板改变标签集"
       ],
       "correct": 0,
-      "explanation": "Template wording materially shifts entailment scores; tune it on a small held-out set."
+      "explanation": "模板措辞会实质性地改变蕴含分数；在小型保留集上调整模板。"
     },
     {
       "stage": "post",
-      "question": "What is a safe limit to claim about NLI for hallucination detection?",
+      "question": "关于 NLI 用于幻觉检测，安全的说法是什么？",
       "options": [
-        "It only works on English",
-        "It reduces hallucination as a faithfulness signal but does not eliminate it; combine with retrieval recall and human review",
-        "It eliminates hallucination",
-        "It requires LLMs"
+        "它只适用于英语",
+        "它作为忠实度信号减少幻觉，但不能消除；需结合检索召回率和人工审查",
+        "它消除幻觉",
+        "它需要 LLM"
       ],
       "correct": 1,
-      "explanation": "NLI is a useful signal but not a complete solution; pair with retrieval metrics and human spot-checks."
+      "explanation": "NLI 是有用的信号，但不是完整方案；需结合检索指标和人工抽查。"
     }
   ]
 }

@@ -4,99 +4,99 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "What does zero-shot cross-lingual transfer mean?",
+      "question": "零样本跨语言迁移是什么意思？",
       "options": [
-        "Fine-tune a multilingual model on one source language and evaluate on a different language with no target-language labels",
-        "Translating without a translation model",
-        "Tokenizing with zero merges",
-        "Training with zero examples"
+        "在一种源语言上微调多语言模型，并在没有目标语言标注的情况下评估另一种语言",
+        "不使用翻译模型进行翻译",
+        "用零次合并进行分词",
+        "用零个样本训练"
       ],
       "correct": 0,
-      "explanation": "Zero-shot transfer: train on the source language, run on the target without target-language supervision."
+      "explanation": "零样本迁移：在源语言上训练，在没有目标语言监督的情况下在目标语言上运行。"
     },
     {
       "stage": "pre",
-      "question": "Which model family ships as the standard 100-language cross-lingual baseline?",
+      "question": "哪个模型族是标准的 100 语言跨语言基准？",
       "options": [
         "GloVe",
         "GPT-2",
-        "XLM-R (e.g. XLM-RoBERTa-base, 270M)",
+        "XLM-R（如 XLM-RoBERTa-base，270M）",
         "DistilBERT"
       ],
       "correct": 2,
-      "explanation": "XLM-R is the canonical 100-language pretrained baseline for cross-lingual classification."
+      "explanation": "XLM-R 是跨语言分类的标准 100 语言预训练基准。"
     },
     {
       "stage": "check",
-      "question": "Why does English-as-source not always give the best transfer for a non-English target?",
+      "question": "为什么英语作为源语言并不总能在非英语目标语言上获得最佳迁移效果？",
       "options": [
-        "English has too little data",
-        "Language similarity (typology, script, morphology) predicts transfer quality; a closer high-resource source can outperform English",
-        "English uses BPE",
-        "English is too short"
+        "英语数据太少",
+        "语言相似度（类型学、文字、形态）能预测迁移质量；更接近的高资源源语言可能优于英语",
+        "英语使用 BPE",
+        "英语太短"
       ],
       "correct": 1,
-      "explanation": "Typologically related sources (e.g. Hindi for Indic targets) often outperform English as a fine-tune source."
+      "explanation": "类型学相关的源语言（如印地语系目标的印地语）通常优于英语作为微调源。"
     },
     {
       "stage": "check",
-      "question": "What is the 'fertility tax' for low-resource languages?",
+      "question": "低资源语言的"生育率代价"是什么？",
       "options": [
-        "BPE refuses to train",
-        "Low-resource text tokenizes into more subwords per word than English, consuming context window, latency, and capacity",
-        "Smaller models train slower",
-        "Tokenizers cannot handle Unicode"
+        "BPE 拒绝训练",
+        "低资源文本每个词分成比英语更多的子词，消耗上下文窗口、延迟和模型容量",
+        "较小的模型训练更慢",
+        "分词器无法处理 Unicode"
       ],
       "correct": 1,
-      "explanation": "Long-tail languages tokenize at much higher fertility, eating context and training efficiency."
+      "explanation": "长尾语言的分词生育率远高于英语，消耗上下文和训练效率。"
     },
     {
       "stage": "check",
-      "question": "Why is per-language evaluation required, not aggregated accuracy?",
+      "question": "为什么需要按语言单独评估，而不是使用聚合准确率？",
       "options": [
-        "Aggregates ignore tokenization",
-        "Aggregate numbers hide long-tail languages where a multilingual model can be far worse than its mean suggests",
-        "Aggregates only work on classification",
-        "Aggregates run faster"
+        "聚合忽略分词",
+        "聚合数字掩盖了多语言模型可能远差于其平均水平的长尾语言",
+        "聚合仅适用于分类",
+        "聚合运行更快"
       ],
       "correct": 1,
-      "explanation": "Aggregate accuracy masks poor performance on low-resource languages; per-language scores expose it."
+      "explanation": "聚合准确率掩盖了低资源语言上的低效表现；按语言分别评分才能揭示问题。"
     },
     {
       "stage": "post",
-      "question": "Why is fine-tuning learning rate critical when adapting a multilingual model with few-shot data?",
+      "question": "为什么在用少样本数据适配多语言模型时，微调学习率至关重要？",
       "options": [
-        "Lower LR wastes GPU",
-        "Required by tokenizers",
-        "It changes the vocabulary",
-        "High LR can collapse the multilingual alignment and effectively reduce the model to English-only"
+        "较低的学习率浪费 GPU",
+        "分词器要求",
+        "它改变词汇表",
+        "高学习率可能破坏多语言对齐，将模型有效地退化为仅英语模型"
       ],
       "correct": 3,
-      "explanation": "Excessive LR drifts the shared representation; conservative LR (~2e-5) preserves cross-lingual structure."
+      "explanation": "过高的学习率会偏移共享表示；保守的学习率（约 2e-5）能保留跨语言结构。"
     },
     {
       "stage": "post",
-      "question": "Which mitigation directly addresses tokenizer fertility for long-tail scripts?",
+      "question": "哪种缓解措施直接解决长尾文字的分词生育率问题？",
       "options": [
-        "Skip stopwords",
-        "Lower batch size",
-        "Use byte-fallback (SentencePiece byte_fallback=True) or a tokenizer with broader script coverage (e.g. XLM-V)",
-        "More training epochs"
+        "跳过停用词",
+        "降低批量大小",
+        "使用字节回退（SentencePiece byte_fallback=True）或具有更广泛文字覆盖的分词器（如 XLM-V）",
+        "更多训练轮次"
       ],
       "correct": 2,
-      "explanation": "Byte fallback and broader-vocab tokenizers reduce fertility and OOV for low-resource scripts."
+      "explanation": "字节回退和更大词汇量的分词器能降低低资源文字的生育率和 OOV 问题。"
     },
     {
       "stage": "post",
-      "question": "When is a monolingual model from scratch worth trying instead of a multilingual one?",
+      "question": "什么时候值得尝试从头训练单语模型，而不是使用多语言模型？",
       "options": [
-        "Always for English",
-        "When the target language has enough data to train a monolingual model that beats the multilingual baseline; test before assuming",
-        "Only for translation",
-        "Whenever the tokenizer is BPE"
+        "英语永远如此",
+        "当目标语言有足够数据来训练单语模型并击败多语言基准时；在假设之前先测试",
+        "仅用于翻译",
+        "每当分词器是 BPE 时"
       ],
       "correct": 1,
-      "explanation": "Sometimes monolingual training beats multilingual for high-resource targets; empirical comparison decides."
+      "explanation": "有时单语训练对高资源目标语言优于多语言；需要实证比较来决定。"
     }
   ]
 }

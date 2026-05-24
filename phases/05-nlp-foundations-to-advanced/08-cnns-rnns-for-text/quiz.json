@@ -4,99 +4,99 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "What is a 1D convolutional filter of width 3 over word embeddings effectively learning?",
+      "question": "对词嵌入应用宽度为 3 的一维卷积过滤器实际上在学习什么？",
       "options": [
-        "A learnable bigram detector",
-        "A position embedding",
-        "A learnable trigram (n-gram) detector",
-        "A unigram count"
+        "可学习的二元组检测器",
+        "位置嵌入",
+        "可学习的三元组（n-gram）检测器",
+        "一元组计数"
       ],
       "correct": 2,
-      "explanation": "A width-3 filter spans three consecutive tokens, acting as a learnable trigram detector."
+      "explanation": "宽度为 3 的过滤器跨越三个连续 token，充当可学习的三元组检测器。"
     },
     {
       "stage": "pre",
-      "question": "Why does an LSTM use a cell state with mostly additive interactions?",
+      "question": "为什么 LSTM 使用以加法交互为主的细胞状态？",
       "options": [
-        "Additive flow lets gradients propagate through long sequences without vanishing or exploding",
-        "Faster softmax",
-        "It saves memory",
-        "To avoid matrix inversion"
+        "加法流让梯度可以在长序列中传播而不消失或爆炸",
+        "更快的 softmax",
+        "节省内存",
+        "避免矩阵求逆"
       ],
       "correct": 0,
-      "explanation": "The cell-state highway keeps gradients stable across hundreds of steps, fixing vanishing-gradient issues."
+      "explanation": "细胞状态的高速公路使梯度在数百步中保持稳定，解决了梯度消失问题。"
     },
     {
       "stage": "check",
-      "question": "Why does TextCNN use global max-pooling after the convolutional layer?",
+      "question": "为什么 TextCNN 在卷积层之后使用全局最大池化？",
       "options": [
-        "To enable backpropagation",
-        "To remove embeddings",
-        "To reduce vocabulary",
-        "Max-pool gives a fixed-size, position-invariant representation by selecting the strongest activation per filter"
+        "启用反向传播",
+        "移除嵌入",
+        "缩减词汇表",
+        "最大池化通过选择每个过滤器的最强激活，给出固定大小、位置不变的表示"
       ],
       "correct": 3,
-      "explanation": "Global max-pool produces a fixed-size feature vector regardless of input length, with position invariance."
+      "explanation": "全局最大池化产生固定大小的特征向量，与输入长度无关，且具有位置不变性。"
     },
     {
       "stage": "check",
-      "question": "What is the main advantage of a bidirectional RNN over a one-way RNN for sequence labeling?",
+      "question": "双向 RNN 相比单向 RNN 在序列标注上的主要优势是什么？",
       "options": [
-        "Faster training",
-        "Each token's representation sees both left and right context, which is essential for tagging",
-        "Avoids embeddings",
-        "Cheaper memory"
+        "训练更快",
+        "每个 token 的表示都能看到左右两侧的上下文，这对标注至关重要",
+        "避免嵌入",
+        "内存更便宜"
       ],
       "correct": 1,
-      "explanation": "Bidirectional networks concatenate forward + backward hidden states so labels can use full context."
+      "explanation": "双向网络拼接正向和反向隐藏状态，使标签可以使用完整的上下文。"
     },
     {
       "stage": "check",
-      "question": "Why does max-pooling over an LSTM's outputs often beat using just the last hidden state for classification?",
+      "question": "为什么对 LSTM 输出进行最大池化通常优于仅使用最后一个隐藏状态进行分类？",
       "options": [
-        "Max-pool is differentiable; last-state is not",
-        "Information at the end of a long sequence tends to dominate the last state, hiding earlier evidence",
-        "Max-pool removes capitalization",
-        "Last-state pool ignores padding"
+        "最大池化可以反向传播；最后状态不行",
+        "长序列末尾的信息往往主导最后状态，隐藏了早期的证据",
+        "最大池化去除了大小写",
+        "最后状态池化忽略填充"
       ],
       "correct": 1,
-      "explanation": "Max-pool aggregates strongest signal across positions; last-state can lose earlier evidence."
+      "explanation": "最大池化聚合跨位置的最强信号；最后状态可能丢失早期的证据。"
     },
     {
       "stage": "post",
-      "question": "Which limitation of LSTM/RNN encoder-decoders motivated attention?",
+      "question": "LSTM/RNN 编码器-解码器的哪个局限性促使了注意力机制的出现？",
       "options": [
-        "They require subword tokenizers",
-        "They cannot use embeddings",
-        "The decoder sees only a fixed-size encoder state, losing detail on long inputs; recurrence also serializes training",
-        "They cannot embed tokens"
+        "需要子词分词器",
+        "无法使用嵌入",
+        "解码器只看到固定大小的编码器状态，在长输入上丢失细节；循环还使训练串行化",
+        "无法嵌入 token"
       ],
       "correct": 2,
-      "explanation": "Fixed-size summarization plus serial training were two failures attention removed."
+      "explanation": "固定大小的摘要加上串行训练是注意力机制消除的两个失败。"
     },
     {
       "stage": "post",
-      "question": "When does a TextCNN or BiLSTM still beat a transformer in 2026?",
+      "question": "2026 年什么情况下 TextCNN 或 BiLSTM 仍然优于 Transformer？",
       "options": [
-        "On image inputs",
-        "Edge / on-device, streaming token-by-token inputs, or tiny-data baselines",
-        "Whenever the dataset is multilingual",
-        "When latency requirements are extremely loose"
+        "图像输入时",
+        "边缘/设备端、流式逐 token 输入，或小数据量基线",
+        "数据集是多语言时",
+        "延迟要求极宽松时"
       ],
       "correct": 1,
-      "explanation": "Small architectures still win on edge inference, streaming inputs, and rapid baselines."
+      "explanation": "小架构在边缘推理、流式输入和快速基线上仍然胜出。"
     },
     {
       "stage": "post",
-      "question": "What is the vanishing gradient problem in plain RNNs?",
+      "question": "普通 RNN 中的梯度消失问题是什么？",
       "options": [
-        "Repeated multiplication by recurrent weights smaller than 1 makes gradients toward early steps shrink toward zero",
-        "Embedding matrix becomes singular",
-        "Inputs become zero",
-        "Loss becomes negative"
+        "反复乘以小于 1 的循环权重使早期步骤的梯度趋于零",
+        "嵌入矩阵变成奇异矩阵",
+        "输入变为零",
+        "损失变为负数"
       ],
       "correct": 0,
-      "explanation": "Long-product gradients vanish (or explode) without gating; this is why LSTMs and GRUs exist."
+      "explanation": "没有门控时，长乘积梯度消失（或爆炸）；这就是 LSTM 和 GRU 存在的原因。"
     }
   ]
 }

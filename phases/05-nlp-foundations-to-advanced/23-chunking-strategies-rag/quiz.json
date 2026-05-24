@@ -4,99 +4,99 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "Why is chunking strategy as important as the embedding model in RAG?",
+      "question": "为什么分块策略与嵌入模型的选择在 RAG 中同样重要？",
       "options": [
-        "Chunk boundaries determine whether the answer is even retrievable; bad chunks defeat any embedding",
-        "Chunking shrinks the model",
-        "Smaller chunks train faster",
-        "Chunking is required by FAISS"
+        "块边界决定了答案是否能被检索到；错误的分块会击败任何嵌入",
+        "分块缩小了模型",
+        "更小的块训练更快",
+        "FAISS 要求分块"
       ],
       "correct": 0,
-      "explanation": "Vectara's 2025 study showed chunking quality matches or exceeds embedding-model impact on retrieval quality."
+      "explanation": "Vectara 2025 的研究表明分块质量对检索质量的影响与嵌入模型相当甚至更大。"
     },
     {
       "stage": "pre",
-      "question": "What does LangChain's RecursiveCharacterTextSplitter try in order?",
+      "question": "LangChain 的 RecursiveCharacterTextSplitter 按什么顺序尝试分割？",
       "options": [
-        "Always split on character N",
-        "Split on token IDs",
-        "Try splitting on paragraph breaks, then newlines, then sentence boundaries, then spaces",
-        "Split on whitespace only"
+        "始终在第 N 个字符处分割",
+        "在 token ID 处分割",
+        "先尝试段落分隔符，再换行符，再句子边界，再空格",
+        "仅在空白处分割"
       ],
       "correct": 2,
-      "explanation": "Recursive splitting falls back through paragraph -> newline -> sentence -> space to preserve structure."
+      "explanation": "递归分割通过段落 → 换行 → 句子 → 空格依次回退，以保留结构。"
     },
     {
       "stage": "check",
-      "question": "Why does the parent-document pattern improve answer quality?",
+      "question": "为什么父文档模式能提升答案质量？",
       "options": [
-        "Children give precise retrieval; returning the larger parent block preserves the surrounding context the reader needs",
-        "It removes embeddings",
-        "It avoids tokenization",
-        "It uses fewer GPU cycles"
+        "子块提供精确检索；返回更大的父块保留了阅读器所需的周围上下文",
+        "它消除了嵌入",
+        "它避免了分词",
+        "它使用更少的 GPU 周期"
       ],
       "correct": 0,
-      "explanation": "Retrieve by small child chunks for precision, then expand to the parent for context."
+      "explanation": "通过小子块精确检索，然后扩展到父块以获取上下文。"
     },
     {
       "stage": "check",
-      "question": "What does Anthropic's 'contextual retrieval' add to each chunk before indexing?",
+      "question": "Anthropic 的"上下文检索"在索引前为每个块添加了什么？",
       "options": [
-        "A POS tag",
-        "A language code",
-        "An LLM-generated 50-100 word summary placing the chunk in the document's overall context",
-        "Random noise"
+        "词性标注",
+        "语言代码",
+        "LLM 生成的 50-100 词摘要，说明该块在文档整体上下文中的位置",
+        "随机噪声"
       ],
       "correct": 2,
-      "explanation": "Contextual retrieval prepends an LLM-written situating summary to each chunk; ~35-50% recall gain."
+      "explanation": "上下文检索在每个块前加上 LLM 撰写的定位摘要；召回率提升约 35-50%。"
     },
     {
       "stage": "check",
-      "question": "Which 2026 finding contradicts the conventional wisdom about chunk overlap?",
+      "question": "哪个 2026 年的发现推翻了关于块重叠的传统认知？",
       "options": [
-        "Overlap is required for BM25",
-        "Empirical 2026 benchmarks show overlap often provides zero measurable benefit while doubling index cost",
-        "Overlap improves contextual retrieval only",
-        "Overlap should be 50%"
+        "BM25 需要重叠",
+        "2026 年的实证基准测试显示重叠通常带来零可测量的收益，同时使索引成本翻倍",
+        "重叠仅改善上下文检索",
+        "重叠应该是 50%"
       ],
       "correct": 1,
-      "explanation": "Newer studies (SPLADE+Mistral on NQ) show chunk overlap rarely helps and inflates index size."
+      "explanation": "新研究（SPLADE+Mistral 在 NQ 上）表明块重叠很少有帮助，还会使索引大小膨胀。"
     },
     {
       "stage": "post",
-      "question": "Which chunk size does NVIDIA's 2026 benchmark associate with factoid queries?",
+      "question": "NVIDIA 2026 年基准测试将哪种块大小与事实型查询关联？",
       "options": [
-        "64 tokens",
-        "Roughly 256-512 tokens",
-        "2048-4096 tokens",
-        "8192 tokens"
+        "64 token",
+        "约 256-512 token",
+        "2048-4096 token",
+        "8192 token"
       ],
       "correct": 1,
-      "explanation": "Factoid queries benefit from smaller chunks (256-512 tokens) that concentrate the answer signal."
+      "explanation": "事实型查询受益于更小的块（256-512 token），能集中答案信号。"
     },
     {
       "stage": "post",
-      "question": "Why is a min-token floor important when using semantic chunking?",
+      "question": "使用语义分块时为什么最小 token 下限很重要？",
       "options": [
-        "Required by BERT",
-        "Without a floor, semantic chunking can produce tiny 40-token fragments that hurt retrieval",
-        "Floors speed up inference",
-        "Floors prevent overlap"
+        "BERT 要求",
+        "没有下限，语义分块可能产生 40 token 的微小片段，损害检索",
+        "下限加快推断",
+        "下限防止重叠"
       ],
       "correct": 1,
-      "explanation": "Semantic chunkers can over-segment; enforcing a min size prevents low-signal fragments."
+      "explanation": "语义分块器可能过度分割；强制执行最小大小可防止低信号片段。"
     },
     {
       "stage": "post",
-      "question": "What does 'late chunking' do differently from traditional chunking?",
+      "question": "后期分块（late chunking）与传统分块有什么不同？",
       "options": [
-        "Skips chunking entirely",
-        "Embeds the whole document at the token level first, then pools token embeddings into chunk vectors to preserve cross-chunk context",
-        "Chunks after retrieval",
-        "Uses BM25 instead"
+        "完全跳过分块",
+        "先在 token 级别嵌入整个文档，然后将 token 嵌入池化为块向量，以保留跨块上下文",
+        "在检索后分块",
+        "改用 BM25"
       ],
       "correct": 1,
-      "explanation": "Late chunking embeds first and pools second, preserving contextual interactions across chunk boundaries."
+      "explanation": "后期分块先嵌入后池化，保留了跨块边界的上下文交互。"
     }
   ]
 }

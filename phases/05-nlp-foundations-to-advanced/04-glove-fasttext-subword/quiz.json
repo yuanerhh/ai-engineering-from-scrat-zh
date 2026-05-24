@@ -4,99 +4,99 @@
   "questions": [
     {
       "stage": "pre",
-      "question": "What did GloVe contribute over Word2Vec?",
+      "question": "GloVe 相比 Word2Vec 的贡献是什么？",
       "options": [
-        "Direct factorization of the word-word co-occurrence matrix with a weighted loss",
-        "Byte-level tokenization",
-        "A deeper neural network",
-        "Subword n-gram embeddings"
+        "使用加权损失函数直接对词-词共现矩阵进行分解",
+        "字节级分词",
+        "更深的神经网络",
+        "子词 n-gram 嵌入"
       ],
       "correct": 0,
-      "explanation": "GloVe factorizes the global co-occurrence matrix with a thoughtfully weighted log-loss."
+      "explanation": "GloVe 使用精心设计的加权对数损失对全局共现矩阵进行分解。"
     },
     {
       "stage": "pre",
-      "question": "What problem does FastText solve that Word2Vec and GloVe do not?",
+      "question": "FastText 解决了 Word2Vec 和 GloVe 未解决的什么问题？",
       "options": [
-        "Reducing training cost",
-        "Multilingual transfer",
-        "Producing vectors for unseen words by composing character n-grams",
-        "Polysemy disambiguation"
+        "降低训练成本",
+        "多语言迁移",
+        "通过组合字符 n-gram 为未见过的词生成向量",
+        "多义词消歧"
       ],
       "correct": 2,
-      "explanation": "FastText composes a word vector from its subword n-grams, so OOV words still get a sensible vector."
+      "explanation": "FastText 从子词 n-gram 组合词向量，因此 OOV 词仍能得到合理的向量。"
     },
     {
       "stage": "check",
-      "question": "In GloVe, what role does the weighting function f(x) = (x/x_max)^alpha play?",
+      "question": "在 GloVe 中，加权函数 f(x) = (x/x_max)^alpha 起什么作用？",
       "options": [
-        "Downweights extremely frequent pairs so they do not dominate the loss",
-        "Selects negative samples",
-        "Initializes weights randomly",
-        "Normalizes vectors to unit length"
+        "对极高频对降权，使其不主导损失",
+        "选择负样本",
+        "随机初始化权重",
+        "将向量归一化为单位长度"
       ],
       "correct": 0,
-      "explanation": "The weighting prevents ubiquitous co-occurrences like (the, and) from dominating training."
+      "explanation": "加权函数防止像 (the, and) 这样无处不在的共现对主导训练。"
     },
     {
       "stage": "check",
-      "question": "How does the BPE merge step pick which pair to combine next?",
+      "question": "BPE 合并步骤如何选择下一个要合并的对？",
       "options": [
-        "A random pair",
-        "The lexicographically first pair",
-        "The most frequent adjacent token pair across the corpus",
-        "The pair with highest IDF"
+        "随机选一对",
+        "字典序最靠前的对",
+        "语料库中最高频的相邻 token 对",
+        "IDF 最高的对"
       ],
       "correct": 2,
-      "explanation": "BPE iteratively merges the most frequent adjacent pair."
+      "explanation": "BPE 迭代合并最高频的相邻对。"
     },
     {
       "stage": "check",
-      "question": "Why does GPT-2 use byte-level BPE?",
+      "question": "为什么 GPT-2 使用字节级 BPE？",
       "options": [
-        "Byte BPE skips merge training",
-        "The base vocabulary of 256 bytes covers any input, eliminating out-of-vocabulary entirely",
-        "Bytes train faster than characters",
-        "Bytes preserve casing implicitly"
+        "字节 BPE 跳过合并训练",
+        "256 个字节的基础词汇表覆盖任何输入，完全消除词汇表外问题",
+        "字节比字符训练更快",
+        "字节隐式保留大小写"
       ],
       "correct": 1,
-      "explanation": "Starting from 256 bytes means every UTF-8 string tokenizes; nothing is OOV."
+      "explanation": "从 256 个字节开始意味着每个 UTF-8 字符串都能被分词，不会有 OOV。"
     },
     {
       "stage": "post",
-      "question": "Which tokenizer should you use when fine-tuning a pretrained transformer?",
+      "question": "微调预训练 Transformer 时应该使用哪个分词器？",
       "options": [
-        "Always SentencePiece",
-        "The exact tokenizer the model shipped with; mismatch breaks the embeddings",
-        "Whichever has the largest vocabulary",
-        "Always byte-level BPE"
+        "始终用 SentencePiece",
+        "模型附带的原始分词器；不匹配会破坏嵌入",
+        "词汇量最大的那个",
+        "始终用字节级 BPE"
       ],
       "correct": 1,
-      "explanation": "Tokenizer-model mismatch silently corrupts inputs; always pair the shipped tokenizer with its model."
+      "explanation": "分词器与模型不匹配会悄悄破坏输入；始终将原始分词器与其模型配对使用。"
     },
     {
       "stage": "post",
-      "question": "When would you pick FastText over GloVe for pretrained word vectors?",
+      "question": "什么情况下你会选择 FastText 而非 GloVe 作为预训练词向量？",
       "options": [
-        "When you need a 50d model",
-        "For morphologically rich languages or domains with frequent neologisms and misspellings",
-        "When latency is tightest",
-        "When the corpus is very small"
+        "需要 50 维模型时",
+        "处理形态丰富的语言，或频繁出现新词和拼写错误的领域",
+        "延迟要求最严格时",
+        "语料库很小时"
       ],
       "correct": 1,
-      "explanation": "FastText's subword composition handles inflections, neologisms, and misspellings that GloVe cannot."
+      "explanation": "FastText 的子词组合能处理 GloVe 无法应对的曲变形式、新词和拼写错误。"
     },
     {
       "stage": "post",
-      "question": "What unit forms the base of WordPiece, BPE, and SentencePiece vocabularies?",
+      "question": "WordPiece、BPE 和 SentencePiece 词汇表的基础单元是什么？",
       "options": [
-        "Sentences",
-        "Whole words",
-        "Paragraphs",
-        "Subword pieces (characters, n-grams, or learned merges) below the word level"
+        "句子",
+        "完整的词",
+        "段落",
+        "词级以下的子词片段（字符、n-gram 或学习到的合并）"
       ],
       "correct": 3,
-      "explanation": "All three are subword tokenizers; they differ in how merges or pieces are learned, not in being subword."
+      "explanation": "三者都是子词分词器；区别在于如何学习合并或片段，而非是否使用子词。"
     }
   ]
 }
