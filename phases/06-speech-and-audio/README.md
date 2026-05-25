@@ -1,5 +1,5 @@
-# Phase 6: Speech & Audio
+# Phase 6：语音与音频
 
-> The other half of human communication. Hear, understand, speak.
+> 人类沟通的另一半。倾听、理解、开口。
 
-See [ROADMAP.md](../../ROADMAP.md) for the full lesson plan.
+完整课程计划见 [ROADMAP.md](../../ROADMAP.md)。
