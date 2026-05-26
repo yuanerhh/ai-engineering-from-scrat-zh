@@ -1,37 +1,37 @@
 [
   {
-    "question": "A 7B parameter model in FP16 needs how much VRAM just for weights?",
+    "question": "FP16 格式的 70 亿参数模型仅权重就需要多少显存？",
     "options": ["7 GB", "14 GB", "28 GB", "56 GB"],
     "correct": 1,
-    "explanation": "Each parameter in FP16 is 2 bytes. 7 billion * 2 bytes = 14 GB. With Adam optimizer states (2 copies) and gradients, total training memory is roughly 56 GB before accounting for activations.",
+    "explanation": "FP16 格式每个参数占 2 字节。70 亿 × 2 字节 = 14 GB。加上 Adam 优化器状态（2 份副本）和梯度，总训练内存约为 56 GB，还未计算激活值。",
     "stage": "pre"
   },
   {
-    "question": "What are the three types of parallelism used in distributed training?",
-    "options": ["CPU, GPU, and TPU parallelism", "Data parallelism, tensor parallelism, and pipeline parallelism", "Batch, sequence, and token parallelism", "Forward, backward, and optimizer parallelism"],
+    "question": "分布式训练中使用的三种并行类型是什么？",
+    "options": ["CPU、GPU 和 TPU 并行", "数据并行、张量并行和流水线并行", "批次、序列和 token 并行", "前向、反向和优化器并行"],
     "correct": 1,
-    "explanation": "Data parallelism replicates the model on each GPU and splits the data. Tensor parallelism splits individual layers across GPUs. Pipeline parallelism splits the model's layers into stages across GPUs.",
+    "explanation": "数据并行将模型复制到每块 GPU 上并分割数据。张量并行将单个层分割到多块 GPU 上。流水线并行将模型的层分成多个阶段分布到不同 GPU 上。",
     "stage": "pre"
   },
   {
-    "question": "What does FSDP (Fully Sharded Data Parallel) do that standard DDP does not?",
-    "options": ["It uses a different optimizer", "It shards model parameters, gradients, and optimizer states across GPUs instead of replicating the full model on each", "It processes data faster", "It supports more GPUs"],
+    "question": "FSDP（全分片数据并行）与标准 DDP 相比做了什么不同的事情？",
+    "options": ["它使用不同的优化器", "它将模型参数、梯度和优化器状态跨 GPU 分片，而不是在每块 GPU 上复制完整模型", "它处理数据更快", "它支持更多 GPU"],
     "correct": 1,
-    "explanation": "Standard DDP replicates the entire model on every GPU (wasteful). FSDP shards parameters across GPUs so each holds only a fraction. Parameters are gathered on-demand for computation and released after.",
+    "explanation": "标准 DDP 在每块 GPU 上复制整个模型（浪费）。FSDP 将参数跨 GPU 分片，每块 GPU 只持有一小部分。参数在计算时按需收集，之后释放。",
     "stage": "post"
   },
   {
-    "question": "What is DeepSpeed ZeRO Stage 3?",
-    "options": ["A quantization method", "It partitions optimizer states, gradients, AND model parameters across GPUs, achieving maximum memory efficiency", "A learning rate schedule", "A data preprocessing pipeline"],
+    "question": "什么是 DeepSpeed ZeRO 阶段 3？",
+    "options": ["一种量化方法", "它跨 GPU 划分优化器状态、梯度和模型参数，实现最大内存效率", "一种学习率调度", "一个数据预处理流水线"],
     "correct": 1,
-    "explanation": "ZeRO Stage 1 shards optimizer states, Stage 2 adds gradient sharding, Stage 3 adds parameter sharding. Stage 3 gives maximum memory savings, allowing training of models that far exceed single-GPU memory.",
+    "explanation": "ZeRO 阶段 1 分片优化器状态，阶段 2 增加梯度分片，阶段 3 增加参数分片。阶段 3 提供最大的内存节省，允许训练远超单 GPU 内存的模型。",
     "stage": "post"
   },
   {
-    "question": "Why is gradient synchronization necessary in data-parallel training?",
-    "options": ["To prevent overfitting", "Each GPU computes gradients on different data; averaging gradients across GPUs ensures all replicas update identically", "To reduce memory usage", "To speed up the forward pass"],
+    "question": "为什么数据并行训练中梯度同步是必要的？",
+    "options": ["防止过拟合", "每块 GPU 在不同数据上计算梯度；跨 GPU 平均梯度确保所有副本进行相同的更新", "减少内存使用", "加速前向传播"],
     "correct": 1,
-    "explanation": "In data parallelism, each GPU processes a different batch and computes different gradients. AllReduce averages these gradients across all GPUs so every replica applies the same update and stays in sync.",
+    "explanation": "在数据并行中，每块 GPU 处理不同的批次并计算不同的梯度。AllReduce 在所有 GPU 间平均这些梯度，使每个副本应用相同的更新并保持同步。",
     "stage": "post"
   }
 ]

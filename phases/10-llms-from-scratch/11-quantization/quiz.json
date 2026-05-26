@@ -1,37 +1,37 @@
 [
   {
-    "question": "How much VRAM does a 70B parameter model in FP16 require just for weights?",
+    "question": "FP16 格式的 70B 参数模型仅权重需要多少显存？",
     "options": ["35 GB", "70 GB", "140 GB", "280 GB"],
     "correct": 2,
-    "explanation": "70 billion parameters * 2 bytes per FP16 parameter = 140 billion bytes = 140 GB. This exceeds a single A100 (80GB), requiring at least two GPUs just to load the weights.",
+    "explanation": "700亿参数 × 每个FP16参数2字节 = 1400亿字节 = 140 GB。这超过了单块A100（80GB）的容量，仅加载权重就至少需要两块GPU。",
     "stage": "pre"
   },
   {
-    "question": "What is quantization in the context of LLMs?",
-    "options": ["Removing unused model layers", "Reducing the numerical precision of weights (e.g., FP16 to INT4) to decrease memory usage and increase inference speed", "Compressing the training data", "Reducing the vocabulary size"],
+    "question": "LLM 背景下的量化是什么？",
+    "options": ["删除未使用的模型层", "降低权重的数值精度（例如从FP16到INT4）以减少内存使用并提高推理速度", "压缩训练数据", "减少词汇表大小"],
     "correct": 1,
-    "explanation": "Quantization maps high-precision floating point weights to lower-precision integers. INT4 quantization stores each weight in 4 bits instead of 16, reducing memory by 4x with minimal accuracy loss.",
+    "explanation": "量化将高精度浮点权重映射到低精度整数。INT4量化将每个权重存储在4位而非16位，内存减少4倍，精度损失最小。",
     "stage": "pre"
   },
   {
-    "question": "What is the key difference between post-training quantization (PTQ) and quantization-aware training (QAT)?",
-    "options": ["PTQ is more accurate", "PTQ quantizes after training with no retraining; QAT simulates quantization during training so the model learns to tolerate reduced precision", "QAT doesn't use gradients", "PTQ requires more data"],
+    "question": "训练后量化（PTQ）和量化感知训练（QAT）之间的关键区别是什么？",
+    "options": ["PTQ更准确", "PTQ在训练后量化，无需重新训练；QAT在训练期间模拟量化，使模型学会容忍精度降低", "QAT不使用梯度", "PTQ需要更多数据"],
     "correct": 1,
-    "explanation": "PTQ is fast (just calibrate and quantize) but can lose accuracy. QAT includes fake quantization during training, allowing the model to adjust its weights to be more robust to precision loss. QAT usually gives better accuracy.",
+    "explanation": "PTQ速度快（只需校准和量化），但可能损失精度。QAT在训练期间包含伪量化，让模型调整权重以更好地容忍精度损失。QAT通常精度更好。",
     "stage": "post"
   },
   {
-    "question": "What does 'per-channel' quantization mean and why is it better than 'per-tensor'?",
-    "options": ["It quantizes each output channel separately, using different scale/zero-point for each, reducing quantization error", "It processes one color channel at a time", "It uses separate GPUs per channel", "It's a type of data parallelism"],
+    "question": "\"逐通道\"量化是什么意思，为什么比\"逐张量\"更好？",
+    "options": ["它分别量化每个输出通道，对每个通道使用不同的缩放/零点，减少量化误差", "它逐个处理颜色通道", "它每个通道使用独立的GPU", "这是一种数据并行的形式"],
     "correct": 0,
-    "explanation": "Per-tensor uses one scale factor for the entire weight matrix. Per-channel uses a separate scale for each output channel (row). Since different channels have different value ranges, per-channel captures them more accurately.",
+    "explanation": "逐张量对整个权重矩阵使用一个缩放因子。逐通道对每个输出通道（行）使用独立的缩放。由于不同通道的值范围不同，逐通道能更准确地捕捉它们。",
     "stage": "post"
   },
   {
-    "question": "Why do 95% of weights in Llama 3 70B fall between -0.1 and +0.1?",
-    "options": ["The model is poorly trained", "Weight decay and normalization during training push weights toward small values, making the full FP16 range wasteful", "The weights haven't converged yet", "This is specific to the Llama architecture"],
+    "question": "为什么 Llama 3 70B 中 95% 的权重落在 -0.1 到 +0.1 之间？",
+    "options": ["模型训练不充分", "训练过程中的权重衰减和归一化将权重推向小值，使得FP16的完整范围很浪费", "权重尚未收敛", "这是Llama架构特有的"],
     "correct": 1,
-    "explanation": "Weight decay regularization shrinks weights toward zero. Layer normalization keeps activations centered. Combined, they produce weight distributions concentrated near zero, making low-precision quantization effective.",
+    "explanation": "权重衰减正则化将权重缩小到零。层归一化使激活保持中心化。结合起来，它们产生集中在零附近的权重分布，使低精度量化有效。",
     "stage": "post"
   }
 ]

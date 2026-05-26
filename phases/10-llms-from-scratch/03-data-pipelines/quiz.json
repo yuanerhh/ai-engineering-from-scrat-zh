@@ -1,37 +1,37 @@
 [
   {
-    "question": "Why can't you simply load all pre-training data into memory?",
-    "options": ["Python doesn't support large arrays", "Pre-training corpora are terabytes in size, far exceeding available RAM, requiring streaming pipelines", "Loading data into memory is slower", "Memory is only needed for model weights"],
+    "question": "为什么不能简单地将所有预训练数据加载到内存中？",
+    "options": ["Python 不支持大型数组", "预训练语料库是 TB 级别的，远超可用 RAM，需要流式流水线", "将数据加载到内存更慢", "内存只需要用来存储模型权重"],
     "correct": 1,
-    "explanation": "LLM pre-training data is typically 1-15 TB of text. Even with 256GB of RAM, you can't hold the full dataset. Streaming pipelines process data on-the-fly, loading only what's needed for the current batch.",
+    "explanation": "大语言模型预训练数据通常是 1-15 TB 的文本。即使有 256GB RAM，也无法保存完整数据集。流式流水线实时处理数据，只加载当前批次所需的内容。",
     "stage": "pre"
   },
   {
-    "question": "Why is data deduplication important for pre-training?",
-    "options": ["It saves disk space", "Duplicate documents cause the model to memorize specific text verbatim and waste training compute on repeated content", "It speeds up tokenization", "It reduces the vocabulary size"],
+    "question": "为什么数据去重对预训练很重要？",
+    "options": ["节省磁盘空间", "重复文档会导致模型逐字记忆特定文本，并在重复内容上浪费训练计算资源", "加快分词速度", "减少词汇表大小"],
     "correct": 1,
-    "explanation": "Near-duplicate content (boilerplate, scraped duplicates) causes the model to memorize rather than generalize. Deduplication reduces training compute waste and improves model quality by ensuring diverse training signal.",
+    "explanation": "近似重复内容（样板文本、爬取的副本）会导致模型记忆而非泛化。去重减少了训练计算浪费，并通过确保多样化的训练信号来提高模型质量。",
     "stage": "pre"
   },
   {
-    "question": "What is the purpose of creating fixed-length training sequences from variable-length documents?",
-    "options": ["It makes the text easier to read", "GPU training requires uniform tensor shapes, so documents must be packed or padded into fixed-length sequences", "Fixed-length sequences are more accurate", "It reduces the total number of tokens"],
+    "question": "为什么要从可变长度文档创建固定长度的训练序列？",
+    "options": ["让文本更易于阅读", "GPU 训练需要统一的张量形状，因此文档必须被打包或填充成固定长度的序列", "固定长度序列更准确", "减少总 token 数"],
     "correct": 1,
-    "explanation": "GPUs process batches of tensors with identical shapes. Variable-length documents must be chunked into fixed-length sequences (e.g., 2048 or 4096 tokens) with proper attention masks at document boundaries.",
+    "explanation": "GPU 处理形状相同的张量批次。可变长度的文档必须被分块为固定长度序列（如 2048 或 4096 个 token），并在文档边界处设置正确的注意力掩码。",
     "stage": "post"
   },
   {
-    "question": "What happens if the data pipeline is slower than GPU training speed?",
-    "options": ["Training automatically slows down to match", "The GPU sits idle waiting for batches, wasting expensive compute time", "The model trains on the same batch repeatedly", "Nothing -- the pipeline runs asynchronously"],
+    "question": "如果数据流水线比 GPU 训练速度慢会发生什么？",
+    "options": ["训练自动减速以匹配", "GPU 空闲等待批次，浪费昂贵的计算时间", "模型重复训练同一批次", "没有影响——流水线异步运行"],
     "correct": 1,
-    "explanation": "If the dataloader can't serve batches fast enough, the GPU stalls between steps. On A100 clusters costing $30+/hour, pipeline bottlenecks directly waste money. Profiling pipeline throughput is essential.",
+    "explanation": "如果数据加载器无法足够快地提供批次，GPU 会在步骤之间停顿。在每小时花费 30 美元以上的 A100 集群上，流水线瓶颈直接浪费金钱。分析流水线吞吐量是必不可少的。",
     "stage": "post"
   },
   {
-    "question": "Why is data quality filtering (language detection, content filtering) applied before tokenization?",
-    "options": ["Tokenizers can't handle low-quality text", "Low-quality data (spam, boilerplate, toxic content) degrades model capabilities proportional to its share of training data", "Filtering after tokenization is impossible", "It reduces tokenization time"],
+    "question": "为什么数据质量过滤（语言检测、内容过滤）要在分词之前进行？",
+    "options": ["分词器无法处理低质量文本", "低质量数据（垃圾信息、样板文本、有害内容）会按其在训练数据中的比例降低模型能力", "分词后过滤是不可能的", "减少分词时间"],
     "correct": 1,
-    "explanation": "The model learns from whatever data it sees. If 10% of training data is spam or low-quality content, the model allocates 10% of its capacity to reproducing those patterns. Filtering early ensures only high-quality signal reaches the model.",
+    "explanation": "模型从它看到的任何数据中学习。如果 10% 的训练数据是垃圾信息或低质量内容，模型就会把 10% 的能力分配给复现这些模式。提前过滤确保只有高质量信号能到达模型。",
     "stage": "post"
   }
 ]

@@ -1,37 +1,37 @@
 [
   {
-    "question": "What is the main advantage of DPO over RLHF?",
-    "options": ["DPO produces better models", "DPO eliminates the need for a separate reward model and PPO, training directly on preference pairs in a single loop", "DPO uses less training data", "DPO works without any preference data"],
+    "question": "DPO 相比 RLHF 的主要优势是什么？",
+    "options": ["DPO 产生更好的模型", "DPO 消除了对单独奖励模型和 PPO 的需求，直接在偏好对上单循环训练", "DPO 使用更少的训练数据", "DPO 无需任何偏好数据就能工作"],
     "correct": 1,
-    "explanation": "RLHF requires training a reward model separately, then running PPO optimization. DPO folds both steps into a single training objective that directly optimizes the language model on preference pairs.",
+    "explanation": "RLHF 需要单独训练奖励模型，然后运行 PPO 优化。DPO 将两个步骤折叠成一个训练目标，直接在偏好对上优化语言模型。",
     "stage": "pre"
   },
   {
-    "question": "What role does the reference model play in DPO?",
-    "options": ["It generates training data", "It serves as the anchor that prevents the trained model from diverging too far, similar to the KL penalty in RLHF", "It evaluates model quality", "It handles tokenization"],
+    "question": "参考模型在 DPO 中扮演什么角色？",
+    "options": ["它生成训练数据", "它作为锚点防止训练模型偏离太远，类似于 RLHF 中的 KL 惩罚", "它评估模型质量", "它处理分词"],
     "correct": 1,
-    "explanation": "The DPO loss compares log probabilities under the trained policy and the reference (usually SFT) model. The reference model constrains how far the policy can drift, preventing reward hacking without explicit KL tuning.",
+    "explanation": "DPO 损失比较训练策略和参考（通常是 SFT）模型下的对数概率。参考模型约束策略漂移的程度，无需显式 KL 调整就能防止奖励欺骗。",
     "stage": "pre"
   },
   {
-    "question": "What does the beta parameter in DPO control?",
-    "options": ["The learning rate", "How strongly the policy is constrained to stay close to the reference model -- higher beta means more conservative updates", "The batch size", "The number of training epochs"],
+    "question": "DPO 中的 beta 参数控制什么？",
+    "options": ["学习率", "策略被约束保持接近参考模型的程度——beta 越大意味着更保守的更新", "批量大小", "训练轮数"],
     "correct": 1,
-    "explanation": "Beta scales the implicit KL divergence penalty. Beta=0.1 allows the model to diverge significantly from the reference (potentially better but riskier). Beta=0.5 keeps it close (safer but less learning).",
+    "explanation": "Beta 缩放隐式的 KL 散度惩罚。beta=0.1 允许模型与参考显著偏离（可能更好但风险更高）。beta=0.5 使其保持接近（更安全但学习更慢）。",
     "stage": "post"
   },
   {
-    "question": "How does DPO implicitly represent a reward model?",
-    "options": ["It doesn't -- DPO has no concept of reward", "The DPO loss function can be derived by showing that the optimal policy under a reward function is directly expressible through policy log probabilities", "It trains a hidden reward model inside the language model", "DPO uses the loss function as the reward"],
+    "question": "DPO 如何隐式表示奖励模型？",
+    "options": ["它不表示——DPO 没有奖励的概念", "DPO 损失函数可以通过证明奖励函数下的最优策略可直接用策略对数概率表达来推导", "它在语言模型内部训练一个隐藏的奖励模型", "DPO 使用损失函数作为奖励"],
     "correct": 1,
-    "explanation": "Rafailov et al. showed that the closed-form solution of the RLHF objective expresses the reward as a function of the policy's log-probabilities relative to the reference. DPO optimizes this directly, implicitly learning the reward.",
+    "explanation": "Rafailov 等人证明，RLHF 目标的闭式解将奖励表达为策略相对于参考模型的对数概率的函数。DPO 直接优化这个目标，隐式学习奖励。",
     "stage": "post"
   },
   {
-    "question": "When might RLHF still be preferred over DPO?",
-    "options": ["Always -- RLHF is strictly better", "When you need a reusable reward model for evaluating multiple policies or when online data collection is beneficial", "When you have less preference data", "When training smaller models"],
+    "question": "什么情况下 RLHF 仍然优于 DPO？",
+    "options": ["始终——RLHF 严格更好", "当你需要可复用的奖励模型来评估多个策略，或者在线数据收集有益时", "当你拥有更少的偏好数据时", "当训练更小的模型时"],
     "correct": 1,
-    "explanation": "DPO is offline (fixed preference data). RLHF allows online data collection where the reward model scores new generations, discovering reward-hacking patterns. A standalone reward model is also useful for evaluation and other policies.",
+    "explanation": "DPO 是离线的（固定的偏好数据）。RLHF 允许在线数据收集，奖励模型可以对新生成内容评分，发现奖励欺骗模式。独立的奖励模型对评估和其他策略也很有用。",
     "stage": "post"
   }
 ]
