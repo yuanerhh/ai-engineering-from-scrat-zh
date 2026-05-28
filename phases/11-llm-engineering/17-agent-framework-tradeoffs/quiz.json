@@ -3,7 +3,7 @@
   "questions": [
     {
       "stage": "post",
-      "question": "Which framework is the right first pick for a workflow that must resume after a crash, accept a human approval mid-run, and fan out to three retrievers in parallel?",
+      "question": "对于一个必须在崩溃后恢复、接受运行中的人工批准，并将任务并行扇出到三个检索器的工作流，哪个框架是首选？",
       "options": [
         "CrewAI",
         "AutoGen",
@@ -11,35 +11,35 @@
         "Agno"
       ],
       "correct": 2,
-      "explanation": ""
+      "explanation": "LangGraph 是唯一具有以下所有特性的框架：一等检查点器（支持崩溃后恢复）、interrupt_before/after（支持运行中的人工批准）以及 Send 原语（支持并行扇出与归约器合并）。"
     },
     {
       "stage": "post",
-      "question": "Why does LLM-selected routing cost more tokens per turn than explicit routing?",
+      "question": "为什么 LLM 选择的路由比显式路由每轮花费更多 token？",
       "options": [
-        "It pre-fetches the next node in parallel to hedge latency.",
-        "A planner LLM call picks the next step each turn, adding prompt and completion tokens for every decision.",
-        "It duplicates the tool list for every agent in the crew.",
-        "It sends the whole conversation history to a verifier model."
+        "它预先并行获取下一个节点以对冲延迟。",
+        "规划器 LLM 调用每轮选择下一步，为每次决策添加提示词和补全 token。",
+        "它为团队中的每个智能体复制工具列表。",
+        "它将整个对话历史发送给验证器模型。"
       ],
       "correct": 1,
-      "explanation": ""
+      "explanation": "CrewAI 的层级管理者和 AutoGen 的 GroupChatManager 等框架进行 LLM 选择的路由——每次需要决定接下来谁运行时都调用规划器 LLM。这会在每次决策上添加提示词 token 和补全 token，与 LangGraph 或 Agno 中开发者决定的显式路由不同。"
     },
     {
       "stage": "post",
-      "question": "Proposer-critic dialogue in code review naturally maps to which framework's core abstraction?",
+      "question": "代码审查中的提议者-批评者对话自然映射到哪个框架的核心抽象？",
       "options": [
-        "CrewAI's sequential Crew",
-        "LangGraph's StateGraph",
-        "AutoGen's GroupChat / ConversableAgent pair",
-        "Agno's single Agent with tools"
+        "CrewAI 的顺序 Crew",
+        "LangGraph 的 StateGraph",
+        "AutoGen 的 GroupChat / ConversableAgent 对",
+        "Agno 的带工具的单智能体"
       ],
       "correct": 2,
-      "explanation": ""
+      "explanation": "AutoGen 的核心抽象是两个智能体轮流发言的对话（ConversableAgent 对）——提议者和批评者互相发消息直到满足退出条件。这种形状非常适合提议者-批评者、教师-学生或演员-评审者模式，其中思考从聊天中涌现。"
     },
     {
       "stage": "post",
-      "question": "Which framework has built-in storage drivers (SQLite, Postgres, Redis, Mongo, DynamoDB) attached directly to the Agent primitive for session and memory persistence?",
+      "question": "哪个框架有内置存储驱动（SQLite、Postgres、Redis、Mongo、DynamoDB），直接附加到 Agent 原语用于会话和记忆持久化？",
       "options": [
         "LangGraph",
         "CrewAI",
@@ -47,19 +47,19 @@
         "Agno"
       ],
       "correct": 3,
-      "explanation": ""
+      "explanation": "Agno 通过 storage= 参数将存储驱动直接附加到 Agent——会话和用户记忆自动持久化，支持 SQLite、Postgres、Mongo、Redis 和 DynamoDB。这使其成为需要内置记忆和会话的单智能体应用的最精简选择。"
     },
     {
       "stage": "post",
-      "question": "You have a two-call summarizer: fetch text, summarize. Which option is the right framework choice?",
+      "question": "你有一个两次调用的摘要器：获取文本，然后摘要。哪个是正确的框架选择？",
       "options": [
-        "LangGraph StateGraph \u2014 always use a framework for reliability.",
-        "CrewAI with researcher + summarizer roles \u2014 roles make it clearer.",
-        "Plain Python with the provider SDK \u2014 no framework is the fastest framework for tiny pipelines.",
-        "AutoGen GroupChat \u2014 two agents can argue about the best summary."
+        "LangGraph StateGraph — 为了可靠性始终使用框架。",
+        "带研究员 + 摘要员角色的 CrewAI — 角色让它更清晰。",
+        "带提供商 SDK 的纯 Python — 对于小型流水线，没有框架是最快的框架。",
+        "AutoGen GroupChat — 两个智能体可以讨论最佳摘要。"
       ],
       "correct": 2,
-      "explanation": ""
+      "explanation": "对于两次 LLM 调用和一个工具，写 30 行纯 Python。没有框架是最快的框架——每个框架都增加依赖、学习曲线和运行时开销。当任务简单时，引入框架是过度工程。"
     }
   ]
 }

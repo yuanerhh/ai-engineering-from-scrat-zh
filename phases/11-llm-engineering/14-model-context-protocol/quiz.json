@@ -1,34 +1,34 @@
 {
   "lesson": "14-model-context-protocol",
-  "title": "Model Context Protocol",
+  "title": "模型上下文协议",
   "questions": [
     {
       "stage": "post",
-      "question": "What three primitives does an MCP server expose?",
+      "question": "MCP 服务器暴露哪三个原语？",
       "options": [
-        "Functions, types, classes",
-        "Tools, resources, prompts",
-        "Endpoints, webhooks, queues",
-        "Agents, skills, workflows"
+        "函数、类型、类",
+        "工具、资源、提示词",
+        "端点、Webhook、队列",
+        "智能体、技能、工作流"
       ],
       "correct": 1,
-      "explanation": ""
+      "explanation": "MCP 服务器恰好暴露三样东西：工具（模型可调用的函数）、资源（URI 寻址的只读内容）和提示词（用户可调用的模板化快捷方式）。"
     },
     {
       "stage": "post",
-      "question": "What wire format does MCP use?",
+      "question": "MCP 使用什么传输格式？",
       "options": [
-        "GraphQL over HTTP",
-        "gRPC with protobuf",
+        "基于 HTTP 的 GraphQL",
+        "带 protobuf 的 gRPC",
         "JSON-RPC 2.0",
-        "REST with OpenAPI"
+        "带 OpenAPI 的 REST"
       ],
       "correct": 2,
-      "explanation": ""
+      "explanation": "MCP 使用 JSON-RPC 2.0 通过 stdio、WebSocket 或可流式 HTTP 传输。每条消息都遵循标准的 JSON-RPC 信封格式，方法名称如 tools/list、tools/call 等。"
     },
     {
       "stage": "post",
-      "question": "Which metadata field signals a tool mutates state and should require human approval?",
+      "question": "哪个元数据字段表示工具会修改状态并需要人工批准？",
       "options": [
         "readonly: false",
         "mutating: true",
@@ -36,31 +36,31 @@
         "requiresAuth: true"
       ],
       "correct": 2,
-      "explanation": ""
+      "explanation": "当服务器在工具元数据上设置 destructiveHint: true 时，宿主会在模型请求调用该工具时显示人工批准 UI。这对于删除、写入或其他不可逆操作是必须的。"
     },
     {
       "stage": "post",
-      "question": "What is the 2025-06-18 transport that replaced the earlier SSE-only remote transport?",
+      "question": "2025-06-18 规范引入了哪种替代旧版纯 SSE 远程传输的方式？",
       "options": [
         "WebTransport",
-        "Streamable HTTP",
-        "WebSocket-only",
-        "gRPC bidi"
+        "可流式 HTTP（Streamable HTTP）",
+        "纯 WebSocket",
+        "gRPC 双向流"
       ],
       "correct": 1,
-      "explanation": ""
+      "explanation": "可流式 HTTP 是 2025-06-18 规范修订引入的远程传输：每次请求使用一个 POST，可选的 SSE 用于服务器发起的消息。它替代了之前仅支持 SSE 的远程传输。"
     },
     {
       "stage": "post",
-      "question": "When should a tool be split into its own MCP server instead of staying inline?",
+      "question": "什么情况下工具应该拆分成独立的 MCP 服务器而不是保持内联？",
       "options": [
-        "When it is called fewer than 10 times per day",
-        "When it is called from two or more hosts and is read-only/cacheable",
-        "When it returns more than 1KB of data",
-        "Never; MCP is only for local dev"
+        "当每天调用次数少于 10 次时",
+        "当从两个或多个宿主调用且是只读/可缓存的",
+        "当返回超过 1KB 的数据时",
+        "从不；MCP 只用于本地开发"
       ],
       "correct": 1,
-      "explanation": ""
+      "explanation": "经验法则：如果工具是只读的、可缓存的，并且从两个或多个宿主调用，就将其作为 MCP 服务器发布。如果是一次性内联逻辑，保持为本地函数（Phase 11 · 09）。"
     }
   ]
 }

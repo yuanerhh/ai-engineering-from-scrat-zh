@@ -1,58 +1,58 @@
 {
   "lesson": "15-prompt-caching",
-  "title": "Prompt Caching and Context Caching",
+  "title": "提示词缓存与上下文缓存",
   "questions": [
     {
       "stage": "post",
-      "question": "What discount does Anthropic apply to cache reads versus the base input rate?",
+      "question": "Anthropic 对缓存读取相对于基础输入价格给予多少折扣？",
       "options": [
-        "25% off",
-        "50% off",
-        "75% off",
-        "90% off"
+        "减 25%",
+        "减 50%",
+        "减 75%",
+        "减 90%"
       ],
       "correct": 3,
-      "explanation": ""
+      "explanation": "Anthropic 的缓存读取以基础输入价格的 10% 计费，即减 90%。写入时有 25% 的溢价（1.25x），但后续命中时节省 90%，使其成为对经常复用前缀的工作负载高度值得的投资。"
     },
     {
       "stage": "post",
-      "question": "Why must dynamic timestamps go below the cache breakpoint, not above it?",
+      "question": "为什么动态时间戳必须放在缓存断点以下而不是以上？",
       "options": [
-        "Caches only hit when the prefix is byte-identical; a changing timestamp breaks the match for everything after it",
-        "Timestamps confuse the tokenizer",
-        "They cost more tokens than static text",
-        "Anthropic explicitly rejects timestamps in cached blocks"
+        "只有当前缀字节完全相同时缓存才会命中；变化的时间戳会破坏其后所有内容的匹配",
+        "时间戳会让分词器困惑",
+        "它们比静态文本花费更多 token",
+        "Anthropic 明确拒绝缓存块中的时间戳"
       ],
       "correct": 0,
-      "explanation": ""
+      "explanation": "缓存只缓存前缀，且只有前缀字节完全相同时才命中。在系统提示词顶部放置动态时间戳意味着每次请求的第一个 token 就不同，导致完全未命中。"
     },
     {
       "stage": "post",
-      "question": "OpenAI's prompt caching is configured how?",
+      "question": "OpenAI 的提示词缓存是如何配置的？",
       "options": [
-        "Explicit cache_control markers",
-        "A CachedContent API you create and reference",
-        "Automatic prefix matching with no configuration",
-        "A system-level flag you toggle per project"
+        "显式的 cache_control 标记",
+        "你创建和引用的 CachedContent API",
+        "无需配置的自动前缀匹配",
+        "每个项目切换的系统级标志"
       ],
       "correct": 2,
-      "explanation": ""
+      "explanation": "OpenAI 没有给你任何可配置的东西。任何超过 1,024 个 token 且与最近请求匹配的前缀都会自动获得 50% 的折扣。与 Anthropic 的显式标记或 Gemini 的命名缓存对象不同。"
     },
     {
       "stage": "post",
-      "question": "For Anthropic, what write premium does the 1-hour extended TTL cost vs the 5-minute default?",
+      "question": "对于 Anthropic，1 小时扩展 TTL 相对于 5 分钟默认值花费多少写入溢价？",
       "options": [
-        "Same",
-        "2x the write premium (50% over baseline)",
-        "4x the write premium",
-        "No write premium"
+        "相同",
+        "2 倍写入溢价（基准价的 50%）",
+        "4 倍写入溢价",
+        "无写入溢价"
       ],
       "correct": 1,
-      "explanation": ""
+      "explanation": "1 小时 TTL 花费 2 倍写入溢价——基准价的 50% 而不是 25%。但对于在 30 分钟以上批处理作业中复用前缀超过 5 次的情况，这很快就能回本。"
     },
     {
       "stage": "post",
-      "question": "How many reuses are needed to break even on Anthropic's 25% write premium?",
+      "question": "在 Anthropic 25% 写入溢价上盈亏平衡需要多少次复用？",
       "options": [
         "1",
         "2",
@@ -60,7 +60,7 @@
         "10"
       ],
       "correct": 1,
-      "explanation": ""
+      "explanation": "1 次写入（1.25x）+ 1 次读取（0.1x）= 平均 0.675x，节省 32%。你只需要读取 2 次就能达到盈亏平衡并超越不缓存的成本。建议的经验法则是在 TTL 内至少复用 3 次以获得实质性节省。"
     }
   ]
 }

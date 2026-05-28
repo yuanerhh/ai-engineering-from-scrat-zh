@@ -3,63 +3,63 @@
   "questions": [
     {
       "stage": "post",
-      "question": "Why does the `messages` field in a LangGraph State TypedDict need `Annotated[list, add_messages]`?",
+      "question": "为什么 LangGraph State TypedDict 中的 `messages` 字段需要 `Annotated[list, add_messages]`？",
       "options": [
-        "It enables streaming of token deltas from the model.",
-        "Without the reducer, node updates overwrite the list instead of appending, so every turn loses the prior history.",
-        "It compresses the message list when checkpoints are written to disk.",
-        "It converts plain dicts into LangChain message objects at runtime."
+        "它使模型的 token 增量能够流式传输。",
+        "没有归约器，节点更新会覆盖列表而不是追加，导致每个轮次都丢失先前的历史记录。",
+        "它在检查点写入磁盘时压缩消息列表。",
+        "它在运行时将普通字典转换为 LangChain 消息对象。"
       ],
       "correct": 1,
-      "explanation": ""
+      "explanation": "LangGraph 状态字段默认使用覆盖归约器。对于消息列表，你需要 add_messages 归约器，这样每个节点的新消息会追加到列表而不是替换整个列表。忘记它是最常见的 LangGraph 错误。"
     },
     {
       "stage": "post",
-      "question": "What is the difference between `interrupt_before=['tools']` and `interrupt_after=['tools']`?",
+      "question": "`interrupt_before=['tools']` 和 `interrupt_after=['tools']` 有什么区别？",
       "options": [
-        "No difference; they are aliases.",
-        "`interrupt_before` pauses after the model emits tool_calls but before the tools execute; `interrupt_after` pauses after the tools have already run.",
-        "`interrupt_before` runs the tool in a sandbox first; `interrupt_after` runs it in production.",
-        "`interrupt_before` is for unit tests; `interrupt_after` is for production."
+        "没有区别；它们是别名。",
+        "`interrupt_before` 在模型发出 tool_calls 后但工具执行前暂停；`interrupt_after` 在工具已经运行后暂停。",
+        "`interrupt_before` 先在沙箱中运行工具；`interrupt_after` 在生产中运行它。",
+        "`interrupt_before` 用于单元测试；`interrupt_after` 用于生产。"
       ],
       "correct": 1,
-      "explanation": ""
+      "explanation": "interrupt_before 在有副作用的节点运行之前停止执行，允许人工在造成伤害之前取消操作——这是批准的正确位置。interrupt_after 在工具已经执行后才暂停，此时副作用已经发生。"
     },
     {
       "stage": "post",
-      "question": "Given a thread's checkpoint history, how do you time-travel to a prior state and explore a different branch?",
+      "question": "给定一个线程的检查点历史，如何时间旅行到先前状态并探索不同的分支？",
       "options": [
-        "Call `graph.reset(thread_id)` then `graph.invoke(new_input, config)`.",
-        "Delete the checkpoint directory and reinvoke with the same thread_id.",
-        "Invoke the graph with the desired prior `checkpoint_id` in the config; passing `None` as input replays from that checkpoint, passing a new value appends to it before resuming.",
-        "Set `graph.rewind = True` and reinvoke."
+        "调用 `graph.reset(thread_id)` 然后用 `graph.invoke(new_input, config)`。",
+        "删除检查点目录并用相同的 thread_id 重新调用。",
+        "用配置中所需的先前 `checkpoint_id` 调用图；将 `None` 作为输入传递会从该检查点重放，传递新值会在恢复前追加到它。",
+        "设置 `graph.rewind = True` 并重新调用。"
       ],
       "correct": 2,
-      "explanation": ""
+      "explanation": "通过将先前的 checkpoint_id 传递给图的配置来实现时间旅行。传递 None 作为输入会从该检查点向前重放；传递新值会将其作为更新追加到该状态后再恢复。这样可以调试糟糕的智能体运行，无需重新运行整个对话。"
     },
     {
       "stage": "post",
-      "question": "In a four-node ReAct graph (agent, tools, conditional edge, static edge back to agent), where does the conditional edge live?",
+      "question": "在四节点 ReAct 图（agent、tools、条件边、回到 agent 的静态边）中，条件边在哪里？",
       "options": [
-        "From `tools` back to `agent`, routing on whether tool output was empty.",
-        "From `agent`, routing to `tools` if the last message has tool_calls and to `END` otherwise.",
-        "From `START`, routing to either `agent` or `END` based on input length.",
-        "There is no conditional edge; both are static."
+        "从 `tools` 回到 `agent`，根据工具输出是否为空进行路由。",
+        "从 `agent` 出发，如果最后一条消息有 tool_calls 则路由到 `tools`，否则路由到 `END`。",
+        "从 `START` 出发，根据输入长度路由到 `agent` 或 `END`。",
+        "没有条件边；两条边都是静态的。"
       ],
       "correct": 1,
-      "explanation": ""
+      "explanation": "条件边从 agent 节点出发。路由函数检查最后一条消息：如果它包含 tool_calls，则路由到 tools 节点；如果不包含（即纯文本响应），则路由到 END。这实现了 ReAct 的思考-行动-观察循环。"
     },
     {
       "stage": "post",
-      "question": "When should you use `Send(node_name, state)` instead of a plain edge?",
+      "question": "什么时候应该用 `Send(node_name, state)` 而不是普通边？",
       "options": [
-        "To retry a node after a failure.",
-        "To defer a node until a timer expires.",
-        "To dispatch N parallel executions of a target node whose outputs merge back through the state reducer.",
-        "To invoke a node in a different process for isolation."
+        "在失败后重试节点。",
+        "将节点延迟到计时器到期。",
+        "调度目标节点的 N 个并行执行，其输出通过状态归约器合并回来。",
+        "在不同进程中调用节点以实现隔离。"
       ],
       "correct": 2,
-      "explanation": ""
+      "explanation": "Send 用于扇出（fanout）：当智能体需要并行执行多个相同类型的工作（例如同时查询三个检索器）时。每个 Send 产生目标节点的独立执行，它们的输出通过状态归约器合并——这是实现编排者-工作者模式的方式，无需线程原语。"
     }
   ]
 }
