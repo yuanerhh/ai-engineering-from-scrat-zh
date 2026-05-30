@@ -17,7 +17,7 @@ const ROADMAP_PATH = path.join(REPO_ROOT, 'ROADMAP.md');
 const GLOSSARY_PATH = path.join(REPO_ROOT, 'glossary', 'terms.md');
 const OUTPUT_PATH = path.join(__dirname, 'data.js');
 
-const GITHUB_BASE = 'https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/';
+const GITHUB_BASE = 'https://github.com/yuanerhh/ai-engineering-from-scrat-zh/tree/main/';
 
 // ─── Parse ROADMAP.md for lesson statuses ────────────────────────────
 function parseRoadmap(content) {
@@ -73,12 +73,16 @@ function parseReadme(content, roadmapStatuses) {
     // Old: <summary><strong>Phase 1: Math Foundations</strong> <code>22 lessons</code> ... <em>Description</em></summary>
     // New: ### ![](https://img.shields.io/badge/Phase_0-Setup_&_Tooling-95A5A6?style=for-the-badge) `12 lessons`
     // New: <summary><b>🟣 Phase 1 — Math Foundations</b> &nbsp;<code>22 lessons</code>&nbsp; <em>Description</em></summary>
+    // ZH:  ### 阶段 0：环境与工具 `12 节课`
+    // ZH:  <summary><b>阶段 1 — 数学基础</b> &nbsp;<code>22 节课</code>&nbsp; <em>描述</em></summary>
     const phaseHeaderMatch =
       line.match(/###\s+Phase\s+(\d+):\s+(.+?)\s*`(\d+)\s+lessons?`/) ||
-      line.match(/###\s+!\[\]\([^)]*?Phase[_\s]+(\d+)[-_]([^?)]+?)-[A-F0-9]{6}[^)]*\)\s*`(\d+)\s+lessons?`/i);
+      line.match(/###\s+!\[\]\([^)]*?Phase[_\s]+(\d+)[-_]([^?)]+?)-[A-F0-9]{6}[^)]*\)\s*`(\d+)\s+lessons?`/i) ||
+      line.match(/###\s+阶段\s+(\d+)[：:]\s*(.+?)\s*`(\d+)\s+节课`/);
     const detailsHeaderMatch =
       line.match(/<summary><strong>Phase\s+(\d+):\s+(.+?)<\/strong>\s*<code>(\d+)\s+(?:lessons?|projects?)<\/code>.*?<em>(.*?)<\/em>/) ||
-      line.match(/<summary>\s*<b>\s*(?:[^\w\s]+\s+)?Phase\s+(\d+)\s*[—\-:]\s*(.+?)<\/b>.*?<code>(\d+)\s+(?:lessons?|projects?)<\/code>.*?<em>(.*?)<\/em>/);
+      line.match(/<summary>\s*<b>\s*(?:[^\w\s]+\s+)?Phase\s+(\d+)\s*[—\-:]\s*(.+?)<\/b>.*?<code>(\d+)\s+(?:lessons?|projects?)<\/code>.*?<em>(.*?)<\/em>/) ||
+      line.match(/<summary><b>阶段\s+(\d+)\s*[—\-]\s*(.+?)<\/b>.*?<code>(\d+)\s+(?:节课|个项目)<\/code>.*?<em>(.*?)<\/em>/);
 
     if (phaseHeaderMatch) {
       const [, idStr, rawName] = phaseHeaderMatch;
@@ -112,7 +116,7 @@ function parseReadme(content, roadmapStatuses) {
     }
 
     // Detect start of lesson table
-    if (currentPhase && line.match(/^\|\s*#\s*\|\s*Lesson/)) {
+    if (currentPhase && (line.match(/^\|\s*#\s*\|\s*Lesson/) || line.match(/^\|\s*#\s*\|\s*课程/))) {
       inLessonTable = true;
       isCapstoneTable = false;
       continue;
@@ -133,9 +137,11 @@ function parseReadme(content, roadmapStatuses) {
         const typeRaw = cols[2];
         const langRaw = cols[3];
 
-        // Type may be plain ("Build") or a shield image: ![Build](https://...)
+        // Type may be plain ("Build"/"实践") or a shield image: ![Build](https://...)
         const typeBadgeMatch = typeRaw.match(/!\[([^\]]+)\]/);
-        const type = typeBadgeMatch ? typeBadgeMatch[1] : typeRaw;
+        const typeRawStr = typeBadgeMatch ? typeBadgeMatch[1] : typeRaw;
+        const TYPE_ZH = { '实践': 'Build', '学习': 'Learn', '综合': 'Capstone' };
+        const type = TYPE_ZH[typeRawStr] || typeRawStr;
 
         // Lang may be plain ("Python, Rust") or emoji flags (🐍 🟦 🦀 🟣 ⚛️)
         const EMOJI_LANG = {
@@ -212,7 +218,7 @@ function parseReadme(content, roadmapStatuses) {
     }
 
     // Also detect capstone table format (# | Project | Combines | Lang)
-    if (currentPhase && line.match(/^\|\s*#\s*\|\s*Project/)) {
+    if (currentPhase && (line.match(/^\|\s*#\s*\|\s*Project/) || line.match(/^\|\s*#\s*\|\s*项目/))) {
       inLessonTable = true;
       isCapstoneTable = true;
       continue;
@@ -237,7 +243,7 @@ function parseReadme(content, roadmapStatuses) {
  * matching content — expected for planned lessons with no docs yet.
  */
 function extractLessonMeta(relPath) {
-  const docPath = path.join(REPO_ROOT, relPath, 'docs', 'en.md');
+  const docPath = path.join(REPO_ROOT, relPath, 'docs', 'zh.md');
   const result = { summary: '', keywords: '' };
   try {
     const lines = fs.readFileSync(docPath, 'utf8').split(/\r?\n/);
