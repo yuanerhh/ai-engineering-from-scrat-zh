@@ -1,34 +1,34 @@
 ---
 name: batch-triager
-description: Triage LLM workloads into interactive / semi-interactive / batch lanes, compute stacked discount (batch + cache) savings, and flag mis-triaged workloads.
+description: 将 LLM 工作负载分流至交互式/半交互式/批处理通道，计算叠加折扣（批处理 + 缓存）节省额，并标记分流错误的工作负载。
 version: 1.0.0
 phase: 17
 lesson: 15
 tags: [batch-api, openai-batch, anthropic-batches, vertex-batch, triage, cost]
 ---
 
-Given a workload (name, user expectation for latency, traffic volume, shared prompt structure), produce a triage + cost plan.
+给定工作负载（名称、用户对延迟的期望、流量量级、共享提示词结构），生成分流与成本方案。
 
-Produce:
+输出内容：
 
-1. Lane. Interactive (TTFT-bound, sync), semi-interactive (minutes OK, async queue), or batch (by-morning OK, batch API). Justify with the specific user expectation.
-2. Current cost. Compute monthly cost at current configuration (sync, no cache, etc.).
-3. Target cost. Compute cost after recommended config (batch + cache or sync + cache). Express as % of current.
-4. Migration plan. Provider-specific steps (pick the one that matches the workload's model, not both):
-   - OpenAI: migrate to `/v1/batches`. Prompt caching is enabled automatically for eligible prompts (≥1024 tokens) — no `cache_control` to set. Optionally pass `prompt_cache_key` for tighter attribution.
-   - Anthropic: migrate to Message Batches. Cache reuse requires explicit `cache_control` blocks (e.g., `{"type": "ephemeral"}`) on the cacheable prompt spans; batch discount stacks with cached-read pricing.
-   - Both: instrument a success/failure webhook and a spillover lane to sync for batches that miss their turnaround window.
-5. Risk. What if the batch turnaround is 20 hours at P99? Name the downstream system behavior (email delivery, queue spillover to sync).
-6. Observable. Metric that catches mis-triage: batch job completion latency P95; alert if > 12 hours.
+1. 通道。交互式（TTFT 敏感，同步）、半交互式（分钟级可接受，异步队列）或批处理（次日晨可接受，批处理 API）。结合具体用户期望加以说明。
+2. 当前成本。按当前配置（同步、无缓存等）计算月度成本。
+3. 目标成本。按推荐配置（批处理 + 缓存，或同步 + 缓存）计算成本，以当前成本的百分比表示。
+4. 迁移方案。针对特定提供商的步骤（根据工作负载模型选择其一，不要两者都列）：
+   - OpenAI：迁移至 `/v1/batches`。对于符合条件的提示词（≥1024 tokens），提示词缓存自动启用——无需设置 `cache_control`。可选择传入 `prompt_cache_key` 以进行更精确的归因。
+   - Anthropic：迁移至 Message Batches。缓存复用需要在可缓存的提示词片段上显式设置 `cache_control` 块（例如 `{"type": "ephemeral"}`）；批处理折扣与缓存读取定价叠加计算。
+   - 两者通用：添加成功/失败 webhook，以及针对超时批处理任务的同步溢出通道。
+5. 风险。若批处理周转时间在 P99 达到 20 小时，下游系统会如何表现（邮件投递、队列溢出到同步）。
+6. 可观测指标。捕捉分流错误的指标：批处理任务完成延迟 P95；若超过 12 小时则告警。
 
-Hard rejects:
-- Running an overnight pipeline in sync mode without batch when the user only needs "by morning" latency. Refuse — call out the ~90% leaked spend.
-- Promising batch for anything with a sub-15-minute user expectation. Refuse — batch SLA is 24h.
-- Ignoring prompt caching on a batch workload with shared system prompt. Refuse — the stacked discount is the point.
+强制拒绝：
+- 在用户仅需"次日晨"延迟的情况下，以同步模式运行过夜流水线而不使用批处理。拒绝——指出约 90% 的费用浪费。
+- 对任何用户期望低于 15 分钟的任务承诺批处理。拒绝——批处理 SLA 为 24 小时。
+- 在有共享系统提示词的批处理工作负载上忽略提示词缓存。拒绝——叠加折扣正是关键所在。
 
-Refusal rules:
-- If the workload is marketed as "real-time" but the actual user expectation is minutes, require explicit confirmation before recommending batch.
-- If the workload targets a provider without prompt caching in batch (e.g., any custom or self-hosted stack without KV-prefix reuse), note that only the batch discount applies and recompute without stacked savings. OpenAI batch caching is automatic; Anthropic batch caching requires explicit `cache_control` blocks.
-- If the workload has strict latency SLA (e.g., P99 < 60s) refuse batch outright — it belongs on a different lane.
+拒绝规则：
+- 若工作负载被标记为"实时"但实际用户期望是分钟级，在推荐批处理前需要明确确认。
+- 若工作负载针对不支持批处理提示词缓存的提供商（例如任何无 KV 前缀复用的自定义或自托管栈），注明只有批处理折扣适用，并重新计算（不含叠加节省）。OpenAI 批处理缓存自动生效；Anthropic 批处理缓存需要显式 `cache_control` 块。
+- 若工作负载有严格延迟 SLA（例如 P99 < 60s），直接拒绝批处理——应分配到其他通道。
 
-Output: a one-page triage with lane, current cost, target cost, migration steps, risk, observable. End with a cadence: re-triage all workloads quarterly as product surface changes.
+输出：一页分流报告，列明通道、当前成本、目标成本、迁移步骤、风险、可观测指标。最后给出节奏建议：随着产品形态变化，每季度对所有工作负载重新分流。

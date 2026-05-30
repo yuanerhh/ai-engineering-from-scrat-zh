@@ -1,32 +1,32 @@
 ---
 name: failure-detector
-description: Generate failure-mode detectors for agent traces, wired to a trace store, tagging the five industry-recurring modes plus domain-specific signatures.
+description: 为 Agent 链路生成故障模式检测器，接入链路存储，标记五种行业常见模式及领域专属特征。
 version: 1.0.0
 phase: 14
 lesson: 26
 tags: [failure-modes, masft, detection, observability]
 ---
 
-Given a product domain and a trace store, produce detectors for agent failure modes.
+给定一个产品领域和链路存储，为 Agent 故障模式生成检测器。
 
-Produce:
+输出内容：
 
-1. Detector per mode: `hallucinated_action`, `scope_creep`, `cascading_errors`, `context_loss`, `tool_misuse`, `success_hallucination`.
-2. Domain-specific detectors (e.g. "created a PR without linking an issue" for a dev tool, "sent an email to > 5 recipients without confirmation" for a marketing tool).
-3. Tagger that applies all detectors to each trace and emits a distribution.
-4. Threshold-based alerting: if >=5% of today's traces tag a mode, page or open a ticket.
-5. Sample retention: for each tagged trace, keep inputs + outputs + state snapshots for operator review.
+1. 每种模式一个检测器：`hallucinated_action`（幻觉行为）、`scope_creep`（范围蔓延）、`cascading_errors`（级联错误）、`context_loss`（上下文丢失）、`tool_misuse`（工具误用）、`success_hallucination`（成功幻觉）。
+2. 领域专属检测器（例如开发工具："创建了 PR 但未关联 issue"；营销工具："未经确认发送邮件给超过 5 个收件人"）。
+3. 标记器：对每条链路应用所有检测器并生成分布结果。
+4. 基于阈值的告警：如果今天的链路中有 >=5% 被标记为某种模式，则发送页面告警或创建工单。
+5. 样本留存：对每条被标记的链路，保留输入 + 输出 + 状态快照供运营人员审查。
 
-Hard rejects:
+硬性拒绝：
 
-- Detectors that require LLM calls per trace in production. Use pattern-based detectors; reserve LLM-judge for sampled review.
-- Tagging only on crash. Most failures produce valid-looking output. Signature checks on content + state are required.
-- Storing tagged traces without PII redaction. Failure samples carry the worst content; scrub before storage.
+- 在生产环境中每条链路都需要 LLM 调用的检测器。使用基于规则的检测器；保留 LLM 裁判用于抽样审查。
+- 仅在崩溃时打标签。大多数故障会产生看起来正常的输出。需要对内容 + 状态进行特征检查。
+- 存储已标记链路时未进行 PII 脱敏。故障样本往往包含最敏感的内容，存储前必须清洗。
 
-Refusal rules:
+拒绝规则：
 
-- If the user wants "all traces stored forever," refuse for cost + compliance reasons. Sample by tag + rate.
-- If the product has no "known good" baseline, refuse drift alerts. Drift needs a reference.
-- If detectors are not versioned, refuse. Detector regressions break your signal without notice.
+- 如果用户想"永久存储所有链路"，出于成本 + 合规原因拒绝。按标签 + 比率采样。
+- 如果产品没有"已知正常"基线，拒绝漂移告警。漂移检测需要参考基准。
+- 如果检测器没有版本控制，拒绝。检测器回归会在不知情的情况下破坏你的信号。
 
-Output: `detectors.py`, `tagger.py`, `alerts.py`, `retention.py`, `README.md` explaining thresholds, retention policy, alert routing. End with "what to read next" pointing to Lesson 24 (observability backends) or Lesson 27 (prompt injection) for adversarial failure modes.
+输出：`detectors.py`、`tagger.py`、`alerts.py`、`retention.py`、`README.md`，说明阈值设定、留存策略和告警路由。最后附"下一步阅读"，指向第 24 课（可观测性后端）或第 27 课（提示词注入）了解对抗性故障模式。

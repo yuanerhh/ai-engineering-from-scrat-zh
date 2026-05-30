@@ -1,31 +1,31 @@
 ---
 name: diff-attention-integrator
-description: Integration plan for adding Differential Attention V2 to a new pre-training run or LoRA fine-tune.
+description: 将差分注意力 V2 添加到新预训练运行或 LoRA 微调的集成方案。
 version: 1.0.0
 phase: 10
 lesson: 16
 tags: [differential-attention, diff-transformer, long-context, flash-attention, pre-training, lora]
 ---
 
-Given a model architecture (hidden, heads, KV heads, layers, d_head), a target context length, a hallucination or long-context profile (failure modes on your existing evals), and a training budget (tokens available, GPU-hours), produce an integration plan for DIFF V2.
+给定模型架构（hidden、heads、KV heads、layers、d_head）、目标上下文长度、幻觉或长上下文画像（现有评估上的失败模式），以及训练预算（可用 token 数、GPU 小时数），生成 DIFF V2 集成方案。
 
-Produce:
+输出：
 
-1. Integration mode. From-scratch pre-training, mid-training architecture swap, or LoRA fine-tune on Q projections. Justify the choice against the training budget and the existing weights available.
-2. Architecture diff. Concrete field-by-field change list: which projections grow, which stay the same, which parameter count you are adding, and where the subtraction gets placed in the attention block. Include `lambda_init` schedule by layer depth (`0.8 - 0.6 * exp(-0.3 * (depth - 1))` is the paper's default; adjust per-depth if layerwise telemetry shows instability).
-3. Kernel choice. Confirm FlashAttention 2 or 3 support given V2's head-count doubling. Reject V1's custom-kernel path unless the user explicitly needs it for reproducibility.
-4. Memory budget. KV cache stays at baseline (KV heads unchanged). Compute per-token activation memory delta (extra Q heads, extra compute). Report absolute numbers at the target context.
-5. Training stability plan. Describe what to monitor: `lambda` drift per layer, attention entropy per head, gradient variance on the Q projections. Name the specific metric that should trigger a rollback to baseline attention if telemetry indicates divergence.
+1. 集成模式。从头预训练、中途架构替换或在 Q 投影上做 LoRA 微调。依据训练预算和现有可用权重进行论证。
+2. 架构变更清单。逐字段列出具体变更：哪些投影增大、哪些保持不变、增加了多少参数量，以及减法运算在注意力块中的位置。包含按层深度的 `lambda_init` 调度（论文默认为 `0.8 - 0.6 * exp(-0.3 * (depth - 1))`；若逐层遥测显示不稳定，则按深度调整）。
+3. 内核选择。确认 V2 头数倍增后 FlashAttention 2 或 3 的支持情况。除非用户明确需要可复现性，否则拒绝 V1 的自定义内核路径。
+4. 显存预算。KV 缓存维持基线不变（KV heads 不变）。计算每 token 激活内存增量（额外 Q heads、额外计算量），并给出目标上下文下的绝对数值。
+5. 训练稳定性方案。描述需监控的内容：每层的 `lambda` 漂移、每头的注意力熵、Q 投影上的梯度方差。指明若遥测显示发散，应触发回滚至基线注意力的具体指标。
 
-Hard rejects:
-- Adding DIFF attention to a pre-trained model without continued pre-training. Output distributions drift — not a drop-in fix.
-- DIFF V1 for any new run past April 2026. V2 is strictly better in all measured dimensions.
-- Integrating DIFF without also enabling long-context training data. The benefit only shows past 32k.
-- Changing `lambda_init` to a negative value without a controlled experiment. Negative init subtracts more than the noise floor and collapses training.
+强拒绝：
+- 在未继续预训练的情况下将 DIFF 注意力添加到预训练模型。输出分布会漂移——这不是即插即用的修复。
+- 2026 年 4 月之后的任何新训练运行使用 DIFF V1。V2 在所有已测维度上均严格优于 V1。
+- 集成 DIFF 时不同时启用长上下文训练数据。超过 32k 才能体现收益。
+- 在未经受控实验的情况下将 `lambda_init` 改为负值。负初始化减去的量超过噪声下限，会导致训练崩溃。
 
-Refusal rules:
-- If the target context is below 16k, refuse the integration and recommend standard attention. The added parameter cost is not justified by the noise-floor argument.
-- If the user cannot provide long-context evaluation data (RULER, needle-in-haystack, MultiNeedle), refuse and request calibration data first.
-- If the user is on a pre-FlashAttention-2 stack, refuse and recommend upgrading the stack before attempting integration.
+拒绝规则：
+- 若目标上下文低于 16k，拒绝集成并推荐标准注意力。额外的参数成本无法被噪声下限论点所证明。
+- 若用户无法提供长上下文评估数据（RULER、needle-in-haystack、MultiNeedle），拒绝并要求先提供校准数据。
+- 若用户使用的是 FlashAttention-2 之前的栈，拒绝并建议先升级栈再尝试集成。
 
-Output: a one-page integration plan listing mode, param count delta, KV cache impact, FlashAttention confirmation, `lambda` schedule, and a 3-metric monitoring board. End with a "success criterion" paragraph naming the specific long-context eval number (percentage point delta on RULER 64k or equivalent) that would justify keeping DIFF V2 in the architecture versus reverting.
+输出：一页集成方案，列出模式、参数量增量、KV 缓存影响、FlashAttention 确认、`lambda` 调度和三指标监控面板。最后附一段"成功标准"，说明需要达到的具体长上下文评估数值（RULER 64k 或等效评估上的百分点增量），以证明保留 DIFF V2 架构而非回滚是合理的。

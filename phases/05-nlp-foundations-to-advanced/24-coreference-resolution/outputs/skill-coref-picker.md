@@ -1,17 +1,17 @@
 ---
 name: coref-picker
-description: Pick a coreference approach, evaluation plan, and integration strategy.
+description: 选择共指消解方案、评估计划和集成策略。
 version: 1.0.0
 phase: 5
 lesson: 24
 tags: [nlp, coref, information-extraction]
 ---
 
-Given a use case (single-doc / multi-doc, domain, language), output:
+给定使用场景（单文档 / 多文档、领域、语言），输出：
 
-1. Approach. Rule-based / neural span-based / LLM-prompted / hybrid. One-sentence reason.
-2. Model. Named checkpoint if neural.
-3. Integration. Order of operations: tokenize → NER → coref → downstream task.
-4. Evaluation. CoNLL F1 (MUC + B³ + CEAF-φ4 average) on held-out set + manual cluster review on 20 documents.
+1. 方法。基于规则 / 神经跨度 / LLM 提示 / 混合。一句话说明理由。
+2. 模型。若使用神经方法，提供命名检查点。
+3. 集成。操作顺序：分词 → NER → 共指 → 下游任务。
+4. 评估。留出集上的 CoNLL F1（MUC + B³ + CEAF-φ4 平均值）+ 对 20 个文档进行人工簇审查。
 
-Refuse LLM-only coref for documents over 2,000 tokens without sliding-window merge. Refuse any pipeline that runs coref without a mention-level precision-recall report. Flag gender-heuristic systems deployed in demographically diverse text.
+拒绝在超过 2000 token 的文档中单独使用 LLM 共指消解而不采用滑动窗口合并。拒绝任何未提供提及级别精确率-召回率报告的流水线。标记在人口统计多样化文本中部署的基于性别启发式的系统。

@@ -1,39 +1,39 @@
 ---
 name: orchestration-picker
-description: Pick an orchestration topology (supervisor, swarm, hierarchical, debate, or none) for a given problem and implement it minimally.
+description: 针对给定问题选择最小编排拓扑（supervisor、swarm、hierarchical、debate 或无），并最简化地实现它。
 version: 1.0.0
 phase: 14
 lesson: 28
 tags: [orchestration, supervisor, swarm, hierarchical, debate]
 ---
 
-Given a product domain and a task class, pick the minimal topology.
+给定一个产品领域和任务类别，选择最小拓扑。
 
-Decision:
+决策：
 
-1. 1 agent + workflow patterns (Lesson 12) suffice? -> don't use topology at all.
-2. 2-4 specialists with distinct responsibilities? -> **supervisor-worker**.
-3. Latency-critical and specialists can cleanly hand off? -> **swarm**.
-4. 10+ specialists, supervisor context budget failing? -> **hierarchical**.
-5. Accuracy matters more than cost, multi-proposer + critique helps? -> **debate** (Lesson 25).
+1. 1 个 Agent + 工作流模式（第 12 课）就够用？-> 完全不需要拓扑。
+2. 2-4 个职责明确的专家？-> **supervisor-worker（主管-工作者）**。
+3. 延迟敏感且专家间可以干净地交接？-> **swarm（蜂群）**。
+4. 10+ 个专家，supervisor 上下文预算不够？-> **hierarchical（分层）**。
+5. 准确率比成本更重要，多提案 + 评论有帮助？-> **debate（辩论）**（第 25 课）。
 
-Produce:
+输出内容：
 
-1. The chosen topology scaffold.
-2. Hop counter on swarm; nesting depth limit on hierarchical; round cap on debate.
-3. Observability hooks per handoff or per step (OTel GenAI spans, Lesson 23).
-4. A "why this, not that" README section.
+1. 所选拓扑的脚手架。
+2. swarm 的跳数计数器；hierarchical 的嵌套深度限制；debate 的轮次上限。
+3. 每次交接或每步的可观测性钩子（OTel GenAI span，第 23 课）。
+4. README 中的"为何选此，而非彼"章节。
 
-Hard rejects:
+硬性拒绝：
 
-- Calling 3 LLM calls in sequence "multi-agent." That's a prompt chain.
-- Swarm without hop counter. Bouncing is a certainty.
-- Hierarchical that bottoms out at 1 specialist per branch. Flatten.
+- 将 3 次顺序 LLM 调用称为"多 Agent"。那只是提示词链。
+- 没有跳数计数器的 swarm。反弹是必然的。
+- 每个分支只有 1 个专家的 hierarchical。把它展平。
 
-Refusal rules:
+拒绝规则：
 
-- If the user wants multi-agent for a task that a single ReAct loop handles, refuse and suggest Lesson 01.
-- If the user wants supervisor for a 2-step task, refuse and suggest prompt chaining (Lesson 12).
-- If the domain has compliance / audit requirements, refuse swarm and suggest supervisor or hierarchical.
+- 如果用户想用多 Agent 处理单个 ReAct 循环就能搞定的任务，拒绝并建议第 01 课。
+- 如果用户想用 supervisor 处理 2 步任务，拒绝并建议提示词链（第 12 课）。
+- 如果领域有合规/审计要求，拒绝 swarm，建议使用 supervisor 或 hierarchical。
 
-Output: topology scaffold + README with decision rationale. End with "what to read next" pointing to Lesson 13 (LangGraph) for supervisor implementation, Lesson 16 (OpenAI Agents SDK) for handoffs-as-tools, or Lesson 25 for debate specifics.
+输出：拓扑脚手架 + README（包含决策理由）。最后附"下一步阅读"，指向第 13 课（LangGraph）了解 supervisor 实现，第 16 课（OpenAI Agents SDK）了解工具式交接，或第 25 课了解辩论细节。

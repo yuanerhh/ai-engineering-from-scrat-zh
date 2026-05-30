@@ -1,31 +1,31 @@
 ---
 name: compliance-matrix
-description: Produce the required-framework matrix for an LLM SaaS given customer geography, segment, and contract scope. Map controls across SOC 2, HIPAA, GDPR, PCI-DSS, EU AI Act, Colorado AI Act, ISO 42001.
+description: 根据客户所在地区、细分市场和合同范围，为 LLM SaaS 生成所需框架矩阵，跨 SOC 2、HIPAA、GDPR、PCI-DSS、EU AI Act、科罗拉多州 AI 法案、ISO 42001 进行控制映射。
 version: 1.0.0
 phase: 17
 lesson: 26
 tags: [compliance, soc2, hipaa, gdpr, pci-dss, eu-ai-act, colorado-ai-act, iso-42001, iso-27001]
 ---
 
-Given customer geography (US / EU / Global, or specific US states), segment (SaaS / healthcare / fintech), contract scope (enterprise vs SMB), and current compliance state, produce the required-framework matrix.
+给定客户所在地区（美国 / 欧盟 / 全球，或特定美国州）、细分市场（SaaS / 医疗 / 金融科技）、合同范围（企业级 vs 中小企业）以及当前合规状态，生成所需框架矩阵。
 
-Produce:
+产出内容：
 
-1. Required frameworks. List each framework that must be achieved with rationale (geography, segment, customer profile).
-2. Timeline. For each framework, state current state (none / Type I / in audit / Type II). Name the gap.
-3. Cross-framework control mapping. For each required framework, identify controls that satisfy multiple (access log, encryption, audit log, change mgmt).
-4. EU AI Act posture. Classify the product's risk tier (unacceptable / high / limited / minimal). If high-risk, require conformity-assessment path before August 2, 2026 enforcement date.
-5. PII / PHI handling. Confirm real-time inference-layer redaction (Phase 17 · 25) — post-processing is not GDPR-defensible. Confirm BAAs for all AI vendors touching PHI.
-6. Audit tooling. Drata / Vanta / Secureframe for cross-framework automation. Worth the cost at multi-framework scope.
+1. 所需框架清单。列出每项必须达成的框架及理由（所在地区、细分市场、客户画像）。
+2. 时间线。对每个框架说明当前状态（无 / Type I / 审计中 / Type II）。标注差距。
+3. 跨框架控制映射。对每个所需框架，识别可满足多个框架的控制项（访问日志、加密、审计日志、变更管理）。
+4. EU AI Act 态势。对产品进行风险等级分类（不可接受 / 高风险 / 有限风险 / 最低风险）。如属于高风险，需在 2026 年 8 月 2 日执法日期前完成合规评估路径。
+5. PII / PHI 处理。确认推理层实时脱敏（第 17 阶段 · 第 25 课）——后处理脱敏不符合 GDPR 合规要求。确认所有接触 PHI 的 AI 供应商均签署了 BAA。
+6. 审计工具选型。使用 Drata / Vanta / Secureframe 实现跨框架自动化。在多框架范围内使用值得投入。
 
-Hard rejects:
-- Claiming SOC 2 Type I is "SOC 2 compliant" for enterprise procurement. Refuse — Type II is the gate.
-- Sending PHI to a provider without BAA. Refuse — HIPAA violation.
-- Post-processing PII scrubbing as GDPR posture. Refuse — require real-time.
+强制拒绝：
+- 将 SOC 2 Type I 称为"SOC 2 合规"用于企业采购。拒绝——Type II 才是准入门槛。
+- 在未签署 BAA 的情况下向提供商发送 PHI。拒绝——违反 HIPAA。
+- 将后处理 PII 脱敏作为 GDPR 合规措施。拒绝——需要实时脱敏。
 
-Refusal rules:
-- If the product serves EU users without GDPR Article 30 records, refuse to ship to EU customers until records established.
-- If the product serves Colorado residents in credit/employment/housing/education/essential services, require evidence of a completed impact assessment by June 30, 2026 (Colorado AI Act effective date under SB24-205 as amended by SB25B-004) before launch.
-- If the product is high-risk under EU AI Act and the team has no conformity-assessment plan, refuse to promise August 2026 readiness without a named implementation partner.
+拒绝规则：
+- 如果产品面向欧盟用户但未建立 GDPR 第 30 条记录，拒绝向欧盟客户上线，直到记录建立为止。
+- 如果产品面向科罗拉多州居民提供信贷/就业/住房/教育/基本服务，需在 2026 年 6 月 30 日（《科罗拉多州 AI 法案》SB24-205 及 SB25B-004 修正案生效日期）前提供已完成影响评估的证明，方可上线。
+- 如果产品属于 EU AI Act 高风险类别，且团队尚无合规评估计划，拒绝承诺 2026 年 8 月合规就绪，除非明确指定了实施合作方。
 
-Output: a one-page matrix with frameworks required, current state, gaps, timeline, cross-framework controls, EU AI Act tier, PII posture, tooling. End with the 12-month roadmap: framework-by-framework quarterly milestones.
+输出：一页矩阵，包含所需框架、当前状态、差距、时间线、跨框架控制项、EU AI Act 风险等级、PII 处理态势、工具选型。最后附上 12 个月路线图：按框架逐季度里程碑。

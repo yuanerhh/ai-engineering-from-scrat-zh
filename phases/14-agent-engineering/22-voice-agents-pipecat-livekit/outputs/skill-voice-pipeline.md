@@ -1,33 +1,33 @@
 ---
 name: voice-pipeline
-description: Scaffold a Pipecat-shaped voice pipeline (VAD + STT + LLM + TTS + transport) with barge-in, confidence gating, and latency budget enforcement.
+description: 搭建一个 Pipecat 风格的语音管道（VAD + STT + LLM + TTS + Transport），支持抢话打断、置信度门控和延迟预算强制执行。
 version: 1.0.0
 phase: 14
 lesson: 22
 tags: [voice, pipecat, livekit, webrtc, latency]
 ---
 
-Given a voice product spec (language, transport, providers), scaffold a frame-based pipeline.
+根据语音产品规格（语言、传输方式、服务提供商），搭建一个基于帧的管道。
 
-Produce:
+输出内容：
 
-1. `Frame` type with `kind`, `payload`, `direction` (downstream / upstream).
-2. Processors: `VAD`, `STT`, `LLM`, `TTS`, `Transport`. Each with `process(frame)`.
-3. `link()` helper chaining processors forward and backward.
-4. Cancel frame handling: UPSTREAM path from transport to TTS to LLM to STT, dropping pending work at each stage.
-5. Observers: per-stage latency metrics; emit an OTel span per frame crossing a processor (Lesson 23).
-6. Confidence gate on STT: below threshold, emit a "please repeat" text frame instead of transcript.
+1. `Frame` 类型，包含 `kind`、`payload`、`direction`（downstream / upstream）。
+2. 处理器：`VAD`、`STT`、`LLM`、`TTS`、`Transport`，每个都实现 `process(frame)`。
+3. `link()` 辅助函数，将处理器前后串联。
+4. 取消帧处理：UPSTREAM 路径从 transport 到 TTS 到 LLM 到 STT，在每个阶段丢弃待处理工作。
+5. 观察器：每个阶段的延迟指标；为每个帧跨越处理器时发送一个 OTel span（第 23 课）。
+6. STT 置信度门控：低于阈值时，发送"请重复"文本帧，而非转录文本。
 
-Hard rejects:
+硬性拒绝：
 
-- Pipeline without UPSTREAM handling. Barge-in is not optional for voice.
-- LLM calls without streaming. First-token latency dominates; must be streamed.
-- Confidence-blind STT. Feeding wrong transcripts to the LLM produces wrong replies.
+- 没有 UPSTREAM 处理的管道。抢话打断对语音来说不是可选项。
+- 没有流式传输的 LLM 调用。首 token 延迟决定体验，必须流式传输。
+- 忽略置信度的 STT。将错误转录喂给 LLM 会产生错误回复。
 
-Refusal rules:
+拒绝规则：
 
-- If end-to-end latency exceeds 1500ms on a cold run, refuse to ship. Optimize the chain or use a MultimodalAgent (LiveKit direct-audio).
-- If the product is telephony-first and the pipeline has no SIP adapter, refuse. Route through LiveKit SIP or a platform (Vapi/Retell).
-- If the product carries PII audio without encryption in transit, refuse.
+- 如果冷启动端到端延迟超过 1500ms，拒绝交付。优化链路或使用 MultimodalAgent（LiveKit 直接音频）。
+- 如果产品以电话为主且管道没有 SIP 适配器，拒绝。通过 LiveKit SIP 或平台（Vapi/Retell）路由。
+- 如果产品传输包含 PII 音频但未加密，拒绝。
 
-Output: `frames.py`, `processors.py`, `pipeline.py`, `observers.py`, `README.md` explaining the latency budget, barge-in design, and transport choice. End with "what to read next" pointing to Lesson 23 (OTel), Lesson 24 (observability backends), or LiveKit docs for WebRTC specifics.
+输出：`frames.py`、`processors.py`、`pipeline.py`、`observers.py`、`README.md`，说明延迟预算、抢话打断设计和传输选择。最后附"下一步阅读"，指向第 23 课（OTel）、第 24 课（可观测性后端）或 LiveKit WebRTC 相关文档。

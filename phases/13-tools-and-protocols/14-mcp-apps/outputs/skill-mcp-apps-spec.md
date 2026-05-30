@@ -1,32 +1,32 @@
 ---
 name: mcp-apps-spec
-description: Produce the full MCP Apps contract for a tool that needs an interactive UI resource.
+description: 为需要交互式 UI 资源的工具生成完整的 MCP Apps 合约。
 version: 1.0.0
 phase: 13
 lesson: 14
 tags: [mcp, apps, ui-resources, csp, iframe-sandbox]
 ---
 
-Given a tool that would benefit from an interactive UI (timeline, form, dashboard, map, chart), produce the MCP Apps contract.
+给定一个能从交互式 UI（时间轴、表单、仪表盘、地图、图表）中受益的工具，生成 MCP Apps 合约。
 
-Produce:
+输出内容：
 
-1. `ui://` URI. One canonical name for the UI resource (e.g. `ui://notes/timeline`).
-2. Tool result shape. `content[]` with `text` preamble and `ui_resource` block; `_meta.ui` populated.
-3. CSP. Minimum allowlist for `default-src`, `script-src`, `connect-src`, `img-src`, `style-src`. Avoid `'unsafe-inline'` unless necessary.
-4. Permissions list. Camera / mic / geolocation / network if needed; empty if not.
-5. postMessage entry points. Which `host.*` calls the UI will make and what they return.
-6. Security checklist. Distinguish-from-host, no clickjacking, strict connect-src, HTML sanitization if any user content is rendered.
+1. **`ui://` URI**。UI 资源的唯一规范名称（例如 `ui://notes/timeline`）。
+2. **工具结果结构**。包含 `text` 前言和 `ui_resource` 块的 `content[]`；填充 `_meta.ui`。
+3. **CSP**。`default-src`、`script-src`、`connect-src`、`img-src`、`style-src` 的最小允许列表。除非必要，避免使用 `'unsafe-inline'`。
+4. **权限列表**。如需要则列出摄像头 / 麦克风 / 地理位置 / 网络；不需要则留空。
+5. **postMessage 入口点**。UI 将发起哪些 `host.*` 调用及其返回值。
+6. **安全检查清单**。与宿主的区分、防点击劫持、严格的 connect-src、用户内容渲染时的 HTML 净化。
 
-Hard rejects:
-- CSP with `default-src *`. Wide-open security risk.
-- Any `permissions` request beyond what the UI actually uses. Minimum privilege.
-- Any ui:// resource that loads external scripts. Bundle or refuse.
-- Any UI that renders user-controlled HTML without sanitization. XSS vector.
+硬性拒绝：
+- CSP 为 `default-src *`。开放的安全风险。
+- 任何超出 UI 实际使用范围的 `permissions` 请求。最小权限原则。
+- 任何加载外部脚本的 `ui://` 资源。请打包或拒绝。
+- 任何在未净化的情况下渲染用户可控 HTML 的 UI。XSS 漏洞。
 
-Refusal rules:
-- If the UI is just a static result, refuse to scaffold an App; return text content.
-- If the tool would benefit from native host widgets (progress bars, confirmation dialogs), recommend those instead.
-- If the host does not yet support MCP Apps (VS Code stable, Zed, Windsurf as of 2026-04), flag fallback-to-text path.
+拒绝规则：
+- 若 UI 仅展示静态结果，拒绝为其搭建 App；改为返回文本内容。
+- 若工具能从原生宿主控件（进度条、确认对话框）中受益，建议优先使用这些控件。
+- 若宿主尚不支持 MCP Apps（截至 2026 年 4 月的 VS Code 稳定版、Zed、Windsurf），标注回退到纯文本的路径。
 
-Output: a one-page contract with the `ui://` URI, tool result JSON, CSP, permissions, postMessage entry points, and a security checklist. End with one sentence on the minimum host that will render this UI.
+输出：一页合约文档，包含 `ui://` URI、工具结果 JSON、CSP、权限、postMessage 入口点和安全检查清单。结尾用一句话说明能渲染该 UI 的最低宿主要求。

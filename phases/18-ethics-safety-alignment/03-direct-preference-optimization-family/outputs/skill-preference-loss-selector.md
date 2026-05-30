@@ -1,28 +1,28 @@
 ---
 name: preference-loss-selector
-description: Recommend a direct-alignment-algorithm loss given dataset shape and target stage.
+description: 根据数据集形态和目标训练阶段，推荐合适的直接对齐算法损失函数。
 version: 1.0.0
 phase: 18
 lesson: 3
 tags: [dpo, ipo, kto, simpo, orpo, bpo, daa, preference-optimization]
 ---
 
-Given a preference dataset description (paired vs unpaired, preference-strength distribution, length distribution, size) and a training target (one-stage from base, two-stage after SFT, on-policy continuation), recommend a loss from the DPO family and name the single failure mode it protects against.
+给定偏好数据集描述（配对与非配对、偏好强度分布、长度分布、规模）和训练目标（从基础模型一阶段训练、SFT 后两阶段训练、在线策略延续），从 DPO 系列中推荐一种损失函数，并指出它所防范的单一失效模式。
 
-Produce:
+输出内容：
 
-1. Dataset fingerprint. Paired? Unpaired? Length-balanced? Preference-strength variance? Mostly in-distribution or open-domain? Pick the most informative 4 fields for this dataset.
-2. Loss recommendation. From {DPO, IPO, KTO, SimPO, ORPO, BPO}. One primary and one fallback. For each, name the specific failure mode it protects against on this dataset.
-3. Hyperparameter defaults. `beta` for anchored methods, `gamma` margin for SimPO, `lambda` for ORPO. Always cite these as starting points for a sweep, never as final values.
-4. Red flags in the data. If preference strengths are perfectly uniform, DPO-family methods lose their pairwise signal — recommend collecting calibrated preferences. If average `|y_w| / |y_l|` deviates > 1.5, flag length bias and push toward SimPO.
+1. 数据集指纹。是否配对？是否非配对？长度是否均衡？偏好强度方差如何？主要为域内还是开放域？为该数据集选取信息量最大的 4 个字段。
+2. 损失推荐。从 {DPO、IPO、KTO、SimPO、ORPO、BPO} 中选择。一个主要选项和一个备选选项。对每个，说明它针对该数据集所防范的具体失效模式。
+3. 超参数默认值。有锚点方法的 `beta`、SimPO 的 `gamma` 边际、ORPO 的 `lambda`。始终将这些作为扫描的起始点，而非最终值。
+4. 数据中的红色预警。若偏好强度完全均匀，DPO 系列方法将失去配对信号——建议收集校准偏好。若平均 `|y_w| / |y_l|` 偏差 > 1.5，标记长度偏差并推向 SimPO。
 
-Hard rejects:
-- Any claim that DPO (or any family member) "escapes Goodhart." Rafailov et al. (NeurIPS 2024) prove direct alignment algorithms over-optimize on the same gold-reward curve shape as explicit-RM RLHF.
-- Any recommendation that does not specify held-out capability evaluation alongside preference evaluation. Direct alignment algorithms still need gold-signal benchmarks.
-- Any claim that reference-policy-free methods (SimPO, ORPO) "don't need regularization." The SFT-like term or length penalty is the regularizer.
+硬性拒绝：
+- 任何声称 DPO（或任何系列成员）"逃脱了古德哈特"的说法。Rafailov 等人（NeurIPS 2024）证明直接对齐算法在与显式 RM RLHF 相同形状的黄金奖励曲线上过度优化。
+- 任何不同时指定保留能力评估与偏好评估的建议。直接对齐算法仍然需要黄金信号基准。
+- 任何声称无参考策略方法（SimPO、ORPO）"不需要正则化"的说法。类 SFT 项或长度惩罚即为正则化器。
 
-Refusal rules:
-- If the dataset is smaller than 5k pairs and the user targets a frontier-scale model, refuse and recommend expanding the dataset or using an SFT-first approach.
-- If the user requests "the best" loss, refuse and explain no closed-form winner exists — the right method depends on dataset shape and task.
+拒绝规则：
+- 若数据集少于 5k 对且用户针对前沿规模模型，拒绝并建议扩展数据集或采用先 SFT 的方法。
+- 若用户要求"最佳"损失函数，拒绝并解释不存在闭合形式的赢家——正确方法取决于数据集形态和任务。
 
-Output: a one-page recommendation listing the dataset fingerprint, primary and fallback loss, starting hyperparameters, and red flags. Cite DPO (arXiv:2305.18290) and one other family paper (IPO, KTO, SimPO, ORPO, or BPO) exactly once each.
+输出：一页推荐报告，列出数据集指纹、主要和备选损失函数、起始超参数，以及红色预警。分别引用 DPO（arXiv:2305.18290）和另一篇系列论文（IPO、KTO、SimPO、ORPO 或 BPO）各一次。

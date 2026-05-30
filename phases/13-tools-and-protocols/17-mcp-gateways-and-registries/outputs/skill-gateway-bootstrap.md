@@ -1,30 +1,30 @@
 ---
 name: gateway-bootstrap
-description: Produce a gateway configuration spec given users, backends, and compliance constraints.
+description: 根据用户、后端和合规约束生成网关配置规范。
 version: 1.0.0
 phase: 13
 lesson: 17
 tags: [mcp, gateway, rbac, audit, policy]
 ---
 
-Given an enterprise MCP plan (users, backends, compliance constraints), produce the gateway configuration spec.
+给定一个企业 MCP 方案（用户、后端、合规约束），生成网关配置规范。
 
-Produce:
+输出内容：
 
-1. Backend list. Each with its registry (Official / Glama / custom), canonical name (reverse-DNS), pinned description hashes.
-2. User list. Each with a role and allowed-tool set.
-3. RBAC matrix. One row per user x backend-tool, with allow/deny.
-4. Rate limits. Per-user burst and sustained limits; per-tool limits for expensive tools.
-5. Audit plan. Log destination (file, OpenTelemetry, SIEM), retention, fields captured.
+1. **后端列表**。每项包含注册表来源（官方 / Glama / 自定义）、规范名称（反向 DNS）、固定描述哈希。
+2. **用户列表**。每项包含角色和允许的工具集合。
+3. **RBAC 矩阵**。每行为用户 x 后端工具的组合，标注允许/拒绝。
+4. **速率限制**。每用户的突发和持续限制；高开销工具的每工具限制。
+5. **审计方案**。日志目标（文件、OpenTelemetry、SIEM）、保留期限、捕获字段。
 
-Hard rejects:
-- Any backend not in the Official Registry without explicit admin approval.
-- Any RBAC rule allowing all users all tools. Privilege explosion.
-- Any audit plan without immutable storage. Compliance fail.
+硬性拒绝：
+- 任何未经明确管理员批准、不在官方注册表中的后端。
+- 任何允许所有用户访问所有工具的 RBAC 规则。权限爆炸。
+- 任何没有不可变存储的审计方案。合规失败。
 
-Refusal rules:
-- If a developer population exceeds 100 without any roles defined, refuse to bootstrap and require at least three roles.
-- If the plan does not identify an OAuth 2.1 identity provider, refuse and recommend adopting Keycloak or Auth0 first.
-- If any backend uses stdio, refuse to proxy it through the HTTP gateway; stdio servers run per-developer locally.
+拒绝规则：
+- 若开发人员数量超过 100 人且未定义任何角色，拒绝引导并要求至少定义三个角色。
+- 若方案未指定 OAuth 2.1 身份提供商，拒绝并建议先采用 Keycloak 或 Auth0。
+- 若任何后端使用 stdio，拒绝通过 HTTP 网关代理；stdio 服务器在每个开发者的本地运行。
 
-Output: a one-page config document with backend list, user list, RBAC matrix, rate limits, and audit plan. End with the single policy rule the team should implement first.
+输出：一页配置文档，包含后端列表、用户列表、RBAC 矩阵、速率限制和审计方案。结尾给出团队应首先实施的单条策略规则。

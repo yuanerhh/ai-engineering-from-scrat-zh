@@ -1,30 +1,30 @@
 ---
 name: primitive-splitter
-description: Categorize each capability in an MCP server draft as tool, resource, or prompt with rationale.
+description: 将 MCP 服务器草案中的每项能力分类为 tool、resource 或 prompt，并附上分类理由。
 version: 1.0.0
 phase: 13
 lesson: 10
 tags: [mcp, primitives, resources, prompts]
 ---
 
-Given a proposed MCP server's capabilities (as plain English or a draft tool list), categorize each one as tool, resource, or prompt with a one-sentence rationale.
+给定拟议 MCP 服务器的能力（以自然语言或草稿工具列表形式），将每项能力分类为 tool、resource 或 prompt，并附上一句话理由。
 
-Produce:
+输出内容：
 
-1. Per-capability categorization. For each item, return `{name, primitive: tool | resource | prompt, rationale}`.
-2. Resource URI scheme. If any capabilities become resources, propose a URI scheme (`notes://`, `gh://`, `db://`) and a template pattern.
-3. Prompt argument skeletons. If any capabilities become prompts, propose the argument list and required/optional flags.
-4. Subscription candidates. Flag resources that change often and would benefit from `resources/subscribe`.
-5. Anti-pattern flags. Call out cases where an old design wrapped a read in a tool (e.g. `notes_read(id)`) when a resource would serve better.
+1. 逐能力分类。对每项，返回 `{name, primitive: tool | resource | prompt, rationale}`。
+2. 资源 URI 方案。如果有能力被归为资源，提出 URI 方案（`notes://`、`gh://`、`db://`）和模板模式。
+3. 提示词参数骨架。如果有能力被归为提示词，提出参数列表及必填/可选标志。
+4. 订阅候选。标记频繁变化、可从 `resources/subscribe` 中受益的资源。
+5. 反模式标记。指出旧设计中将读取封装为工具的情况（例如 `notes_read(id)`），并说明资源更为合适。
 
-Hard rejects:
-- Any capability categorized as "both tool and resource" without a split. Pick one or scaffold a pair.
-- Any prompt without required arguments identified. Surfacing in slash-command UIs needs argument schemas.
-- Any resource URI scheme not addressable (free-form strings, not URIs).
+硬性拒绝：
+- 任何被归类为"既是工具又是资源"而未拆分的能力。选择其一或搭建一对。
+- 任何未识别必填参数的提示词。在斜杠命令 UI 中展示需要参数 Schema。
+- 任何 URI 方案不可寻址的资源（自由格式字符串，而非 URI）。
 
-Refusal rules:
-- If all capabilities land as tools, refuse and ask whether the server has read-only data that could be a resource.
-- If no capability fits prompts, that is fine; prompts are optional. Do not invent them.
-- If the server's domain is better served by A2A (agent-to-agent collaboration, opaque state), refuse and redirect to Phase 13 · 19.
+拒绝规则：
+- 如果所有能力都落入工具分类，拒绝并询问服务器是否有可以作为资源的只读数据。
+- 如果没有能力适合提示词分类，没问题；提示词是可选的，不要凭空创造。
+- 如果服务器的领域更适合 A2A（智能体间协作、不透明状态），拒绝并重定向到 Phase 13 · 19。
 
-Output: a one-page decision report with the categorization table, a URI scheme proposal, prompt skeletons, and subscription flags. End with the single most impactful tool -> resource conversion for this server.
+输出：一页决策报告，包含分类表、URI 方案提案、提示词骨架和订阅标记。以此服务器影响最大的工具 -> 资源转换建议作为结尾。

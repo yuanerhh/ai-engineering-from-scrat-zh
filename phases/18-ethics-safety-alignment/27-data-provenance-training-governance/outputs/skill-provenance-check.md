@@ -1,29 +1,29 @@
 ---
 name: provenance-check
-description: Check a training dataset against California AB 2013 and EU TDM opt-out obligations.
+description: 对照加利福尼亚州 AB 2013 和欧盟 TDM 退出义务，检查训练数据集的合规性。
 version: 1.0.0
 phase: 18
 lesson: 27
 tags: [data-provenance, ab-2013, tdm-opt-out, legitimate-interest, dpa]
 ---
 
-Given a training dataset used by a deployment, check compliance against California AB 2013 and EU TDM opt-out.
+针对部署所使用的训练数据集，检查其对加利福尼亚州 AB 2013 和欧盟 TDM 退出要求的合规情况。
 
-Produce:
+产出内容：
 
-1. AB 2013 coverage. Fill the 12 fields. Flag any missing or placeholder-only fields. Note that the summary becomes binding once published.
-2. Opt-out compliance. Does the dataset respect machine-readable opt-out signals (robots.txt, C2PA "No AI Training", TDM.Reservation)? Pre-collection filter must be in place.
-3. DPA jurisdiction mapping. For each jurisdiction the data subjects belong to, identify the applicable DPA and the 2025 legitimate-interest position (Irish DPC, Cologne Higher Regional Court, Hamburg DPA, UK ICO, Brazilian ANPD).
-4. Irreversibility audit. If the dataset contains PII, what unlearning or remediation procedure is in place? Acknowledge that no procedure fully remediates training data.
-5. Provenance-chain completeness. Is there a signed chain from the data source to the training pipeline? If the dataset is derived (crawled + filtered), document the derivation.
+1. AB 2013 覆盖率。填写 12 个字段。标出任何缺失或仅为占位符的字段。注意：摘要一经发布即具有约束力。
+2. 退出合规性。数据集是否遵循了机器可读的退出信号（robots.txt、C2PA "No AI Training"、TDM.Reservation）？必须在采集前部署过滤机制。
+3. 数据保护机构（DPA）司法管辖区映射。对于数据主体所属的每个司法管辖区，识别适用的 DPA 及 2025 年合理利益立场（爱尔兰 DPC、科隆高等地区法院、汉堡 DPA、英国 ICO、巴西 ANPD）。
+4. 不可逆性审计。若数据集包含个人身份信息（PII），已制定哪些遗忘或补救程序？承认现有程序均无法完全补救训练数据。
+5. 溯源链完整性。是否存在从数据源到训练流水线的签名链？若数据集为衍生数据（爬取后过滤），记录衍生过程。
 
-Hard rejects:
-- Any deployment that cites AB 2013 without per-dataset 12-field summaries.
-- Any deployment that does not respect robots.txt or equivalent opt-out signals.
-- Any remediation claim that assumes surgical removal of data from trained weights.
+硬性拒绝条件：
+- 任何援引 AB 2013 却未提供每个数据集 12 字段摘要的部署。
+- 任何不遵守 robots.txt 或等效退出信号的部署。
+- 任何假设可从已训练权重中精确删除数据的补救声明。
 
-Refusal rules:
-- If the user asks whether a specific dataset is "safe to train on," refuse without jurisdiction-by-jurisdiction analysis.
-- If the user asks for a universal compliance strategy, refuse — jurisdictions differ materially.
+拒绝规则：
+- 若用户询问某个特定数据集是否"可以安全用于训练"，拒绝在未进行逐司法管辖区分析的情况下给出答案。
+- 若用户要求提供通用合规策略，拒绝——各司法管辖区要求存在实质性差异。
 
-Output: a one-page check filling the five sections, identifying the highest-risk compliance gap, and naming the single most urgent remediation. Cite California AB 2013 and EU Copyright Directive TDM exception once each.
+输出：一页检查报告，填充上述五个部分，识别最高风险的合规缺口，并指出单一最紧迫的补救措施。分别引用加利福尼亚州 AB 2013 和欧盟版权指令 TDM 例外条款各一次。

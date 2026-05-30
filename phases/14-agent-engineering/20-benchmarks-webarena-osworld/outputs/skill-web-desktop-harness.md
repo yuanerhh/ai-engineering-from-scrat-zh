@@ -1,32 +1,32 @@
 ---
 name: web-desktop-harness
-description: Build a WebArena/OSWorld-style harness with execution-based evaluation and trajectory-efficiency metrics.
+description: 构建 WebArena/OSWorld 风格的测试装置，包含基于执行的评估和轨迹效率指标。
 version: 1.0.0
 phase: 14
 lesson: 20
 tags: [webarena, osworld, harness, trajectory-efficiency]
 ---
 
-Given a target app (web or desktop) and a list of tasks with gold trajectories, build an eval harness.
+给定目标应用（Web 或桌面）和一组带有黄金轨迹的任务列表，构建评估测试装置。
 
-Produce:
+输出内容：
 
-1. Task definitions: `(tid, description, gold_steps, success_predicate, state_reset)`.
-2. Runner: runs the agent, captures every action, records step count + elapsed time + success state.
-3. Trajectory-efficiency metric: `agent_steps / gold_steps`. Report per-task and aggregate.
-4. State reset between tasks — never run one task on state dirtied by another.
-5. Failure-mode classifier: for each failure, tag whether it's a grounding miss (wrong element) or a planning miss (wrong action).
+1. 任务定义：`(tid, description, gold_steps, success_predicate, state_reset)`。
+2. 运行器：运行智能体，捕获每个动作，记录步骤数 + 耗时 + 成功状态。
+3. 轨迹效率指标：`agent_steps / gold_steps`。报告每任务和聚合结果。
+4. 任务间状态重置——绝不在被上一个任务污染的状态上运行下一个任务。
+5. 失败模式分类器：对每次失败，打上标签，区分是定位失误（选错元素）还是规划失误（选错动作）。
 
-Hard rejects:
+硬性拒绝：
 
-- No state reset between tasks. Cross-task contamination invalidates all scores.
-- Success-rate-only reporting. Trajectory efficiency is the 2026 standard.
-- Screenshots-only harness without DOM parity. Some agents use DOM+vision; give both unless specifically constraining the surface.
+- 任务间不重置状态。跨任务污染会使所有分数无效。
+- 只报告成功率。轨迹效率是 2026 年的标准。
+- 只有截图而没有 DOM 对等的测试装置。某些智能体同时使用 DOM+视觉；除非有意限制接入面，否则两者都要提供。
 
-Refusal rules:
+拒绝规则：
 
-- If the tasks have no gold trajectories, refuse. You cannot measure efficiency without them.
-- If the app is not pinned to a specific version, refuse. Drift invalidates cross-run comparisons.
-- If the agent has destructive tools (delete, publish), require a sandbox copy of the app.
+- 如果任务没有黄金轨迹，拒绝。没有黄金轨迹就无法衡量效率。
+- 如果应用没有固定到特定版本，拒绝。版本漂移会使跨运行比较失效。
+- 如果智能体拥有破坏性工具（删除、发布），要求使用应用的沙箱副本。
 
-Output: `tasks.py`, `runner.py`, `failure_classifier.py`, `report.py`, `README.md` explaining reset policy, gold-trajectory sourcing, and the grounding-vs-planning split. End with "what to read next" pointing to Lesson 21 (computer use models) or Lesson 30 (eval-driven development).
+输出：`tasks.py`、`runner.py`、`failure_classifier.py`、`report.py`、`README.md`（说明重置策略、黄金轨迹来源及定位与规划失误的区分方式）。末尾附"下一步阅读"，指向第 21 课（计算机使用模型）或第 30 课（评估驱动开发）。

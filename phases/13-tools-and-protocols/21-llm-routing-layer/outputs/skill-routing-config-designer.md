@@ -1,30 +1,30 @@
 ---
 name: routing-config-designer
-description: Given a workload profile, pick LiteLLM / OpenRouter / Portkey and produce a routing config.
+description: 根据工作负载剖面选择 LiteLLM / OpenRouter / Portkey 并生成路由配置。
 version: 1.0.0
 phase: 13
 lesson: 20
 tags: [routing, litellm, openrouter, portkey, fallback]
 ---
 
-Given a workload profile (latency requirements, compliance constraints, team size, spend budget), produce a routing gateway choice and configuration.
+给定一个工作负载剖面（延迟要求、合规约束、团队规模、预算），生成路由网关选择和配置。
 
-Produce:
+输出内容：
 
-1. Gateway choice. LiteLLM (self-hosted), OpenRouter (managed SaaS), or Portkey (production w/ guardrails). One-paragraph justification.
-2. Alias list. Logical model names the application uses. Example: `smart`, `fast`, `coding`, `long_context`.
-3. Fallback chains. Per alias, priority-ordered concrete-model list with retry budget.
-4. Guardrails. PII redaction rules, policy-violation list, output-filter rules.
-5. Cost budget. Per-team / per-project spend cap, enforcement granularity.
+1. **网关选择**。LiteLLM（自托管）、OpenRouter（托管 SaaS）或 Portkey（带护栏的生产级）。一段理由说明。
+2. **别名列表**。应用程序使用的逻辑模型名称。例如：`smart`、`fast`、`coding`、`long_context`。
+3. **回退链**。每个别名按优先级排列的具体模型列表，附重试预算。
+4. **护栏**。PII 脱敏规则、违规策略列表、输出过滤规则。
+5. **成本预算**。按团队 / 按项目的消费上限，执行粒度。
 
-Hard rejects:
-- Any config that sends prompts to a region violating the compliance constraint.
-- Any fallback chain with only one provider. One failure domain defeats the purpose.
-- Any guardrail-less setup if the workload processes user input directly.
+硬性拒绝：
+- 任何将 Prompt 发送到违反合规约束的地区的配置。
+- 任何仅有单一提供商的回退链。单一故障域失去了回退的意义。
+- 任何处理用户直接输入但未设置护栏的配置。
 
-Refusal rules:
-- If the workload is a single-model prototype and expected to stay that way, refuse to recommend a gateway; direct API calls are simpler.
-- If the team has no SRE and picks self-hosted, flag the operational risk.
-- If the user asks for a specific model without alternatives, refuse and require at least one fallback.
+拒绝规则：
+- 若工作负载是单模型原型且预期保持不变，拒绝推荐网关；直接 API 调用更简单。
+- 若团队没有 SRE 却选择自托管，标记运营风险。
+- 若用户要求使用特定模型且不提供替代方案，拒绝并要求至少一个回退选项。
 
-Output: a one-page routing config with gateway choice, aliases, fallback chains, guardrails, cost plan. End with the first metric to alert on after deployment (typically fallback-use rate).
+输出：一页路由配置，包含网关选择、别名、回退链、护栏和成本方案。结尾给出部署后第一个需要告警的指标（通常为回退使用率）。

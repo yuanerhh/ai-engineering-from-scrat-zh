@@ -1,15 +1,15 @@
 ---
 name: seq2seq-design
-description: Design a sequence-to-sequence pipeline for a given task.
+description: 为给定任务设计序列到序列流水线。
 phase: 5
 lesson: 09
 ---
 
-Given a task (translation, summarization, paraphrase, question rewrite), output:
+给定任务（翻译、摘要、复述、问题改写），输出：
 
-1. Architecture. Pretrained transformer encoder-decoder (BART, T5, mBART, NLLB) is the default. RNN-based seq2seq only for specific constraints (streaming, edge inference, pedagogy).
-2. Starting checkpoint. Name it (`facebook/bart-base`, `google/flan-t5-base`, `facebook/nllb-200-distilled-600M`). Match checkpoint to task and language coverage.
-3. Decoding strategy. Greedy for deterministic output, beam search (width 4-5) for quality, sampling with temperature for diversity. One sentence justification.
-4. One failure mode to verify before shipping. Exposure bias manifests as generation drift on longer outputs; sample 20 outputs at 90th-percentile length and eyeball.
+1. 架构。预训练 transformer 编码器-解码器（BART、T5、mBART、NLLB）是默认选择。仅在特定约束下（流式处理、边缘推理、教学目的）使用基于 RNN 的 seq2seq。
+2. 起始检查点。明确命名（`facebook/bart-base`、`google/flan-t5-base`、`facebook/nllb-200-distilled-600M`）。将检查点与任务和语言覆盖范围匹配。
+3. 解码策略。确定性输出用贪心解码，质量优先用束搜索（宽度 4-5），多样性用带温度的采样。一句话说明理由。
+4. 上线前需验证的一个失败模式。曝光偏差在较长输出上表现为生成漂移；对第 90 百分位长度的 20 个输出进行抽样并人工检查。
 
-Refuse to recommend training a seq2seq from scratch for under ~1M parallel examples. Flag any pipeline using greedy decoding for user-facing content as fragile (greedy repeats and loops).
+拒绝推荐在少于约 100 万平行样本的情况下从零训练 seq2seq。将任何对用户可见内容使用贪心解码的流水线标记为脆弱（贪心解码会产生重复和循环）。

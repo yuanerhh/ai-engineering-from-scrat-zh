@@ -1,45 +1,45 @@
 ---
 name: safety-harness
-description: Wire a layered safety pipeline around a target LLM app, run a six-family red-team range, and run a constitutional self-critique for a measurable harmlessness delta.
+description: 围绕目标 LLM 应用构建分层安全管道，运行六类红队攻击范围，并通过宪法自我批评实现可量化的无害性提升。
 version: 1.0.0
 phase: 19
 lesson: 15
 tags: [capstone, safety, red-team, llama-guard, x-guard, garak, pyrit, constitutional-ai]
 ---
 
-Given a target LLM application (8B instruction-tuned model or a RAG chatbot), harden it with a layered safety pipeline and run an autonomous red-team range across six attack families. Produce a before/after harmlessness report.
+给定一个目标 LLM 应用（80亿参数指令微调模型或 RAG 聊天机器人），使用分层安全管道对其进行加固，并在六类攻击家族上运行自主红队范围测试。生成加固前后的无害性报告。
 
-Build plan:
+构建计划：
 
-1. Five-layer pipeline: input sanitize (zero-width strip, encoding decode, Unicode normalize) -> NeMo Guardrails v0.12 rails -> classifier gate (Llama Guard 4 / X-Guard / ShieldGemma-2 / Nemotron 3) -> target LLM -> output filter (Llama Guard 4 + Presidio PII + citation check). Flagged outputs go to a Slack HITL queue.
-2. Emit a Langfuse span per layer so attribution is observable end to end.
-3. Red-team scheduler running garak, PyRIT, PAIR, TAP, GCG, multi-turn persona, and multilingual code-switch attacks on a cron.
-4. Each successful jailbreak: CVSS 4.0 score, repro, mitigation plan, disclosure timeline.
-5. XSTest benign-prompt probe continuously running to catch over-refusal regressions.
-6. Constitutional self-critique run: 1k harmful-attempt prompts -> target drafts -> critic scores against a written constitution -> rewritten pairs -> SFT. Measure before/after on held-out harmlessness eval.
-7. Alerts: Slack warning on benign-regression, PagerDuty critical on new jailbreak family.
+1. 五层管道：输入净化（零宽字符过滤、编码解码、Unicode 规范化）-> NeMo Guardrails v0.12 规则 -> 分类器门控（Llama Guard 4 / X-Guard / ShieldGemma-2 / Nemotron 3）-> 目标 LLM -> 输出过滤（Llama Guard 4 + Presidio PII + 引用检查）。被标记的输出进入 Slack HITL 队列。
+2. 每层发射一个 Langfuse span，使归因端到端可观测。
+3. 红队调度器按计划运行 garak、PyRIT、PAIR、TAP、GCG、多轮角色扮演和多语言代码切换攻击。
+4. 每次成功越狱：CVSS 4.0 评分、复现方法、缓解计划、披露时间线。
+5. XSTest 良性提示探测持续运行，以捕获过度拒绝回退。
+6. 宪法自我批评运行：1000 个有害尝试提示 -> 目标草稿 -> 批评者按照书面宪法打分 -> 重写配对 -> SFT。在保留无害性评估上测量加固前后效果。
+7. 告警：良性回退时发送 Slack 警告，新越狱家族时触发 PagerDuty 严重告警。
 
-Assessment rubric:
+评估标准：
 
-| Weight | Criterion | Measurement |
+| 权重 | 评估项 | 度量方式 |
 |:-:|---|---|
-| 25 | Attack-surface coverage | 6+ attack families exercised, 2+ languages |
-| 20 | True-positive / false-positive trade-off | Attack block rate vs XSTest benign pass rate |
-| 20 | Self-critique delta | Before/after harmlessness on held-out eval |
-| 20 | Documentation and disclosure | CVSS-scored findings with timeline |
-| 15 | Automation and repeatability | Cron-driven, alerts exercised end to end |
+| 25 | 攻击面覆盖率 | 6+ 类攻击家族，2+ 种语言 |
+| 20 | 真正例/假正例权衡 | 攻击阻断率与 XSTest 良性通过率 |
+| 20 | 自我批评提升 | 在保留评估上的加固前后无害性 |
+| 20 | 文档与披露 | 带时间线的 CVSS 评分发现 |
+| 15 | 自动化与可重复性 | 定时驱动，告警端到端验证 |
 
-Hard rejects:
+硬性拒绝条件：
 
-- Single-layer safety stacks. The thesis of this capstone is defense in depth.
-- Red-team runs that report success rate without XSTest over-refusal numbers.
-- Constitutional self-critique without a held-out eval (reports the training-set accuracy, not the generalization).
-- Missing CVSS scoring on jailbreak findings.
+- 单层安全栈。该项目的核心论点是纵深防御。
+- 报告成功率而不含 XSTest 过度拒绝数字的红队运行。
+- 没有保留评估的宪法自我批评（报告的是训练集准确率，而非泛化性）。
+- 越狱发现缺少 CVSS 评分。
 
-Refusal rules:
+拒绝规则：
 
-- Refuse to report a safety number without a benign-probe counterpoint. One without the other is misleading.
-- Refuse to auto-retrain on red-team successes without human curation of the critique pairs.
-- Refuse to claim multilingual coverage without running X-Guard on at least two non-English languages.
+- 拒绝报告安全数字而没有良性探测对照。两者缺一不可，否则误导性强。
+- 拒绝在没有人工筛选批评配对的情况下基于红队成功自动重训练。
+- 拒绝声称多语言覆盖而未在至少两种非英语语言上运行 X-Guard。
 
-Output: a repo containing the five-layer pipeline, the red-team scheduler, the PAIR/TAP/GCG runners, the constitutional-self-critique training harness, the XSTest over-refusal dashboard, the CVSS findings tracker, and a write-up naming the three attack families that had the highest success rate pre-hardening and the specific pipeline layer that mitigated each.
+输出：一个包含五层管道、红队调度器、PAIR/TAP/GCG 运行器、宪法自我批评训练框架、XSTest 过度拒绝仪表板、CVSS 发现追踪器的代码库，以及一份说明加固前成功率最高的三类攻击家族及各自被哪个具体管道层缓解的报告。

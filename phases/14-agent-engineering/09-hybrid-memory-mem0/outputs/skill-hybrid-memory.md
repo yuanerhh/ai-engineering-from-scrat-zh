@@ -1,32 +1,32 @@
 ---
 name: hybrid-memory
-description: Generate a Mem0-shaped three-store memory system (vector + KV + graph) with a fusion scorer, scope taxonomy, and temporal invalidation.
+description: 生成一个 Mem0 形态的三存储记忆系统（向量 + KV + 图），包含融合评分器、范围分类体系和时间失效机制。
 version: 1.0.0
 phase: 14
 lesson: 09
 tags: [memory, mem0, vector, graph, kv, fusion, scope]
 ---
 
-Given a target runtime, a vector backend (Qdrant, pgvector, Chroma, sqlite-vec), a KV backend (Postgres, Redis, dict), and a graph backend (Neo4j, in-memory edges), produce a fused memory system.
+给定目标运行时、向量后端（Qdrant、pgvector、Chroma、sqlite-vec）、KV 后端（Postgres、Redis、dict）和图后端（Neo4j、内存边），构建一个融合记忆系统。
 
-Produce:
+输出内容：
 
-1. Three store classes behind an `add(text, user_id, session_id, scope, importance, tags)` facade. On write, the extractor decomposes `text` into records, KV triples, and graph triples. No store is optional.
-2. A fusion scorer `score = w_rel * relevance + w_imp * importance + w_rec * recency`. Expose all three weights as config. Tune per product, not per call.
-3. Scope taxonomy: `user`, `session`, `agent`. Retrieval MUST respect scope. A user query must never leak another user's records.
-4. Temporal invalidation. Contradictions mark old edges/records invalid; never delete. Expose `search(query, as_of=timestamp)` for historical queries.
-5. An extractor interface. The default can be LLM-driven; allow a deterministic regex fallback for tests. Cap graph edges per `add()` to prevent explosion.
+1. 三个存储类，统一暴露 `add(text, user_id, session_id, scope, importance, tags)` 接口。写入时，提取器将 `text` 分解为记录、KV 三元组和图三元组。三个存储缺一不可。
+2. 融合评分器 `score = w_rel * relevance + w_imp * importance + w_rec * recency`。将三个权重作为配置项暴露。按产品调优，而非按调用调优。
+3. 范围分类体系：`user`、`session`、`agent`。检索时必须遵守范围约束。用户查询绝不能泄露其他用户的记录。
+4. 时间失效机制。矛盾内容将旧边/旧记录标记为无效，永不删除。暴露 `search(query, as_of=timestamp)` 以支持历史查询。
+5. 一个提取器接口。默认实现可由 LLM 驱动；允许用确定性正则表达式作为测试回退。每次 `add()` 中的图边数量须设上限，以防止爆炸式增长。
 
-Hard rejects:
+硬性拒绝：
 
-- Single-store memory described as "Mem0-shaped." Vector-only, KV-only, graph-only products are fine but are not hybrid memory. Do not misname them.
-- Cross-scope retrieval without per-scope weights or an explicit `scope=` filter. Scope leak is a compliance and privacy incident.
-- Deleting on contradiction. Invalidate and time-stamp. Deletion hides bugs and breaks audits.
+- 将单一存储系统描述为"Mem0 形态"。纯向量、纯 KV、纯图产品都可以，但不属于混合记忆，不得混用名称。
+- 跨范围检索时不提供每范围权重或显式 `scope=` 过滤。范围泄漏是合规性与隐私事故。
+- 矛盾时执行删除。应使其失效并加时间戳。删除会隐藏 bug 并破坏审计。
 
-Refusal rules:
+拒绝规则：
 
-- If the user asks for "no importance weighting," refuse. Flat relevance ranking over a million records is a retrieval failure waiting to happen.
-- If the graph backend has no conflict detector, refuse to call the resulting system "Mem0-shaped." Downgrade the name.
-- If the product involves PII (medical, legal, HR), refuse to ship with an extractor that has not been audited by the product owner.
+- 如果用户要求"不做重要性加权"，拒绝。在百万条记录上做扁平相关性排序，是迟早会发生的检索失败。
+- 如果图后端没有冲突检测器，拒绝将该系统称为"Mem0 形态"。降级使用其他名称。
+- 如果产品涉及 PII（医疗、法律、HR），拒绝在未经产品负责人审计的提取器下上线。
 
-Output: one file per store plus `memory.py` (facade), `config.py` (weights), `README.md` explaining the fusion weights, scope policy, extractor contract, and invalidation semantics. End with "what to read next" pointing to Lesson 10 if the agent needs to learn new skills, Lesson 23 if OTel spans are required on memory ops, or Lesson 27 for untrusted-input handling on retrieval.
+输出：每个存储对应一个文件，加上 `memory.py`（门面）、`config.py`（权重）、`README.md`（说明融合权重、范围策略、提取器契约与失效语义）。末尾附"下一步阅读"，若智能体需要学习新技能指向第 10 课，若需要在记忆操作上添加 OTel span 指向第 23 课，若需要处理检索中的不可信输入指向第 27 课。

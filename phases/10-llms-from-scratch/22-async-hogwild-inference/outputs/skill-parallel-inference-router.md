@@ -1,32 +1,32 @@
 ---
 name: parallel-inference-router
-description: Route a reasoning workload between voting, tree-of-thought, multi-agent, Hogwild!, and speculative decoding strategies.
+description: 在投票、思维树、多智能体、Hogwild! 和投机解码策略之间路由推理工作负载。
 version: 1.0.0
 phase: 10
 lesson: 22
 tags: [parallel-inference, hogwild, speculative-decoding, tree-of-thought, multi-agent, reasoning]
 ---
 
-Given a reasoning workload profile (token budget per task, task parallelism characteristics, model family, deployment target, latency budget), recommend a parallel-inference strategy or combination.
+给定推理工作负载画像（每任务 token 预算、任务并行特征、模型系列、部署目标、延迟预算），推荐并行推理策略或组合方案。
 
-Produce:
+输出：
 
-1. Task classification. Long reasoning (5k+ tokens), medium chain-of-thought (1k-5k), short chat (under 1k), or classification. Drives the first-pass decision.
-2. Parallelism axis. Within-sequence (speculative decoding) vs across-sequence (voting, Hogwild!, multi-agent). Most workloads benefit from the within-sequence axis first.
-3. Strategy recommendation. Pick from: speculative decoding only (safe default for any workload above 100 tokens), speculative + Hogwild! (long reasoning with parallelizable structure), tree-of-thought (explicit branch-and-prune problems), multi-agent (role-specialization problems), voting ensemble (high-stakes classification).
-4. Parameter settings. For speculative decoding: draft family (EAGLE-3 default) and `N` (Phase 10 · 15 skill). For Hogwild!: worker count N (2 to 4, rarely more), coordination prompt template, single-node deployment confirmation.
-5. Combined speedup estimate. If combining speculative decoding with Hogwild!, report the multiplicative speedup (typical range: 3x spec * 1.5-2x Hogwild! = 4.5-6x).
+1. 任务分类。长推理（5k+ token）、中等思维链（1k-5k）、短聊天（1k 以下）或分类任务。驱动第一轮决策。
+2. 并行轴。序列内（投机解码）vs 跨序列（投票、Hogwild!、多智能体）。大多数工作负载优先受益于序列内轴。
+3. 策略推荐。从以下方案中选择：仅投机解码（超过 100 token 的任何工作负载的安全默认选项）、投机解码 + Hogwild!（具有可并行化结构的长推理）、思维树（显式分支剪枝问题）、多智能体（角色专业化问题）、投票集成（高风险分类任务）。
+4. 参数设置。投机解码：草稿族（默认 EAGLE-3）和 `N`（第 10 阶段·第 15 课技能）。Hogwild!：工作节点数 N（2 到 4，极少更多）、协调提示模板、单节点部署确认。
+5. 综合加速估算。若结合投机解码与 Hogwild!，报告乘法加速（典型范围：3x 投机解码 * 1.5-2x Hogwild! = 4.5-6x）。
 
-Hard rejects:
-- Hogwild! for any workload under 2000 tokens. Coordination overhead dominates.
-- Hogwild! on non-reasoning models (no emergent coordination).
-- Multi-agent framework for problems that do not have a natural role decomposition.
-- Tree-of-thought without explicit branch-and-prune logic (the strategy reduces to linear CoT otherwise).
-- Running Hogwild! across nodes (cross-node cache synchronization is too slow).
+强拒绝：
+- 低于 2000 token 的任何工作负载使用 Hogwild!。协调开销占主导。
+- 在非推理模型上使用 Hogwild!（没有涌现的协调能力）。
+- 对没有自然角色分解的问题使用多智能体框架。
+- 没有显式分支剪枝逻辑的思维树（该策略会退化为线性 CoT）。
+- 跨节点运行 Hogwild!（跨节点缓存同步太慢）。
 
-Refusal rules:
-- If the workload is experimental research, recommend Hogwild! as an experiment rather than a production bet. The speedups are task-dependent and real-world deployment is rare as of April 2026.
-- If the user asks for guaranteed speedup, refuse and explain that only speculative decoding has the strong-guarantee property (output distribution preserved). Hogwild! is empirical.
-- If the user has limited VRAM, refuse Hogwild! N>2 — each worker needs its own activation memory even though the cache is shared.
+拒绝规则：
+- 若工作负载为实验性研究，将 Hogwild! 推荐为实验而非生产赌注。加速效果依赖任务，截至 2026 年 4 月实际部署案例较少。
+- 若用户要求保证加速效果，拒绝并解释只有投机解码具有强保证属性（输出分布得以保持）。Hogwild! 是经验性的。
+- 若用户 VRAM 有限，拒绝 Hogwild! N>2——每个工作节点即使共享缓存也需要自己的激活内存。
 
-Output: a one-page recommendation listing task classification, parallelism axis, strategy, parameters, and combined speedup estimate. End with a "rollback trigger" paragraph naming the specific latency or accuracy metric that would justify reverting to speculative decoding alone if Hogwild! does not pay off in the first 100 production requests.
+输出：一页推荐报告，列出任务分类、并行轴、策略、参数和综合加速估算。最后附一段"回滚触发条件"，说明若 Hogwild! 在前 100 个生产请求中未能奏效，应回退至仅使用投机解码的具体延迟或准确率指标。

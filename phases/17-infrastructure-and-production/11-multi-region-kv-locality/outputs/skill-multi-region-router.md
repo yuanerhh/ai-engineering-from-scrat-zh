@@ -1,30 +1,30 @@
 ---
 name: multi-region-router
-description: Design a multi-region LLM routing plan with KV-cache locality, residency boundaries, DR manifest, and a quarterly failover drill.
+description: 设计多区域 LLM 路由方案，涵盖 KV 缓存局部性、数据驻留边界、DR 清单及季度故障转移演练。
 version: 1.0.0
 phase: 17
 lesson: 11
 tags: [multi-region, kv-cache, routing, dr, bedrock-cri, vllm-router, llm-d, gorgo]
 ---
 
-Given regions in scope, residency boundaries, expected prefix-cache diversity, and TTFT SLA, produce a multi-region routing and DR plan.
+给定在范围内的区域、数据驻留边界、预期前缀缓存多样性及 TTFT SLA，生成多区域路由与 DR 方案。
 
-Produce:
+输出内容：
 
-1. Router choice. Pick cache-aware router (vLLM Router, llm-d router) and describe the KV-event channel. State the prefix-hash algorithm (e.g., 512-token rolling) and tie-breaker (least queue depth).
-2. Routing policy. Regional-first or global (GORGO-style) minimization of prefill + RTT? Justify with the prompt-length distribution — long prompts (>8K tokens) benefit from cross-region routing; short prompts do not.
-3. Residency partitioning. Before any optimization: which requests are bound to which regions for legal reasons (GDPR, HIPAA). Forbid cross-residency routing even when TTFT improves.
-4. Commercial CRI layer. Recommend whether to enable Bedrock Cross-Region Inference or GKE Multi-Cluster Gateway as the availability layer. State clearly this layer is NOT a TTFT optimization.
-5. DR manifest. Three-file minimum (HF repo + engine config + deployment manifest). Verify tokenizer, quantization configs, RoPE, chat templates, LoRA adapters are included. State the storage (S3 cross-region replication, multi-region GCS).
-6. Failover drill. Quarterly cadence. Who runs it, what gets measured (RTO, RPO, cache warm-up time). Target: 30-minute RTO matched to real 2024 JPMorgan drill.
+1. 路由器选择。选择缓存感知路由器（vLLM Router、llm-d router）并描述 KV 事件通道。说明前缀哈希算法（例如 512-token 滚动窗口）及平局打破规则（最短队列深度）。
+2. 路由策略。区域优先还是全局（GORGO 风格）最小化预填充 + RTT？用提示词长度分布加以说明——长提示词（>8K tokens）可从跨区域路由中获益；短提示词则不然。
+3. 驻留分区。在任何优化之前：出于法律原因（GDPR、HIPAA），哪些请求必须绑定到哪些区域。即使 TTFT 有改善，也禁止跨驻留区路由。
+4. 商业 CRI 层。建议是否启用 Bedrock Cross-Region Inference 或 GKE Multi-Cluster Gateway 作为可用性层。明确说明该层**不是** TTFT 优化手段。
+5. DR 清单。最少三个文件（HF repo + 引擎配置 + 部署清单）。验证分词器、量化配置、RoPE、聊天模板、LoRA 适配器均已包含。说明存储方式（S3 跨区域复制、多区域 GCS）。
+6. 故障转移演练。季度频率。由谁执行，测量什么（RTO、RPO、缓存预热时间）。目标：30 分钟 RTO，参照 2024 年摩根大通的真实演练结果。
 
-Hard rejects:
-- Ignoring residency for routing optimization. Refuse — GDPR violation beats TTFT gain.
-- Claiming Bedrock CRI "solves" cross-region routing. Refuse — CRI is availability, not TTFT.
-- Backing up weights only. Refuse — name the 32% DR failure statistic and require the three-file manifest.
+强制拒绝：
+- 在路由优化中忽略驻留要求。拒绝——GDPR 合规优先于 TTFT 收益。
+- 声称 Bedrock CRI"解决"了跨区域路由问题。拒绝——CRI 是可用性机制，不是 TTFT 优化。
+- 仅备份模型权重。拒绝——引用 32% DR 失败统计数据，并要求提供三文件清单。
 
-Refusal rules:
-- If only one region is in scope, decline the plan — single-region has different failure modes (Phase 17 · 03 covers it).
-- If residency and TTFT SLA are incompatible (e.g., EU residency forcing prefill on cold prefix per request with P99 TTFT < 100 ms on 8K prompts), refuse to promise the SLA and escalate the product requirement.
+拒绝规则：
+- 如果范围内只有一个区域，拒绝制定该方案——单区域有不同的故障模式（Phase 17 · 03 已覆盖）。
+- 如果驻留要求与 TTFT SLA 不兼容（例如，EU 驻留强制每次请求在冷前缀上预填充，而 P99 TTFT < 100 ms 针对 8K 提示词），拒绝承诺该 SLA，并将产品需求升级处理。
 
-Output: a one-page plan naming router, routing policy, residency partitions, CRI layer posture, DR manifest, quarterly drill owner. End with the single metric to alert on: cross-region prefix-cache hit rate dropping below a plan-specified threshold.
+输出：一页方案，列明路由器、路由策略、驻留分区、CRI 层定位、DR 清单、季度演练负责人。最后给出唯一监控指标：跨区域前缀缓存命中率低于方案规定阈值时触发告警。

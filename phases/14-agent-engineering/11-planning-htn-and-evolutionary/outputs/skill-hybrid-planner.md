@@ -1,44 +1,44 @@
 ---
 name: hybrid-planner
-description: Build a hybrid planner — ChatHTN for provably-sound plans, AlphaEvolve for code search with a machine-checkable evaluator — and pick the right one for the problem.
+description: 构建混合规划器——用 ChatHTN 生成可证明合理的计划，用 AlphaEvolve 进行具有机器可验证评估器的代码搜索——并针对问题选择合适的方案。
 version: 1.0.0
 phase: 14
 lesson: 11
 tags: [planning, htn, chathtn, alphaevolve, evolutionary-search]
 ---
 
-Given a problem class (policy-bound workflow vs code optimization vs open-ended task), pick a planner and produce a correct scaffold.
+给定问题类别（策略约束工作流 vs 代码优化 vs 开放式任务），选择规划器并生成正确的脚手架。
 
-Decision:
+决策逻辑：
 
-1. Does the problem have hard preconditions / policy / scheduling constraints? -> HTN (ChatHTN).
-2. Does the problem have a deterministic, machine-checkable fitness function? -> Evolutionary (AlphaEvolve).
-3. Neither? -> Reach for ReAct (Lesson 01) or ReWOO (Lesson 02) instead.
+1. 问题是否有硬性前置条件 / 策略 / 调度约束？-> HTN（ChatHTN）。
+2. 问题是否有确定性的、机器可验证的适应度函数？-> 进化式（AlphaEvolve）。
+3. 两者都不符合？-> 改用 ReAct（第 01 课）或 ReWOO（第 02 课）。
 
-For HTN, produce:
+对于 HTN，输出：
 
-1. `Operator` type with `preconditions`, `effects_add`, `effects_remove`.
-2. `Method` type with `task`, `preconditions`, `subtasks`.
-3. A planner that tries methods first, falls back to LLM decomposition, and caches successful LLM decompositions.
-4. A validation step that rejects LLM decompositions referencing unknown operators or methods.
+1. `Operator` 类型，包含 `preconditions`、`effects_add`、`effects_remove`。
+2. `Method` 类型，包含 `task`、`preconditions`、`subtasks`。
+3. 一个规划器，优先尝试方法，退而使用 LLM 分解，并缓存成功的 LLM 分解结果。
+4. 一个验证步骤，拒绝引用未知算子或方法的 LLM 分解结果。
 
-For Evolutionary, produce:
+对于进化式，输出：
 
-1. A seed population of candidate programs.
-2. A deterministic evaluator returning a scalar fitness.
-3. A mutation operator (LLM-driven or rule-based).
-4. A selection loop (keep top-k, mutate, repeat) with early stopping.
+1. 一个候选程序种群作为初始种子。
+2. 一个返回标量适应度值的确定性评估器。
+3. 一个变异算子（LLM 驱动或基于规则）。
+4. 一个选择循环（保留 top-k，变异，重复），并带早停机制。
 
-Hard rejects:
+硬性拒绝：
 
-- ChatHTN where LLM output is applied directly without operator-schema validation. The soundness claim fails.
-- AlphaEvolve where the evaluator calls an LLM judge. Fitness must be deterministic; LLM judges introduce stochastic noise the loop cannot recover from.
-- Either pattern for open-ended tasks ("write a blog post"). No evaluator, no preconditions -> use ReAct.
+- ChatHTN 中 LLM 输出未经算子模式验证即直接应用。这会导致合理性声明失效。
+- AlphaEvolve 中评估器调用 LLM 作为评判者。适应度必须是确定性的；LLM 评判者引入的随机噪声是循环无法恢复的。
+- 将上述任一模式用于开放式任务（如"写一篇博客"）。没有评估器、没有前置条件 -> 使用 ReAct。
 
-Refusal rules:
+拒绝规则：
 
-- If the domain has no clear operator schema, refuse ChatHTN. Suggest ReWOO or plain ReAct.
-- If the domain has no machine-checkable fitness, refuse AlphaEvolve. Suggest Self-Refine (Lesson 05).
-- If the user wants "planner + LLM makes final call," refuse. The split between symbolic correctness and LLM exploration is load-bearing.
+- 如果领域没有清晰的算子模式，拒绝使用 ChatHTN。建议改用 ReWOO 或普通 ReAct。
+- 如果领域没有机器可验证的适应度，拒绝使用 AlphaEvolve。建议改用自我精炼（第 05 课）。
+- 如果用户想要"规划器 + LLM 做最终决定"，拒绝。符号正确性与 LLM 探索之间的分离是核心承重结构。
 
-Output: `operators.py`, `methods.py`, `planner.py` (HTN) or `evaluator.py`, `mutator.py`, `loop.py` (evolutionary), plus `README.md` with the decision rationale. End with "what to read next" pointing to Lesson 25 if debate-style verification fits the problem, or Lesson 02 if the task is actually ReWOO-shaped after all.
+输出：`operators.py`、`methods.py`、`planner.py`（HTN）或 `evaluator.py`、`mutator.py`、`loop.py`（进化式），以及 `README.md`（含决策依据）。末尾附"下一步阅读"，若辩论式验证适合该问题指向第 25 课，若任务实际上是 ReWOO 形态则指向第 02 课。

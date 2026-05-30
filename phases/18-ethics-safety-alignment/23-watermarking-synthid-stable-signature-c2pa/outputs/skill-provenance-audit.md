@@ -1,29 +1,29 @@
 ---
 name: provenance-audit
-description: Audit a content deployment's provenance chain across watermarking and C2PA metadata.
+description: 审计内容部署在水印和 C2PA 元数据方面的溯源链。
 version: 1.0.0
 phase: 18
 lesson: 23
 tags: [watermarking, synthid, stable-signature, c2pa, provenance]
 ---
 
-Given a content deployment with a provenance claim, audit the provenance chain.
+针对带有溯源声明的内容部署，审计其溯源链。
 
-Produce:
+产出内容：
 
-1. Watermark inventory. List every modality (text, image, audio, video) and the watermark applied in each. No watermark = no detection path.
-2. Watermark robustness. For each watermark, name the adversarial class it survives (compression, cropping, paraphrase, fine-tune). Flag limitations per Kirchenbauer 2023 Section 6 (paraphrase) and "Stable Signature is Unstable" 2024 (fine-tune).
-3. C2PA coverage. Is C2PA metadata attached? Is the signing chain from a trusted identity? Metadata can be stripped; presence is not sufficient.
-4. Cross-modal detector. Is there a unified detector across modalities (SynthID 2025) or modality-specific only?
-5. Regulatory alignment. Does the deployment meet EU AI Act Article 50 transparency obligations (effective August 2026)? Does it comply with the Transparency Code (final version June 2026)?
+1. 水印清单。列出每种模态（文本、图像、音频、视频）及其所使用的水印。无水印即无检测路径。
+2. 水印鲁棒性。对每种水印，说明其能抵御的对抗类别（压缩、裁剪、改写、微调）。根据 Kirchenbauer 2023 第 6 节（改写）和"Stable Signature is Unstable" 2024（微调）标注局限性。
+3. C2PA 覆盖率。是否附加了 C2PA 元数据？签名链是否来自可信身份？元数据可被剥离，仅有元数据并不充分。
+4. 跨模态检测器。是否存在跨模态统一检测器（SynthID 2025），还是仅有模态专用检测器？
+5. 监管合规性。部署是否满足《欧盟 AI 法案》第 50 条透明度义务（2026 年 8 月起生效）？是否符合《透明度守则》（2026 年 6 月最终版）？
 
-Hard rejects:
-- Any "watermark" claim without a named mechanism and detector.
-- Any "authenticity" claim based only on absence of watermark (model-not-watermarked ≠ authentic).
-- Any image provenance claim without an assessment of the Fernandez 2024 removal attack.
+硬性拒绝条件：
+- 任何缺乏具名机制和检测器的"水印"声明。
+- 任何仅基于"未检测到水印"的"真实性"声明（未加水印 ≠ 真实）。
+- 任何未评估 Fernandez 2024 去除攻击的图像溯源声明。
 
-Refusal rules:
-- If the user asks "will this detect all AI content," refuse the binary claim; watermarking is model-specific.
-- If the user asks for a universal provenance solution, refuse and point to the watermark + C2PA layered approach.
+拒绝规则：
+- 若用户询问"这能检测所有 AI 内容吗"，拒绝二元声明；水印是模型特定的。
+- 若用户要求通用溯源解决方案，拒绝并指向水印 + C2PA 分层方案。
 
-Output: a one-page audit filling the five sections, flagging robustness gaps per modality, and naming the single highest-value additional control. Cite SynthID (Google DeepMind), Stable Signature (Fernandez et al. 2023), and C2PA once each.
+输出：一页审计报告，填充上述五个部分，按模态标出鲁棒性缺口，并指出单一最具价值的补充控制措施。分别引用 SynthID（Google DeepMind）、Stable Signature（Fernandez 等人 2023）和 C2PA 各一次。

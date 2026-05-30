@@ -1,28 +1,28 @@
 ---
 name: instructgpt-explainer
-description: Diagnose an RLHF-family paper or pipeline against the three-stage InstructGPT reference.
+description: 对照 InstructGPT 三阶段参考框架，诊断 RLHF 系列论文或流水线的对齐方式。
 version: 1.0.0
 phase: 18
 lesson: 1
 tags: [rlhf, instructgpt, sft, reward-model, ppo, alignment]
 ---
 
-Given a paper abstract, blog post, or pipeline description that claims to "align" a language model, identify which stages of the InstructGPT reference (SFT + RM + PPO-ptx with KL penalty) the method modifies, and what is at risk when each stage changes.
+给定一篇声称"对齐"语言模型的论文摘要、博客文章或流水线描述，识别该方法修改了 InstructGPT 参考框架（SFT + RM + 带 KL 惩罚的 PPO-ptx）中的哪些阶段，以及每个阶段发生变化时面临的风险。
 
-Produce:
+输出内容：
 
-1. Stage-by-stage mapping. For each of the three InstructGPT stages, mark: kept as-is, modified, removed, or replaced. For every non-"kept" cell, name the replacement (e.g. "Stage 2: replaced by closed-form implicit reward — DPO").
-2. Regularizer check. Does the pipeline keep a reference policy anchor (explicit KL penalty, implicit beta-scaled log-ratio, or policy freeze)? If not, flag the risk of reward hacking under any imperfect proxy.
-3. Preference-source audit. Who provides the preference signal (human labelers, AI judge, a constitution, self-play)? This is the foundation of every sycophancy and reward-hacking failure mode downstream.
-4. Alignment-tax check. Does the method do anything to offset benchmark regression (PPO-ptx, SFT-mixing, rehearsal buffer)? If the paper reports only preference metrics and no capability benchmarks, call that out explicitly.
+1. 阶段逐一映射。针对 InstructGPT 的三个阶段，分别标注：保持不变、已修改、已移除或已替换。对每个非"保持不变"的单元，命名替代方案（例如"阶段 2：替换为闭合形式隐式奖励——DPO"）。
+2. 正则化器检查。流水线是否保留了参考策略锚点（显式 KL 惩罚、隐式 beta 缩放对数比率或策略冻结）？若无，在任何不完美代理下均需标记奖励黑客攻击的风险。
+3. 偏好来源审计。谁提供偏好信号（人工标注者、AI 裁判、宪法、自博弈）？这是所有下游谄媚和奖励黑客攻击失效模式的根源。
+4. 对齐代价检查。该方法是否采取了任何措施来抵消基准回归（PPO-ptx、SFT 混合、回放缓冲区）？如果论文仅报告偏好指标而无能力基准，则需明确指出。
 
-Hard rejects:
-- Any claim that RLHF teaches new facts. It reweights behaviour over the base model's distribution; it does not expand that distribution.
-- Any claim that skipping the KL penalty is safe because the reward model is "well-calibrated." Every RM is a proxy; reward hacking follows from proxy + optimization pressure, not from RM quality alone.
-- Any pipeline that omits stage 1 SFT entirely and trains RM or DPO on top of a base model without some form of format-grounding step.
+硬性拒绝：
+- 任何声称 RLHF 能教授新知识的说法。RLHF 重新加权基础模型分布上的行为；它不扩展该分布。
+- 任何声称跳过 KL 惩罚是安全的（理由是奖励模型"校准良好"）的说法。每个 RM 都是代理；奖励黑客攻击源于代理 + 优化压力，而非 RM 质量本身。
+- 任何完全省略阶段 1 SFT、在没有某种格式规范步骤的情况下直接在基础模型上训练 RM 或 DPO 的流水线。
 
-Refusal rules:
-- If the user asks "is RLHF solved," refuse and point to Lesson 2 (reward hacking) and Lesson 4 (sycophancy).
-- If the user asks which `beta` to use, refuse a numeric answer and explain that `beta` depends on RM quality and task, and the only defensible choice is a sweep with held-out capability benchmarks.
+拒绝规则：
+- 若用户询问"RLHF 是否已被解决"，拒绝回答并指向第 2 课（奖励黑客攻击）和第 4 课（谄媚）。
+- 若用户询问应使用哪个 `beta` 值，拒绝给出数字答案，并解释 `beta` 取决于 RM 质量和任务，唯一合理的选择是结合保留能力基准进行扫描。
 
-Output: a one-page diagnosis that names the three stages, labels each as kept/modified/removed/replaced, identifies the regularizer and preference source, and ends with the single biggest failure mode the pipeline is exposed to given the choices above. Cite InstructGPT (arXiv:2203.02155) once as the reference point.
+输出：一页诊断报告，命名三个阶段，将每个阶段标记为保持不变/已修改/已移除/已替换，标识正则化器和偏好来源，并以流水线在上述选择下面临的最大单一失效模式作为结尾。将 InstructGPT（arXiv:2203.02155）作为参考点引用一次。

@@ -1,31 +1,31 @@
 ---
 name: chaos-plan
-description: Design an LLM chaos engineering plan — verify prerequisites, build four planes, pick tool, start with three safe experiments, enforce safety-plane gates.
+description: 设计 LLM 混沌工程计划——验证前置条件，构建四个平面，选择工具，从三个安全实验入手，并执行安全平面门控。
 version: 1.0.0
 phase: 17
 lesson: 24
 tags: [chaos-engineering, litmuschaos, chaosmesh, harness, llm-chaos, game-day]
 ---
 
-Given stack (Kubernetes / VMs / managed), SLI/SLO maturity, observability quality, and team on-call maturity, produce a chaos plan.
+给定技术栈（Kubernetes / 虚拟机 / 托管服务）、SLI/SLO 成熟度、可观测性质量以及团队值班成熟度，生成一份混沌工程计划。
 
-Produce:
+产出内容：
 
-1. Prerequisite check. Verify SLI/SLO defined, observability wired, rollback automated, runbooks structured, on-call rotation. If any missing, refuse to run production chaos.
-2. Four planes. Name the tools for each plane (control, target, safety, observability). Point to Phase 17 · 13 for observability.
-3. Three initial experiments. Start with pod kill. Then provider 429. Then memory overload. Each with blast-radius cap, duration, success criterion.
-4. Safety gates. Burn-rate (>2x expected), blast-radius (< 30% of fleet), trace-ID tagging, suppression windows.
-5. Cadence. Weekly small canary. Monthly game day (cross-team). Quarterly resilience audit.
-6. Tooling. LitmusChaos (OSS, CNCF graduated), Chaos Mesh (OSS, CNCF sandbox), Harness Chaos (commercial AI-assisted), AWS FIS / Azure Chaos Studio (managed cloud-native).
+1. 前置条件检查。验证 SLI/SLO 已定义、可观测性已接入、回滚已自动化、运行手册已结构化、值班轮换已建立。若有任何缺失，拒绝在生产环境执行混沌实验。
+2. 四个平面。为每个平面（控制面、目标面、安全面、可观测性面）指定工具。可观测性部分参考第 17 阶段 · 第 13 课。
+3. 三个初始实验。从 Pod 杀死实验开始，然后是服务商 429 限流实验，最后是内存过载实验。每个实验标注爆炸半径上限、持续时间、成功判断标准。
+4. 安全门控。燃烧率（> 2 倍预期值）、爆炸半径（< 集群规模的 30%）、Trace ID 标记、抑制时间窗口。
+5. 执行节奏。每周小型金丝雀实验，每月游戏日（跨团队），每季度弹性审计。
+6. 工具选型。LitmusChaos（开源，CNCF 毕业项目）、Chaos Mesh（开源，CNCF 沙箱项目）、Harness Chaos（商业版，AI 辅助）、AWS FIS / Azure Chaos Studio（托管云原生方案）。
 
-Hard rejects:
-- Running chaos in production without the five prerequisites. Refuse — will become real incident.
-- Experiments without blast-radius caps. Refuse.
-- Experiments without trace-ID tagging. Refuse — impossible to dedupe alerts.
+强制拒绝：
+- 未满足五项前置条件就在生产环境执行混沌实验。拒绝——将演变为真实故障。
+- 没有爆炸半径上限的实验。拒绝。
+- 没有 Trace ID 标记的实验。拒绝——无法对告警进行去重。
 
-Refusal rules:
-- If team has never run one successful experiment in staging, refuse production chaos until one is green in staging.
-- If incident volume is already high (>2/week), refuse added chaos — stabilize first.
-- If the team has no SLO, require SLO before any experiment.
+拒绝规则：
+- 如果团队从未在预发布环境成功完成过一次实验，拒绝生产环境混沌测试，直到在预发布环境完成一次成功实验为止。
+- 如果当前故障量已经偏高（> 2 次/周），拒绝增加混沌实验——先稳定系统。
+- 如果团队没有 SLO，需先制定 SLO，再开始任何实验。
 
-Output: a one-page plan with prerequisites check, four-plane tools, three initial experiments, safety gates, cadence. End with a quarterly dependency-map update commitment.
+输出：一页计划，包含前置条件检查、四个平面工具选型、三个初始实验、安全门控、执行节奏。最后附上季度依赖图更新承诺。

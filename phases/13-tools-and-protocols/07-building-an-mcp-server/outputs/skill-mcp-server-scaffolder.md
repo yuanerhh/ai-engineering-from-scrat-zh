@@ -1,30 +1,30 @@
 ---
 name: mcp-server-scaffolder
-description: Scaffold a domain-specific MCP server with the right tools/resources/prompts split and SDK graduation path.
+description: 为特定领域搭建 MCP 服务器框架，合理拆分 tools/resources/prompts，并规划 SDK 升级路径。
 version: 1.0.0
 phase: 13
 lesson: 07
 tags: [mcp, server, fastmcp, scaffold]
 ---
 
-Given a domain (notes, tickets, files, database, whatever), produce an MCP server plan: which capabilities to expose as tools, which as resources, which as prompts, plus a graduation path to the Python or TypeScript SDK.
+给定一个领域（笔记、工单、文件、数据库等），生成一份 MCP 服务器规划：哪些能力作为工具暴露、哪些作为资源、哪些作为提示词，以及升级到 Python 或 TypeScript SDK 的路径。
 
-Produce:
+输出内容：
 
-1. Tools list. Atomic operations the user explicitly asks to perform. Include name, description (Use-when pattern), input schema, and annotation hints.
-2. Resources list. Data the user wants to read. URI scheme, mime type, and whether to enable `resources/subscribe`.
-3. Prompts list. Reusable templates the host should expose as slash-commands. Argument list.
-4. Capability declaration. The exact `capabilities` object the server returns in `initialize`.
-5. Graduation notes. FastMCP (Python) or TypeScript SDK equivalents for each piece. Name one SDK feature (e.g. `lifespan`, `context`) that replaces a hand-rolled stdlib pattern from the scaffold.
+1. 工具列表。用户明确要求执行的原子操作。包含名称、描述（使用"Use-when"模式）、输入 Schema 和注释提示。
+2. 资源列表。用户希望读取的数据。URI 方案、mime 类型，以及是否启用 `resources/subscribe`。
+3. 提示词列表。宿主应作为斜杠命令暴露的可复用模板。参数列表。
+4. 能力声明。服务器在 `initialize` 中返回的精确 `capabilities` 对象。
+5. 升级说明。每个部分对应的 FastMCP（Python）或 TypeScript SDK 等价物。命名一个 SDK 特性（例如 `lifespan`、`context`），用于替换框架中手写的标准库模式。
 
-Hard rejects:
-- Any "database query" exposed only as a tool and not as a resource. The correct split is resource for `/list` and `/read`, tool for `/query` with parameters.
-- Any server that mixes user-input tools with privileged ones in the same namespace without annotations.
-- Any server scaffold that claims `resources/subscribe` capability without a durable notification mechanism.
+硬性拒绝：
+- 任何仅作为工具而非资源暴露"数据库查询"的情况。正确拆分是：`/list` 和 `/read` 用资源，带参数的 `/query` 用工具。
+- 任何在同一命名空间中混用用户输入工具与特权工具且没有注释的服务器。
+- 任何声明 `resources/subscribe` 能力但没有持久通知机制的服务器框架。
 
-Refusal rules:
-- If the domain has no read-only surface, refuse to scaffold resources; recommend a tool-only server.
-- If the domain has no natural slash-command templates, refuse to scaffold prompts.
-- If the user asks for an auth scheme, refuse and route to Phase 13 · 16 (OAuth 2.1).
+拒绝规则：
+- 如果领域没有只读的数据面，拒绝搭建资源；建议使用纯工具服务器。
+- 如果领域没有自然的斜杠命令模板，拒绝搭建提示词。
+- 如果用户要求认证方案，拒绝并路由到 Phase 13 · 16（OAuth 2.1）。
 
-Output: a one-page server plan with the three primitive lists, the capability object, and a 10-line sample `@app.tool()` decorator-style graduation snippet. End with the single most important annotation flag the server should set.
+输出：一页服务器规划，包含三个原语列表、能力对象，以及一个 10 行的 `@app.tool()` 装饰器风格升级代码片段。以服务器应设置的最重要注释标志作为结尾。

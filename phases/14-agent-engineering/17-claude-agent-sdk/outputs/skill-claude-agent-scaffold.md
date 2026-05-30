@@ -1,33 +1,33 @@
 ---
 name: claude-agent-scaffold
-description: Scaffold a Claude Agent SDK app with subagents, lifecycle hooks, session store, MCP server attachment, and W3C trace propagation.
+description: 构建 Claude Agent SDK 应用的脚手架，包含子智能体、生命周期钩子、会话存储、MCP 服务器挂载和 W3C 追踪传播。
 version: 1.0.0
 phase: 14
 lesson: 17
 tags: [claude-agent-sdk, subagents, hooks, session-store, mcp]
 ---
 
-Given a product domain and a list of MCP servers, scaffold a Claude Agent SDK app.
+给定产品领域和一组 MCP 服务器，构建 Claude Agent SDK 应用的脚手架。
 
-Produce:
+输出内容：
 
-1. A main agent definition with instructions, built-in tool access (read_file, write_file, shell, grep, glob, web fetch), and custom function tools.
-2. Subagent spawner for parallelization and context isolation. Use when the orchestrator would otherwise blow its context budget.
-3. Lifecycle hooks registered: PreToolUse + PostToolUse for audit, SessionStart for setup, SessionEnd for teardown, UserPromptSubmit for rule enforcement (see pro-workflow patterns).
-4. Session store (SQLite default) with `list_subkeys` wired to render a subagent tree.
-5. MCP server attachment for external tool/resource surfaces.
-6. W3C trace context propagation so OTel spans from the caller continue through the CLI.
+1. 主智能体定义，包含指令、内置工具访问权限（read_file、write_file、shell、grep、glob、web fetch）和自定义函数工具。
+2. 子智能体生成器，用于并行化和上下文隔离。当编排器自身的上下文预算不足时使用。
+3. 已注册的生命周期钩子：PreToolUse + PostToolUse 用于审计，SessionStart 用于初始化，SessionEnd 用于清理，UserPromptSubmit 用于规则执行（参见 pro-workflow 模式）。
+4. 会话存储（默认 SQLite），`list_subkeys` 接入后可渲染子智能体树。
+5. 挂载 MCP 服务器，用于外部工具/资源接入。
+6. W3C 追踪上下文传播，使调用方的 OTel span 可以贯通 CLI。
 
-Hard rejects:
+硬性拒绝：
 
-- Spawning a subagent for a single-tool task. Subagents are for parallelization or context isolation; not for "one read_file call."
-- Hooks with synchronous expensive work. Hooks should be microseconds to milliseconds. Long work belongs in a subagent.
-- Session stores without a cascade-delete policy. Orphaned subagent sessions bloat storage.
+- 为单工具任务生成子智能体。子智能体用于并行化或上下文隔离，不适用于"一次 read_file 调用"。
+- 钩子中执行同步耗时操作。钩子应在微秒到毫秒级完成。耗时工作应放入子智能体。
+- 没有级联删除策略的会话存储。孤立的子智能体会话会使存储臃肿。
 
-Refusal rules:
+拒绝规则：
 
-- If the product needs long-running async work (hours-to-days), refuse the self-hosted SDK and route to Claude Managed Agents.
-- If the user asks for `--session-mirror` to a shared location, refuse. Session transcripts carry PII; mirror to per-user encrypted storage.
-- If the agent depends on raw LLM streaming for UX without tool use, refuse the Agent SDK and recommend the Client SDK directly.
+- 如果产品需要长时间运行的异步工作（数小时到数天），拒绝使用自托管 SDK，路由到 Claude Managed Agents。
+- 如果用户要求将 `--session-mirror` 指向共享位置，拒绝。会话记录包含 PII；镜像应写入每用户加密存储。
+- 如果智能体依赖原始 LLM 流式输出来提供 UX 体验而不使用工具，拒绝使用 Agent SDK，推荐直接使用 Client SDK。
 
-Output: `agent.py`, `tools.py`, `hooks.py`, `session.py`, `README.md` explaining the subagent policy, hook registry, session backend, MCP attachments, and OTel wiring. End with "what to read next" pointing to Lesson 22 for voice handoffs, Lesson 23 for OTel span attribution, or Lesson 18 if product needs production runtime shape.
+输出：`agent.py`、`tools.py`、`hooks.py`、`session.py`、`README.md`（说明子智能体策略、钩子注册表、会话后端、MCP 挂载和 OTel 接入）。末尾附"下一步阅读"，若需要语音交接指向第 22 课，若需要 OTel span 归因指向第 23 课，若产品需要生产运行时形态指向第 18 课。

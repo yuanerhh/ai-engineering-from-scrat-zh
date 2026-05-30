@@ -1,17 +1,17 @@
 ---
 name: summary-picker
-description: Pick extractive or abstractive, name the library, add a factuality check.
+description: 选择抽取式或生成式摘要方法，指定库，并添加事实性检查。
 version: 1.0.0
 phase: 5
 lesson: 12
 tags: [nlp, summarization]
 ---
 
-Given a task (document type, compliance requirement, length, compute budget), output:
+给定任务描述（文档类型、合规要求、长度、计算预算），输出：
 
-1. Approach. Extractive or abstractive. Explain in one sentence why.
-2. Starting model / library. Name it. `sumy.TextRankSummarizer`, `facebook/bart-large-cnn`, `google/pegasus-pubmed`, or an LLM prompt.
-3. Evaluation plan. ROUGE-1, ROUGE-2, ROUGE-L (use `rouge-score` with stemming). Plus factuality check if abstractive.
-4. One failure mode to probe. Entity swap is the most common in abstractive news summarization; flag samples where source entities do not appear in summary.
+1. 方法。抽取式或生成式。一句话说明原因。
+2. 起始模型/库。明确命名：`sumy.TextRankSummarizer`、`facebook/bart-large-cnn`、`google/pegasus-pubmed` 或 LLM 提示词。
+3. 评估方案。ROUGE-1、ROUGE-2、ROUGE-L（使用带词干提取的 `rouge-score`）。生成式摘要还需添加事实性检查。
+4. 需要探查的一个失败模式。实体替换是生成式新闻摘要中最常见的问题；标记源文本实体未出现在摘要中的样本。
 
-Refuse abstractive summarization for medical, legal, financial, or regulated content without a factuality gate. Flag input over the model's context window as needing chunked map-reduce summarization, not just truncation.
+对于医疗、法律、金融或受监管内容，拒绝在没有事实性门控的情况下使用生成式摘要。将超过模型上下文窗口的输入标记为需要分块 map-reduce 摘要，而非直接截断。

@@ -1,36 +1,36 @@
 ---
 name: init-script
-description: Interview a project and emit a deterministic init_agent.py with five probes plus a CI workflow that refuses to launch the agent if any probe fails.
+description: 对项目进行访谈，生成包含五个探针的确定性 init_agent.py，以及在任意探针失败时拒绝启动 Agent 的 CI 工作流。
 version: 1.0.0
 phase: 14
 lesson: 35
 tags: [init, probes, ci, workbench, fail-loud]
 ---
 
-Given a repo, the agent product, and its dependency surface, produce a project-specific init script and CI wiring.
+给定一个代码仓库、Agent 产品及其依赖项，生成项目专属的初始化脚本和 CI 接线。
 
-Produce:
+需产出：
 
-1. `tools/init_agent.py` with these probes: runtime version, listed dependencies, test command resolvability, required env vars, state file freshness.
-2. `init_report.json` schema documented next to the script. Each probe returns `(name, status: pass|warn|fail, detail)`.
-3. `.github/workflows/agent-init.yml` (or equivalent) that runs the script and blocks the agent job on any fail-severity probe.
-4. A `pre-task` hook script the agent runtime can call before each session starts.
-5. Documentation in `docs/init.md` listing every probe, its severity, and how to fix a failure.
+1. `tools/init_agent.py`，包含以下探针：运行时版本、已列出的依赖项、测试命令可解析性、必要的环境变量、状态文件新鲜度。
+2. `init_report.json` 模式，文档化在脚本旁边。每个探针返回 `(name, status: pass|warn|fail, detail)`。
+3. `.github/workflows/agent-init.yml`（或等效文件），运行该脚本，并在任何 fail 级别的探针触发时阻止 Agent 作业。
+4. Agent 运行时在每次会话开始前可调用的 `pre-task` 钩子脚本。
+5. `docs/init.md` 文档，列出每个探针、其严重级别以及如何修复失败。
 
-Hard rejects:
+强制拒绝：
 
-- Probes that call out to the network without a timeout. Init must be fast and offline-safe.
-- Probes that require LLM calls. Init is deterministic plumbing.
-- A non-zero exit code that the wrapper swallows. Fail loud is the whole point.
-- Probes that touch state without idempotency. Two runs in a row must produce identical reports modulo timestamp.
+- 无超时时间而进行网络调用的探针。初始化必须快速且支持离线运行。
+- 需要调用 LLM 的探针。初始化是确定性的基础设施。
+- 被包装器吞掉的非零退出码。大声失败是整个设计的核心。
+- 触碰状态但不具备幂等性的探针。连续两次运行必须产生除时间戳外完全相同的报告。
 
-Refusal rules:
+拒绝规则：
 
-- If the project has no test command, refuse to ship the script. Add the gap to the workbench audit instead.
-- If the env var list contains secrets the script will print, refuse and force redaction. Init reports should never carry secrets.
-- If a probe takes longer than three seconds in a dry run, surface the timing finding before shipping. Long probes turn init into ceremony.
+- 如果项目没有测试命令，拒绝交付该脚本，并将此缺口添加到工作台审计中。
+- 如果环境变量列表中包含脚本会打印出来的密钥，拒绝并强制脱敏。初始化报告中绝不应包含密钥。
+- 如果某个探针在试运行中耗时超过三秒，在交付前先暴露该耗时发现。耗时过长的探针会将初始化变成一场仪式。
 
-Output structure:
+输出结构：
 
 ```
 <repo>/
@@ -44,8 +44,8 @@ Output structure:
         └── agent-init.yml
 ```
 
-End with "what to read next" pointing to:
+最后以"下一步阅读"结尾，指向：
 
-- Lesson 36 for the per-task scope contract that uses the init report's `repo_paths`.
-- Lesson 37 for the runtime feedback loop that consumes the resolved test command.
-- Lesson 38 for the verification gate that depends on probes passing.
+- 第 36 课，了解使用初始化报告中 `repo_paths` 的单任务范围合约。
+- 第 37 课，了解消费已解析测试命令的运行时反馈循环。
+- 第 38 课，了解依赖探针通过的验证门控。

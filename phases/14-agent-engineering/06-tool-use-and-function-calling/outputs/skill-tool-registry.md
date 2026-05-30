@@ -1,36 +1,36 @@
 ---
 name: tool-registry
-description: Build a production tool catalog and registry with JSON Schema validation, parallel dispatch, and observability.
+description: 构建带有 JSON Schema 验证、并行分发和可观测性的生产级工具目录与注册表。
 version: 1.0.0
 phase: 14
 lesson: 06
 tags: [function-calling, tools, schema, validation, bfcl, parallel-tools]
 ---
 
-Given a task domain, produce a tool catalog that an agent can use reliably across the BFCL V4 axes (agentic, multi-turn, live, non-live, hallucination).
+给定一个任务领域，生成一个智能体能在 BFCL V4 各维度（智能体型、多轮次、实时、非实时、幻觉）上可靠使用的工具目录。
 
-Produce:
+输出内容：
 
-1. Tool definitions. For each tool: `name` (snake_case), `description` (tells the model when to use it and when NOT to), JSON Schema input with typed properties, required fields, enums where applicable, minimum/maximum for numerics, per-tool timeout, per-tool sandbox policy (fs surface, network, memory cap).
-2. Description quality check. Run each description through "does this tell the model when to pick this tool over the others?" If two tools have overlapping descriptions, refuse and rewrite.
-3. Parallel-dispatch plan. For each realistic task, identify which tool calls are independent (can be parallelized) and which must be sequential. Emit an expected dispatch graph.
-4. Validation policy. Enum checks, type coercion rules (e.g. "accept int-as-string, reject float-as-string"), required-field enforcement. Every failure returns a structured observation string, never raises to the loop.
-5. Observability. Each tool emits an OpenTelemetry GenAI `tool_call` span with attributes `gen_ai.tool.name`, `gen_ai.tool.call.id`, `gen_ai.tool.call.arguments`, `gen_ai.tool.call.result` (reference, not inline, when content policy requires).
+1. **工具定义**。每个工具包含：`name`（snake_case）、`description`（告知模型何时使用以及何时不使用）、带类型属性的 JSON Schema 输入、必填字段、适用时的枚举、数值的 minimum/maximum、每工具超时时间、每工具沙箱策略（文件系统面、网络、内存上限）。
+2. **描述质量检查**。对每个描述执行"这是否告知模型何时选择此工具而非其他工具？"的检验。若两个工具描述有重叠，拒绝并重写。
+3. **并行分发方案**。针对每个典型任务，识别哪些工具调用是独立的（可并行化）以及哪些必须顺序执行。生成预期的分发图。
+4. **验证策略**。枚举检查、类型强制规则（例如"接受整数形式的字符串，拒绝浮点形式的字符串"）、必填字段执行。每个失败都返回结构化的观察字符串，永远不抛给循环。
+5. **可观测性**。每个工具生成一个 OpenTelemetry GenAI `tool_call` Span，包含属性 `gen_ai.tool.name`、`gen_ai.tool.call.id`、`gen_ai.tool.call.arguments`、`gen_ai.tool.call.result`（内容策略要求时为引用而非内联）。
 
-Hard rejects:
+硬性拒绝：
 
-- Generic shell/command-exec tool. Refuse and break into specific verbs (`git_status`, `fs_read`, `npm_test`).
-- Missing enums when the parameter has a closed set of values. Enum validation is the cheapest way to catch drift.
-- Same description for two different tools. The model cannot pick between them reliably.
-- `description` that only names the tool ("Adds two numbers"). Include WHEN to pick it over alternatives.
-- No timeout. Every tool call must have a ceiling.
+- 通用的 shell/命令执行工具。拒绝并拆分为具体动词（`git_status`、`fs_read`、`npm_test`）。
+- 参数具有封闭值集合时缺少枚举。枚举验证是捕获偏移最廉价的方式。
+- 两个不同工具使用相同描述。模型无法在它们之间可靠地选择。
+- 仅命名工具的 `description`（"将两个数字相加"）。应包含何时相对于其他选项选择它。
+- 无超时。每个工具调用都必须有上限。
 
-Refusal rules:
+拒绝规则：
 
-- If the tool list exceeds 30 tools for a single agent, refuse and recommend subagent delegation (Lesson 17).
-- If any tool performs a destructive action without a confirmation gate, refuse and point to Lesson 09 (permissions, sandboxing).
-- If the task is computer use (click, type, screenshot), refuse and point to Lesson 21 — that is a separate tool shape with vision-based actions.
+- 若单个智能体的工具列表超过 30 个，拒绝并建议子智能体委托（第 17 课）。
+- 若任何工具执行破坏性操作但没有确认门控，拒绝并指向第 09 课（权限、沙箱）。
+- 若任务涉及计算机使用（点击、输入、截图），拒绝并指向第 21 课——这是独立的工具形态，基于视觉动作。
 
-Output: a JSON tool catalog ready to paste into Anthropic / OpenAI / Gemini SDK calls, a dispatch-graph diagram, a validation-policy document, and a BFCL-style mini-eval the registry should pass.
+输出：可直接粘贴到 Anthropic / OpenAI / Gemini SDK 调用中的 JSON 工具目录、分发图示意、验证策略文档，以及注册表应通过的 BFCL 风格迷你评估。
 
-End with a "what to read next" pointer: Lesson 09 (sandboxing), Lesson 23 (OTel GenAI spans), or Lesson 30 (eval-driven).
+结尾给出"下一步阅读"指引：第 09 课（沙箱）、第 23 课（OTel GenAI Span）或第 30 课（评估驱动）。

@@ -1,27 +1,27 @@
 ---
 name: open-model-picker
-description: Pick an open LLM family, quantization, and inference stack for a given deployment target.
+description: 针对给定部署目标，选择开源 LLM 系列、量化方案及推理栈。
 version: 1.0.0
 phase: 10
 lesson: 14
 tags: [open-models, llama, deepseek, mixtral, qwen, gemma, moe, gqa, mla, quantization]
 ---
 
-Given a deployment target (GPU type, VRAM per GPU, number of GPUs, target context length, target p50/p99 latency, peak concurrent requests) and a task profile (chat, code, reasoning, long-context retrieval, tool use), recommend an open model plus serving stack with explicit reasoning about each of the six architectural knobs from Lesson 14.
+给定部署目标（GPU 类型、每 GPU 的 VRAM、GPU 数量、目标上下文长度、目标 p50/p99 延迟、峰值并发请求数）和任务画像（聊天、代码、推理、长上下文检索、工具调用），结合第 14 课的六个架构旋钮给出包含明确推理的开源模型与推理栈推荐。
 
-Produce:
+输出：
 
-1. Model shortlist. Three candidates, each with total params, active params (MoE-aware), architecture flags (norm / activation / position / attention / MoE / context), and the single reason it made the shortlist.
-2. Memory budget check. For the top candidate: weight memory at BF16 and at the chosen quantization; KV cache at target context for the target batch size; activation headroom. Halt the recommendation if weights + KV cache + activations exceed available VRAM.
-3. Quantization choice. GPTQ-4bit, AWQ-4bit, FP8, or BF16. Justify against accuracy sensitivity of the task (code / math / reasoning tasks take a bigger hit from aggressive quantization than chat or retrieval).
-4. Inference stack. vLLM, TensorRT-LLM, SGLang, or llama.cpp. Justify against: continuous batching need, speculative decoding support, quantization format compatibility, and single-node vs multi-node topology.
-5. Throughput sanity check. Prefill tokens/sec and decode tokens/sec estimates based on GPU memory bandwidth (decode) and TFLOPs (prefill). Reject the recommendation if decode throughput is below the target's concurrent-user floor.
-6. Fallback. Second choice if the top candidate exceeds VRAM or throughput budget. Always name one.
+1. 候选模型列表。三个候选方案，每个包含总参数量、活跃参数量（MoE 感知）、架构标志（归一化 / 激活 / 位置 / 注意力 / MoE / 上下文）以及入选原因。
+2. 显存预算检查。针对最优候选：BF16 和所选量化精度下的权重显存；目标批量大小下目标上下文的 KV 缓存；激活内存余量。若权重 + KV 缓存 + 激活超过可用 VRAM，则停止推荐。
+3. 量化方案。GPTQ-4bit、AWQ-4bit、FP8 或 BF16。依据任务对精度的敏感性进行论证（代码 / 数学 / 推理任务比聊天或检索任务受激进量化的影响更大）。
+4. 推理栈。vLLM、TensorRT-LLM、SGLang 或 llama.cpp。依据以下因素论证：连续批处理需求、投机解码支持、量化格式兼容性、单节点 vs 多节点拓扑。
+5. 吞吐量可行性检验。基于 GPU 显存带宽（解码）和 TFLOPs（预填充），估算预填充 tokens/秒和解码 tokens/秒。若解码吞吐量低于目标并发用户下限，则拒绝该推荐。
+6. 备选方案。若最优候选超过 VRAM 或吞吐预算，则提供次优选择。必须指定一个。
 
-Hard rejects:
-- Dense models above 30B on a single 24GB consumer GPU without offloading or aggressive quantization.
-- MoE models on a serving stack without expert-parallel support.
-- Long-context (128k+) on architectures without GQA or MLA (KV cache explodes).
-- Any recommendation that does not name the specific model revision (e.g., "Llama 3 8B Instruct v3.1", not "Llama 3").
+强拒绝：
+- 在没有卸载或激进量化的情况下，在单张 24GB 消费级 GPU 上运行超过 30B 的密集模型。
+- 在不支持专家并行的推理栈上运行 MoE 模型。
+- 在不具备 GQA 或 MLA 的架构上运行长上下文（128k+）（KV 缓存会爆炸）。
+- 任何未指定具体模型版本的推荐（例如必须写 "Llama 3 8B Instruct v3.1"，而非 "Llama 3"）。
 
-Output: a one-page recommendation listing model, quantization, stack, with numbered evidence for each decision. End with a "worth reconsidering if..." paragraph naming the specific capability or deployment parameter that would flip the choice.
+输出：一页推荐报告，列出模型、量化方案、推理栈，并为每项决策附上编号证据。最后附一段"值得重新考虑的情况"，说明哪些特定能力或部署参数会改变选择。

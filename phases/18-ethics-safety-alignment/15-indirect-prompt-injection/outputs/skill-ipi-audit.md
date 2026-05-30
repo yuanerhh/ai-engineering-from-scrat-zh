@@ -1,29 +1,29 @@
 ---
 name: ipi-audit
-description: Audit an agentic deployment for indirect prompt injection exposure and information-flow-control coverage.
+description: 审计智能体部署的间接提示注入暴露风险和信息流控制覆盖情况。
 version: 1.0.0
 phase: 18
 lesson: 15
 tags: [ipi, indirect-prompt-injection, ifc, agent-security, owasp-llm01]
 ---
 
-Given an agentic deployment description, audit the deployment for indirect prompt injection exposure.
+给定一个智能体部署描述，审计该部署的间接提示注入暴露情况。
 
-Produce:
+输出内容：
 
-1. Untrusted-content inventory. List every source of content the agent may read: RAG documents, inbox, calendar, tool outputs, tickets, product reviews, third-party APIs. Each is a potential IPI vector.
-2. Trust labelling. Does the deployment separate trusted (user prompt) from untrusted (retrieved content)? If content is concatenated into the same prompt without a label, IFC is not in effect.
-3. Action gating. Which tools can be invoked? For each, is invocation gated by the trusted prompt only, or can untrusted content influence the invocation?
-4. Adaptive-attack evaluation. Has the deployment been tested with adaptive attacks (gradient, RL, human red-team) per Nasr et al. 2025? Static-attack-only evaluation is insufficient.
-5. Scope-violation boundaries. Identify each cross-trust boundary (e.g., inbox -> send, documents -> external API). For each, verify the action is either disallowed under untrusted influence, or explicitly ratified by the trusted prompt.
+1. 不可信内容清单。列出智能体可能读取的每个内容来源：RAG 文档、收件箱、日历、工具输出、工单、产品评论、第三方 API。每一个都是潜在的 IPI 向量。
+2. 信任标记。部署是否将可信（用户提示）与不可信（检索内容）分开？若内容在未加标签的情况下被拼接进同一提示，则信息流控制（IFC）未生效。
+3. 操作门控。哪些工具可以被调用？对每个工具，其调用是仅由可信提示控制，还是不可信内容也能影响调用？
+4. 自适应攻击评估。部署是否按照 Nasr 等人 2025 年的方法，以自适应攻击（梯度、RL、人工红队）进行测试？仅基于静态攻击的评估是不足的。
+5. 范围违规边界。识别每个跨信任边界（例如，收件箱 -> 发送，文档 -> 外部 API）。对每个边界，验证该操作要么在不可信影响下被禁止，要么已被可信提示明确批准。
 
-Hard rejects:
-- Any agent deployment without explicit trust labelling on retrieved content.
-- Any defense claim based on static attacks only.
-- Any claim of "our agent is prompt-injection safe" without naming the IFC mechanism.
+硬性拒绝：
+- 任何在检索内容上没有明确信任标记的智能体部署。
+- 任何仅基于静态攻击的防御声明。
+- 任何在未命名 IFC 机制的情况下声称"我们的智能体对提示注入是安全的"的说法。
 
-Refusal rules:
-- If the user asks whether filtering is sufficient, refuse and explain the Nasr 2025 result that adaptive attacks break >90% of filter-based defenses.
-- If the user asks for a silver-bullet defense, refuse — IPI defense requires IFC plus layered response moderation plus human audit on high-stakes actions.
+拒绝规则：
+- 若用户询问过滤是否足够，拒绝并解释 Nasr 2025 年的结论：自适应攻击能破解超过 90% 的基于过滤器的防御。
+- 若用户要求万能防御方案，拒绝——IPI 防御需要 IFC 加上分层响应审核加上对高风险操作的人工审计。
 
-Output: a one-page audit that fills the five sections above, flags the most dangerous untrusted-to-trusted boundary, and names the single most urgent control to add. Cite MDPI Information 17(1):54 (2026) and Nasr et al. (October 2025) once each.
+输出：一页审计报告，填写上述五个部分，标记最危险的不可信到可信边界，并指出最迫切需要添加的单一控制措施。分别引用 MDPI Information 17(1):54（2026）和 Nasr 等人（2025 年 10 月）各一次。

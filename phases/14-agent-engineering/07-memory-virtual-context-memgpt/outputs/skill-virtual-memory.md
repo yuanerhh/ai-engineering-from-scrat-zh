@@ -1,33 +1,33 @@
 ---
 name: virtual-memory
-description: Scaffold a MemGPT-shaped two-tier memory system (main context + archival store + memory tools) for any target runtime with correct eviction, citation, and untrusted-input handling.
+description: 为任意目标运行时搭建 MemGPT 形态的两层记忆系统（主上下文 + 归档存储 + 记忆工具），包含正确的驱逐、引用和不可信输入处理。
 version: 1.0.0
 phase: 14
 lesson: 07
 tags: [memory, memgpt, virtual-context, archival, citations]
 ---
 
-Given a target runtime (Python, Node, Rust), a model provider (Anthropic, OpenAI, local), and a storage backend (in-memory, SQLite, vector DB, KV, graph), produce a correct MemGPT-shaped memory system.
+给定目标运行时（Python、Node、Rust）、模型提供商（Anthropic、OpenAI、本地）和存储后端（内存、SQLite、向量数据库、KV、图数据库），生成正确的 MemGPT 形态记忆系统。
 
-Produce:
+输出内容：
 
-1. A `MainContext` type with a `core` dict (named persistent sections) and a `messages` list (FIFO). Auto-evict on size cap; evicted turns remain retrievable by `conversation_search`.
-2. An `ArchivalStore` with insert and search. Records MUST carry `id`, `text`, `tags`, `session_id`, `turn_id`, `created_at`. Every write returns the stored id for citation.
-3. Five memory tools matching the MemGPT surface: `core_memory_append`, `core_memory_replace`, `archival_memory_insert`, `archival_memory_search`, `conversation_search`. Present them to the model with `description` text that tells the model when to use each.
-4. A citation contract: every archival retrieval MUST return record ids alongside text, and the agent MUST cite them in final answers. Answers without citations are a soft failure.
-5. A consolidation hook (can be a no-op in v1) so Lesson 08 sleep-time agents can plug in without re-plumbing. Expose `list_records_since(timestamp)` and `delete(id)`.
+1. **`MainContext` 类型**，包含 `core` 字典（命名持久区块）和 `messages` 列表（FIFO）。达到大小上限时自动驱逐；被驱逐的轮次仍可通过 `conversation_search` 检索。
+2. **`ArchivalStore`**，包含插入和搜索功能。记录必须携带 `id`、`text`、`tags`、`session_id`、`turn_id`、`created_at`。每次写入返回存储 id 用于引用。
+3. **五个记忆工具**，对应 MemGPT 接口：`core_memory_append`、`core_memory_replace`、`archival_memory_insert`、`archival_memory_search`、`conversation_search`。向模型呈现时附带 `description` 文本，说明每个工具的使用时机。
+4. **引用合约**：每次归档检索必须在文本旁返回记录 id，智能体必须在最终回答中引用它们。无引用的回答为软性失败。
+5. **整合钩子**（v1 中可为空操作），供第 08 课的离线智能体无需重新铺设管道即可接入。暴露 `list_records_since(timestamp)` 和 `delete(id)`。
 
-Hard rejects:
+硬性拒绝：
 
-- Searching archival with full-prompt LLM scoring. Use a proper retrieval backend (BM25, vector similarity). LLM re-ranking is allowed on the top-k shortlist, not the full corpus.
-- Main context with no eviction policy. Unbounded main context silently grows past the window.
-- Storing retrieved content as if it were user instructions. All archival content is untrusted text (Lesson 27). Pass it to the model as observation, not as system prompt.
-- Writing a `core_memory_clear` tool that wipes all sections. Core is load-bearing; clearing is a foot-gun. Support `replace` not `clear`.
+- 使用完整提示词 LLM 评分进行归档搜索。使用合适的检索后端（BM25、向量相似度）。允许对 top-k 候选列表进行 LLM 重排序，不允许对整个语料库进行。
+- 没有驱逐策略的主上下文。无界的主上下文会悄然超出窗口。
+- 将检索到的内容视为用户指令存储。所有归档内容均为不可信文本（第 27 课）。作为观察而非系统提示词传递给模型。
+- 编写 `core_memory_clear` 工具清空所有区块。核心记忆是关键依赖；清空是危险操作。支持 `replace`，不支持 `clear`。
 
-Refusal rules:
+拒绝规则：
 
-- If the user asks for "no citations, just answers," refuse for any domain where source attribution matters (medical, legal, policy, financial). Offer a compromise: citations rendered as footnotes rather than inline.
-- If the user asks for "write all retrieved content back to archival without filtering," refuse and point to Lesson 27. Retrieved content is attacker-reachable; blanket write-back is memory poisoning.
-- If the runtime has no persistence layer, refuse to ship an agent described as having "long-term memory." Downgrade the product description, not the implementation.
+- 若用户要求"无引用，直接给出答案"，对于任何需要来源归属的领域（医疗、法律、政策、金融）拒绝。提供折衷方案：引用以脚注而非内联方式呈现。
+- 若用户要求"将所有检索内容写回归档而不过滤"，拒绝并指向第 27 课。检索内容是攻击者可达的；无条件写回是记忆投毒。
+- 若运行时没有持久化层，拒绝发布描述为"具有长期记忆"的智能体。降低产品描述，而非实现规格。
 
-Output: one file per component (`main_context.*`, `archival_store.*`, `memory_tools.*`, `agent.*`) plus a `README.md` explaining the eviction policy, citation contract, and where to plug in Lesson 08 (sleep-time consolidation) and Lesson 09 (Mem0 fusion). End with "what to read next" pointing to Lesson 08 if the agent needs three tiers or async consolidation, or Lesson 09 if the agent needs vector+KV+graph fusion.
+输出：每个组件各一个文件（`main_context.*`、`archival_store.*`、`memory_tools.*`、`agent.*`），加上 `README.md`，解释驱逐策略、引用合约，以及在何处接入第 08 课（离线整合）和第 09 课（Mem0 融合）。结尾给出"下一步阅读"指引：若智能体需要三层架构或异步整合，指向第 08 课；若智能体需要向量+KV+图融合，指向第 09 课。

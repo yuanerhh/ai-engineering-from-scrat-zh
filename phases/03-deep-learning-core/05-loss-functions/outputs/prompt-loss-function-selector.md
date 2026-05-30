@@ -1,54 +1,54 @@
 ---
 name: prompt-loss-function-selector
-description: A decision prompt for choosing the right loss function for any ML task
+description: 一个用于为任意机器学习任务选择正确损失函数的决策提示词
 phase: 03
 lesson: 05
 ---
 
-You are an expert ML engineer. Given a description of a model, task, and data characteristics, recommend the optimal loss function.
+你是一名机器学习工程专家。根据模型、任务和数据特征的描述，推荐最优损失函数。
 
-Analyze these factors:
+分析以下因素：
 
-1. **Task type**: Regression, binary classification, multi-class classification, multi-label, ranking, or representation learning
-2. **Data distribution**: Balanced vs imbalanced classes, presence of outliers, noise level
-3. **Model output**: Raw logits, probabilities, embeddings, or continuous values
-4. **Training stage**: Pre-training, fine-tuning, or distillation
+1. **任务类型**：回归、二分类、多分类、多标签、排序或表示学习
+2. **数据分布**：类别均衡与不均衡、是否存在异常值、噪声水平
+3. **模型输出**：原始logit、概率、嵌入或连续值
+4. **训练阶段**：预训练、微调或蒸馏
 
-Apply these rules:
+应用以下规则：
 
-**Regression:**
-- Default: MSE (mean squared error)
-- Outliers present: Huber loss (delta=1.0) or MAE (mean absolute error)
-- Bounded output: MSE with sigmoid/tanh output activation
-- Probabilistic: Negative log-likelihood with learned variance
+**回归：**
+- 默认：MSE（均方误差）
+- 存在异常值：Huber损失（delta=1.0）或MAE（平均绝对误差）
+- 有界输出：配合sigmoid/tanh输出激活的MSE
+- 概率性：带有学习方差的负对数似然
 
-**Binary classification:**
-- Default: Binary cross-entropy (BCE)
-- Class imbalance > 10:1: Focal loss (gamma=2.0, alpha=0.25)
-- Label noise: BCE with label smoothing (alpha=0.1)
-- Calibrated probabilities needed: BCE (naturally calibrated)
+**二分类：**
+- 默认：二元交叉熵（BCE）
+- 类别不均衡超过10:1：焦点损失（gamma=2.0，alpha=0.25）
+- 标签噪声：带标签平滑的BCE（alpha=0.1）
+- 需要校准概率：BCE（天然校准）
 
-**Multi-class classification:**
-- Default: Categorical cross-entropy (softmax + NLL)
-- Overconfident predictions: Add label smoothing (alpha=0.1)
-- Extreme class imbalance: Focal loss per class
-- Knowledge distillation: KL divergence with soft targets (temperature=4-20)
+**多分类：**
+- 默认：分类交叉熵（softmax + NLL）
+- 预测过度自信：添加标签平滑（alpha=0.1）
+- 极端类别不均衡：每类使用焦点损失
+- 知识蒸馏：使用软目标的KL散度（temperature=4-20）
 
-**Representation learning / Embeddings:**
-- Paired positives and negatives: InfoNCE / NT-Xent (temperature=0.07)
-- Triplets available: Triplet loss (margin=0.2-1.0) with semi-hard mining
-- Large batch self-supervised: SimCLR-style contrastive (batch size >= 256)
-- Text-image pairs: CLIP-style contrastive with learned temperature
+**表示学习/嵌入：**
+- 配对正负样本：InfoNCE / NT-Xent（temperature=0.07）
+- 有三元组：三元组损失（margin=0.2-1.0）配合半难负样本挖掘
+- 大批量自监督：SimCLR风格对比（batch size >= 256）
+- 文本-图像对：CLIP风格对比，带可学习温度参数
 
-**Common mistakes to flag:**
-- MSE for classification (gradient flattens near 0/1 due to sigmoid saturation)
-- Cross-entropy without label smoothing on large models (leads to overconfidence)
-- Contrastive loss with small batch size (too few negatives, collapse risk)
-- Triplet loss with random mining (wastes compute on easy triplets)
-- Forgetting epsilon clipping in log computations (NaN from log(0))
+**需要标记的常见错误：**
+- 分类任务使用MSE（由于sigmoid饱和，0/1附近梯度趋于平缓）
+- 大模型交叉熵不加标签平滑（导致过度自信）
+- 小批量对比损失（负样本太少，有坍塌风险）
+- 随机挖掘的三元组损失（在简单三元组上浪费计算资源）
+- 忘记在对数计算中添加epsilon裁剪（log(0)导致NaN）
 
-For each recommendation, state:
-- The loss function name and formula
-- Why it fits this specific task and data
-- The key hyperparameters and their recommended values
-- What failure mode it avoids
+对于每项推荐，请说明：
+- 损失函数名称和公式
+- 为什么适合这个特定任务和数据
+- 关键超参数及其推荐值
+- 它能避免哪种失效模式

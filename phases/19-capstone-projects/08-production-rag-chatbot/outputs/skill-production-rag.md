@@ -1,47 +1,47 @@
 ---
 name: production-rag
-description: Deploy a regulated-domain RAG chatbot with role + jurisdiction filtering, prompt caching, guardrails, and live drift monitoring.
+description: 部署一个受监管领域的 RAG 聊天机器人，具备角色与司法管辖区过滤、提示缓存、护栏和实时漂移监控。
 version: 1.0.0
 phase: 19
 lesson: 08
 tags: [capstone, rag, chatbot, regulated, llama-guard, nemo-guardrails, ragas, langfuse]
 ---
 
-Given a regulated-domain corpus (legal contracts, clinical trial protocols, insurance policies, or similar), deploy a chatbot that answers with verifiable citations, respects role and jurisdiction access policies, and is monitored for drift.
+给定一个受监管领域的语料库（法律合同、临床试验协议、保险政策或类似内容），部署一个能够以可验证引用回答问题、遵守角色和司法管辖区访问策略、并对漂移进行监控的聊天机器人。
 
-Build plan:
+构建计划：
 
-1. Parse the corpus with docling or Unstructured; route visually rich documents through ColPali. Emit chunks with role and jurisdiction labels.
-2. Index dense (Voyage-3 or Nomic-embed-v2) into pgvector + pgvectorscale; sparse BM25 via Tantivy.
-3. Wire LangGraph conversational agent: retrieve (filter by role + jurisdiction, hybrid dense+BM25, reciprocal rank fusion), rerank (bge-reranker-v2-gemma-2b or Voyage rerank-2), synth (Claude Sonnet 4.7 with prompt caching).
-4. Assemble prompts with stable prefixes: system preamble -> policy block -> reranked context -> user query. Target 60-80% prompt-cache hit rate.
-5. Guardrails: Llama Guard 4 on input and output, NeMo Guardrails v0.12 rails for off-domain and policy-forbidden questions, Presidio PII scrub on output, citation enforcement post-filter.
-6. Build a 200-question expert-labeled golden set with (answer, citations). Score on exact-citation match, answer correctness, RAGAS faithfulness.
-7. Build a 50-prompt red team (PAIR, TAP, PII extraction, off-domain, cross-jurisdiction probes).
-8. Arize Phoenix drift dashboard tracking retrieval nDCG and citation faithfulness weekly; alert on 5% drop.
-9. Langfuse cost report: prompt-cache hit rate, tokens per query, $/query by stage.
+1. 使用 docling 或 Unstructured 解析语料库；将视觉丰富的文档路由至 ColPali。生成带角色和司法管辖区标签的代码块。
+2. 将密集向量（Voyage-3 或 Nomic-embed-v2）索引到 pgvector + pgvectorscale；通过 Tantivy 进行稀疏 BM25。
+3. 接入 LangGraph 对话智能体：retrieve（按角色 + 司法管辖区过滤，混合密集 + BM25，倒数排名融合）、rerank（bge-reranker-v2-gemma-2b 或 Voyage rerank-2）、synth（带提示缓存的 Claude Sonnet 4.7）。
+4. 使用稳定前缀组装提示词：系统前言 -> 策略块 -> 重排序后的上下文 -> 用户查询。目标提示缓存命中率 60-80%。
+5. 护栏：对输入和输出使用 Llama Guard 4，使用 NeMo Guardrails v0.12 处理域外和策略禁止的问题，对输出进行 Presidio PII 脱敏，并设置引用强制后置过滤器。
+6. 构建包含 200 个专家标注问题（含答案和引用）的黄金集。在精确引用匹配、答案正确性、RAGAS 忠实度上打分。
+7. 构建包含 50 个提示的红队（PAIR、TAP、PII 提取、域外、跨司法管辖区探测）。
+8. 使用 Arize Phoenix 漂移仪表板每周追踪检索 nDCG 和引用忠实度；在下降 5% 时发出告警。
+9. Langfuse 成本报告：提示缓存命中率、每次查询的 Token 数、按阶段分类的每次查询成本。
 
-Assessment rubric:
+评估标准：
 
-| Weight | Criterion | Measurement |
+| 权重 | 评估项 | 度量方式 |
 |:-:|---|---|
-| 25 | RAGAS faithfulness + answer relevance | Online scores on the 200-question golden set |
-| 20 | Citation correctness | Fraction of answers with verifiable source anchors |
-| 20 | Guardrail coverage | Llama Guard 4 pass rate + jailbreak suite result |
-| 20 | Cost / latency engineering | Prompt-cache hit rate, p95 latency, $/query |
-| 15 | Drift monitoring dashboard | Live Phoenix dashboard with weekly retrieval-quality trend |
+| 25 | RAGAS 忠实度 + 答案相关性 | 在 200 个问题黄金集上的在线得分 |
+| 20 | 引用正确性 | 具有可验证来源锚点的答案占比 |
+| 20 | 护栏覆盖率 | Llama Guard 4 通过率 + 越狱套件结果 |
+| 20 | 成本/延迟工程 | 提示缓存命中率、p95 延迟、每次查询成本 |
+| 15 | 漂移监控仪表板 | 带每周检索质量趋势的实时 Phoenix 仪表板 |
 
-Hard rejects:
+硬性拒绝条件：
 
-- Any chatbot that leaks cross-jurisdiction data. Role+jurisdiction filtering must be enforced before retrieval, not after.
-- Synthesis prompts that break cache prefixes (reordering policy between system and context). Will destroy the cache economics.
-- Guardrail configurations without logged red-team runs.
-- Answers without citations; citations without verifiable anchors.
+- 任何泄漏跨司法管辖区数据的聊天机器人。角色 + 司法管辖区过滤必须在检索之前执行，而非之后。
+- 破坏缓存前缀的合成提示词（在系统和上下文之间重新排序策略）。这将破坏缓存经济性。
+- 没有记录红队运行的护栏配置。
+- 没有引用的答案；没有可验证锚点的引用。
 
-Refusal rules:
+拒绝规则：
 
-- Refuse to deploy in a regulated domain without jurisdiction tags on every chunk.
-- Refuse to train retrieval on expert-labeled golden set questions. Contamination destroys eval credibility.
-- Refuse to claim "compliant" without an explicit SOC2/HIPAA/GDPR applicability matrix in the README.
+- 拒绝在每个代码块没有司法管辖区标签的情况下在受监管领域部署。
+- 拒绝在专家标注黄金集问题上训练检索器。污染会破坏评估可信度。
+- 拒绝声称"合规"而 README 中没有明确的 SOC2/HIPAA/GDPR 适用性矩阵。
 
-Output: a repo containing the ingestion pipeline, the LangGraph conversational agent, the 200-question golden set, the 50-prompt red team, the Phoenix drift dashboard, the Langfuse cost dashboard, and a write-up naming the top three citation-breakage patterns you observed and the retrieval or prompt fix for each.
+输出：一个包含摄取管道、LangGraph 对话智能体、200 个问题黄金集、50 个提示红队、Phoenix 漂移仪表板、Langfuse 成本仪表板的代码库，以及一份说明你观察到的三大引用失效模式及每种模式对应检索或提示修复方案的报告。

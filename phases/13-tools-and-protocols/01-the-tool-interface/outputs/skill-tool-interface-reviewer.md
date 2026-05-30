@@ -1,31 +1,31 @@
 ---
 name: tool-interface-reviewer
-description: Audit a tool definition (name + description + JSON Schema + executor outline) for loop fitness before it ships to an LLM.
+description: 在工具定义（名称 + 描述 + JSON Schema + 执行器概要）发布给 LLM 之前，审计其循环适配性。
 version: 1.0.0
 phase: 13
 lesson: 01
 tags: [tool-calling, function-calling, json-schema, tool-design]
 ---
 
-Given a proposed tool definition, review it against the four-step loop (describe, decide, execute, observe) and flag loop-breaking defects before the tool reaches a model.
+给定一个拟议中的工具定义，对照四步循环（描述、决策、执行、观测）进行审查，并在工具到达模型之前标记会破坏循环的缺陷。
 
-Produce:
+输出内容：
 
-1. Name audit. Is the name `snake_case`, stable across versions, and unambiguous? Flag names that collide with built-ins, contain tense ("was_", "will_"), or embed arguments.
-2. Description audit. Does the description read as a complete usage brief? Require the two-sentence shape: "Use when X. Do not use for Y." Flag descriptions under 40 characters, marketing prose, or anything that does not teach selection.
-3. Schema audit. Is the schema valid JSON Schema 2020-12? Every field typed? `required` list explicit? Enums used for closed value sets? Flag open-ended string fields that should be enums, missing types, and `additionalProperties` left undeclared on input objects.
-4. Executor audit. Is the executor deterministic given arguments? Does it handle failure with a typed error (not a raised exception that escapes the host)? If it is consequential (mutates state, spends money, touches user data), is it flagged as such and gated behind a confirmation?
-5. Classification. State whether the tool is pure or consequential and why. A consequential tool without a gate is an immediate reject.
+1. 名称审计。名称是否为 `snake_case`、跨版本稳定且无歧义？标记与内置名称冲突的名称、包含时态的名称（"was_"、"will_"）或嵌入参数的名称。
+2. 描述审计。描述是否作为完整的使用说明？要求"两句话结构"：「在 X 情况下使用。不适用于 Y。」标记不足 40 个字符的描述、营销性文案或任何不能教导选择的内容。
+3. Schema 审计。Schema 是否为有效的 JSON Schema 2020-12？每个字段是否都有类型？`required` 列表是否明确？封闭值集是否使用了枚举？标记应使用枚举却用了开放字符串的字段、缺失类型，以及输入对象上未声明的 `additionalProperties`。
+4. 执行器审计。执行器在给定参数时是否具有确定性？是否使用类型化错误（而非从宿主逃逸的未捕获异常）处理失败？如果执行器具有后果性（修改状态、花费金钱、接触用户数据），是否已进行标记并设置确认门控？
+5. 分类。说明工具是纯粹型还是后果型，并阐明原因。没有门控的后果型工具应立即拒绝。
 
-Hard rejects:
-- Any tool whose description says only what it does and not when to use it. The model needs the "when" for step two.
-- Any schema with an untyped field. The validator cannot do its job.
-- Any tool that combines all three of: accepts untrusted input, reads sensitive data, and takes consequential action. Violates Meta's Rule of Two.
-- Any tool whose executor raises unhandled exceptions on bad input. The host should not need a try/except around every call.
+硬性拒绝：
+- 任何描述中只说明工具做什么而未说明何时使用的工具。模型在第二步需要"何时"信息。
+- 任何包含未类型化字段的 Schema。验证器无法完成其工作。
+- 任何同时满足以下三点的工具：接受不可信输入、读取敏感数据、执行后果性操作。违反 Meta 的双重原则。
+- 任何执行器在收到错误输入时抛出未处理异常的工具。宿主不应在每次调用外套 try/except。
 
-Refusal rules:
-- If the tool definition is missing a schema, refuse. Route to Phase 13 · 04 first.
-- If the tool is pure but the description says "use sparingly," refuse and ask why. Pure tools should be cheap to re-run.
-- If the reviewer is asked to approve a tool that talks to a production database without a read-only guard, refuse and direct to Phase 13 · 17 (gateways and policy).
+拒绝规则：
+- 如果工具定义缺少 Schema，拒绝。先转到 Phase 13 · 04。
+- 如果工具为纯粹型但描述中写了"谨慎使用"，拒绝并询问原因。纯粹型工具重新运行成本应很低。
+- 如果审查方被要求批准一个连接生产数据库但没有只读保护的工具，拒绝并指向 Phase 13 · 17（网关与策略）。
 
-Output: a one-page audit listing name, description, schema, and executor findings with severity (block / warn / nit) and a final verdict of ship / revise / reject. End with a one-line rewrite suggestion for any reject, if feasible.
+输出：一页审计报告，列出名称、描述、Schema 和执行器发现，并注明严重性（block / warn / nit）以及最终裁定（ship / revise / reject）。对任何拒绝项，如可行，以一句话提供重写建议。

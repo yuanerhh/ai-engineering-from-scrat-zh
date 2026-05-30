@@ -1,31 +1,31 @@
 ---
 name: ai-sre-plan
-description: Design an AI SRE rollout for a team — multi-agent triage architecture, structured runbooks, adversarial evaluation, narrow auto-remediation, and predictive-detection posture.
+description: 为团队设计 AI SRE 落地方案——多智能体故障分诊架构、结构化运行手册、对抗性评估、窄范围自动修复以及预测性检测策略。
 version: 1.0.0
 phase: 17
 lesson: 23
 tags: [ai-sre, multi-agent, runbooks, auto-remediation, adversarial-eval, datadog-bits-ai, neubird, predictive]
 ---
 
-Given team size, incident volume, observability maturity, and risk tolerance, produce an AI SRE plan.
+给定团队规模、故障量、可观测性成熟度和风险承受度，生成一份 AI SRE 计划。
 
-Produce:
+产出内容：
 
-1. Architecture. Multi-agent: supervisor + log agent + metric agent + runbook agent + human gate. Match specialized agents to existing data sources (Datadog, Grafana, Loki, Confluence).
-2. Runbook transformation. Move from unstructured Confluence to structured markdown with symptom / hypothesis / verify / act sections. Version in git.
-3. Product choice. Datadog Bits AI, Azure SRE Agent, NeuBird Hawkeye, Incident.io Autopilot, or DIY.
-4. Auto-remediation scope. Narrow safe set (restart pod, revert deploy, scale within bounds). Explicit deny list (topology, code, IAM, database). Policy as code.
-5. Adversarial evaluation. Specify two-model agreement gate for auto-remediation. Disagreement escalates.
-6. Predictive-detection posture. If considering (MIT 89% result), name the actuation policy — pager, pre-drain, auto-scale — otherwise it's just a dashboard.
+1. 架构设计。多智能体架构：主控 + 日志智能体 + 指标智能体 + 运行手册智能体 + 人工审批门控。将专项智能体与现有数据源对接（Datadog、Grafana、Loki、Confluence）。
+2. 运行手册改造。从非结构化的 Confluence 文档迁移至包含"症状 / 假设 / 验证 / 操作"章节的结构化 Markdown。版本托管于 git。
+3. 产品选型。Datadog Bits AI、Azure SRE Agent、NeuBird Hawkeye、Incident.io Autopilot 或自研方案。
+4. 自动修复范围。定义窄范围安全操作集（重启 Pod、回退部署、在限定范围内扩容）。明确禁止操作清单（拓扑变更、代码变更、IAM、数据库）。以代码形式定义策略。
+5. 对抗性评估。为自动修复指定双模型一致性门控。发生分歧时上报人工处理。
+6. 预测性检测策略。如果考虑采用（参考 MIT 89% 的结果），明确触发策略——告警、预先引流、自动扩容——否则只是一个仪表盘而已。
 
-Hard rejects:
-- Auto-remediation without human gate on broad changes. Refuse — name the safe set explicitly.
-- Unstructured runbooks as the knowledge base. Refuse — require structured, versioned markdown.
-- "Set it and forget it" framing. Refuse — explicitly scope what is and isn't autonomous.
+强制拒绝：
+- 大范围变更缺少人工审批门控的自动修复。拒绝——必须明确定义安全操作集。
+- 以非结构化运行手册作为知识库。拒绝——需要结构化、版本化的 Markdown。
+- "设置后不管"的定位。拒绝——必须明确界定哪些是自主操作，哪些不是。
 
-Refusal rules:
-- If incident volume is <10/month, refuse full AI SRE rollout — cost exceeds benefit. Recommend structured runbooks only.
-- If team observability is immature (logs unsearchable, metrics sparse), refuse — AI SRE amplifies bad data.
-- If the team proposes "predictive detection → auto-remediation" as first feature, refuse — walk through the actuation-policy question first.
+拒绝规则：
+- 如果故障量 < 10 次/月，拒绝全量 AI SRE 落地——成本超过收益。建议仅采用结构化运行手册。
+- 如果团队的可观测性不成熟（日志不可检索、指标稀疏），拒绝——AI SRE 会放大劣质数据的问题。
+- 如果团队提议将"预测性检测 → 自动修复"作为第一个功能，拒绝——先把触发策略问题厘清。
 
-Output: a one-page plan with architecture, runbook plan, product choice, auto-remediation scope, adversarial gate, predictive posture. End with a 12-week rollout schedule: weeks 1-4 structured runbooks, 5-8 triage agent, 9-12 narrow auto-remediation.
+输出：一页计划，包含架构设计、运行手册方案、产品选型、自动修复范围、对抗性门控、预测性检测策略。最后附上 12 周落地时间表：第 1-4 周结构化运行手册，第 5-8 周分诊智能体，第 9-12 周窄范围自动修复。

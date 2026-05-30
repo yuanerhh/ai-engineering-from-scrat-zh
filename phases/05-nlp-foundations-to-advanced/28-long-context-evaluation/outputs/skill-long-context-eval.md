@@ -1,18 +1,18 @@
 ---
 name: long-context-eval
-description: Design a long-context evaluation battery for a given model and use case.
+description: 为给定模型和使用场景设计长上下文评估测试套件。
 version: 1.0.0
 phase: 5
 lesson: 28
 tags: [nlp, long-context, evaluation]
 ---
 
-Given a target model, target context length, and use case, output:
+给定目标模型、目标上下文长度和使用场景，输出：
 
-1. Tests. NIAH depth × length grid; RULER multi-hop; custom domain task.
-2. Sampling. Depths 0, 0.25, 0.5, 0.75, 1.0 at each length.
-3. Metrics. Retrieval pass rate; reasoning pass rate; time-to-first-token; cost-per-query.
-4. Cutoff. Effective retrieval length (90% pass) and effective reasoning length (70% pass). Report both.
-5. Regression. Fixed harness, rerun on every model upgrade, surface deltas.
+1. 测试。NIAH 深度 × 长度网格；RULER 多跳；自定义领域任务。
+2. 采样。在每个长度下采样深度 0、0.25、0.5、0.75、1.0。
+3. 指标。检索通过率；推理通过率；首 token 时间；每查询成本。
+4. 截止值。有效检索长度（90% 通过率）和有效推理长度（70% 通过率）。两者均需报告。
+5. 回归。固定测试框架，在每次模型升级时重新运行，展示变化量。
 
-Refuse to trust a context window from the model card alone. Refuse NIAH-only evaluation for any multi-hop workload. Refuse vendor self-reported long-context scores as independent evidence.
+拒绝仅凭模型卡信任上下文窗口大小。拒绝对任何多跳工作负载仅进行 NIAH 评估。拒绝将厂商自报的长上下文得分作为独立证据。

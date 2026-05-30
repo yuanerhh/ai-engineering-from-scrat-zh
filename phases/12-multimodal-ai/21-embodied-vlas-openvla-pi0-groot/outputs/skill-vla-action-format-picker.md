@@ -1,31 +1,31 @@
 ---
 name: vla-action-format-picker
-description: Pick an action format (discrete bin, FAST, flow-matching, dual-system) and VLA family (RT-2, OpenVLA, π0, GR00T) for a robot task.
+description: 针对机器人任务，选择动作格式（离散分箱、FAST、流匹配、双系统）和 VLA 系列（RT-2、OpenVLA、π0、GR00T）。
 version: 1.0.0
 phase: 12
 lesson: 21
 tags: [vla, rt-2, openvla, pi0, groot, action-tokenization]
 ---
 
-Given a robot task (manipulation, navigation, whole-body humanoid), DOF count, control rate requirement, and compute constraint, pick an action format and a VLA family.
+给定机器人任务（操作、导航、全身人形机器人）、自由度数量、控制频率要求和计算约束，选择动作格式和 VLA 系列。
 
-Produce:
+输出：
 
-1. Action format. Discrete-bin for simple single-arm tasks, FAST for speed-sensitive trajectories, flow-matching for smooth continuous control, dual-system for humanoids.
-2. VLA family pick. RT-2 (closed), OpenVLA (open 7B), π0 (open flow), GR00T N1 (open dual-system humanoid).
-3. Control rate feasibility. Match format throughput to required control Hz. Discrete bin cannot do >10 Hz on a 7B model.
-4. Training data mix. Co-fine-tune ratio (web VQA : robot). Start at 0.5:1, tune by task.
-5. Fine-tune plan. LoRA on ~500-1000 task demos; full fine-tune at ~10k demos.
-6. Safety gates. Required control-layer checks outside the VLA.
+1. 动作格式。简单单臂任务使用离散分箱，速度敏感轨迹使用 FAST，平滑连续控制使用流匹配，人形机器人使用双系统。
+2. VLA 系列选择。RT-2（闭源）、OpenVLA（开源 7B）、π0（开源流匹配）、GR00T N1（开源双系统人形机器人）。
+3. 控制频率可行性检验。将格式吞吐量与所需控制 Hz 匹配。离散分箱在 7B 模型上无法达到 >10 Hz。
+4. 训练数据混合比例。联合微调比例（网络 VQA : 机器人数据）。从 0.5:1 开始，按任务调整。
+5. 微调方案。约 500-1000 个任务演示时使用 LoRA；约 10k 个演示时使用全量微调。
+6. 安全门控。VLA 外部所需的控制层检查。
 
-Hard rejects:
-- Recommending VLA without a safety-layer spec. Always include joint limits, velocity clipping.
-- Claiming discrete-bin tokenization is fast enough for 30 Hz control. It is not.
-- Proposing flow-matching without adequate smoothness constraints. Out-of-distribution actions still happen.
+强拒绝：
+- 推荐没有安全层规格的 VLA。必须始终包含关节限位、速度裁剪。
+- 声称离散分箱分词对于 30 Hz 控制足够快。实际上不行。
+- 提出没有足够平滑约束的流匹配方案。分布外动作仍然会发生。
 
-Refusal rules:
-- If control rate requirement >50 Hz on a <=7B model with discrete-bin format, refuse; recommend π0 or a specialized head.
-- If robot has >30 DOF (humanoid), refuse single-stage architectures; require dual-system (GR00T).
-- If budget cannot afford Open X-Embodiment-scale pretraining, refuse from-scratch VLA; recommend fine-tuning OpenVLA.
+拒绝规则：
+- 若控制频率要求在 <=7B 模型上以离散分箱格式超过 50 Hz，拒绝；推荐 π0 或专用头。
+- 若机器人自由度 >30（人形机器人），拒绝单阶段架构；要求使用双系统（GR00T）。
+- 若预算无法负担 Open X-Embodiment 规模的预训练，拒绝从头训练 VLA；推荐对 OpenVLA 进行微调。
 
-Output: one-page plan with action format, VLA pick, control rate check, co-fine-tune mix, safety gates. End with arXiv 2307.15818 (RT-2), 2406.09246 (OpenVLA), 2410.24164 (π0), 2503.14734 (GR00T).
+输出：一页方案，包含动作格式、VLA 选择、控制频率检验、联合微调比例、安全门控。最后附 arXiv 2307.15818（RT-2）、2406.09246（OpenVLA）、2410.24164（π0）、2503.14734（GR00T）。

@@ -1,47 +1,47 @@
 ---
 name: video-qa
-description: Build a video understanding pipeline with scene segmentation, multi-vector indexing, temporal grounding, and timestamped citations.
+description: 构建一个视频理解管道，具备场景分割、多向量索引、时序定位和带时间戳的引用。
 version: 1.0.0
 phase: 19
 lesson: 12
 tags: [capstone, video, multimodal, gemini, qwen-vl, molmo, transnet, qdrant]
 ---
 
-Given 100 hours of video, build an ingestion pipeline and a query system that answers natural-language questions with (start, end) timestamps plus frame previews.
+给定 100 小时视频，构建一个摄取管道和查询系统，以自然语言问题配合 (start, end) 时间戳及帧预览进行回答。
 
-Build plan:
+构建计划：
 
-1. Ingest videos (YouTube URLs or MP4); downscale to 720p if needed.
-2. Scene segmentation with TransNetV2 or PySceneDetect; emit `[{scene_id, start_ms, end_ms, keyframe_path}]`.
-3. ASR with Whisper-v3-turbo (faster-whisper) producing word-level timestamps; slice per scene.
-4. VLM captioning with Gemini 2.5 Pro or Qwen3-VL-Max or Molmo 2; emit caption + frame embedding.
-5. Qdrant multi-vector index with three named vectors per scene (caption_emb, frame_emb, transcript_emb) and payload {video_id, scene_id, start_ms, end_ms, keyframe_url}.
-6. Query: three parallel dense queries; reciprocal rank fusion to merge; top-k=5 scenes.
-7. Temporal grounding (TimeLens adapter or VideoITG) refines (start, end) within the top scene.
-8. VLM synthesis (Gemini 2.5 Pro) with query + top-3 scene clips + transcript; require `(video_id, start_ms, end_ms)` citations.
-9. Eval on ActivityNet-QA, NeXT-GQA, plus a 100-query hand-labeled custom set. Report accuracy overall and per question class (descriptive, counting, action-type).
+1. 摄取视频（YouTube URL 或 MP4）；如有需要降采样至 720p。
+2. 使用 TransNetV2 或 PySceneDetect 进行场景分割；输出 `[{scene_id, start_ms, end_ms, keyframe_path}]`。
+3. 使用 Whisper-v3-turbo（faster-whisper）进行 ASR，生成词级时间戳；按场景切片。
+4. 使用 Gemini 2.5 Pro 或 Qwen3-VL-Max 或 Molmo 2 进行 VLM 描述；输出描述文本 + 帧嵌入。
+5. Qdrant 多向量索引，每个场景包含三个命名向量（caption_emb、frame_emb、transcript_emb），载荷为 {video_id, scene_id, start_ms, end_ms, keyframe_url}。
+6. 查询：三路并行密集查询；倒数排名融合合并；top-k=5 个场景。
+7. 时序定位（TimeLens adapter 或 VideoITG）在最优场景内精确 (start, end)。
+8. VLM 合成（Gemini 2.5 Pro），输入查询 + 前 3 个场景片段 + 转录；要求引用 `(video_id, start_ms, end_ms)`。
+9. 在 ActivityNet-QA、NeXT-GQA 以及 100 个手工标注的自定义问题集上进行评估。按问题类别（描述性、计数、动作类型）分别报告总体和细分准确率。
 
-Assessment rubric:
+评估标准：
 
-| Weight | Criterion | Measurement |
+| 权重 | 评估项 | 度量方式 |
 |:-:|---|---|
-| 25 | Temporal grounding IoU | IoU on held-out grounding set |
-| 20 | QA accuracy | NeXT-GQA and 100-query custom set |
-| 20 | Ingest throughput | Hours of video indexed per dollar |
-| 20 | UI and citation UX | Timestamp links, thumbnail strip, jump-to-frame |
-| 15 | Hallucination rate | Counting and action-type accuracy reported separately |
+| 25 | 时序定位 IoU | 在保留定位集上的 IoU |
+| 20 | 问答准确率 | NeXT-GQA 和 100 个自定义问题集 |
+| 20 | 摄取吞吐量 | 每美元索引的视频小时数 |
+| 20 | UI 和引用用户体验 | 时间戳链接、缩略图条、跳转到帧 |
+| 15 | 幻觉率 | 计数和动作类型准确率单独报告 |
 
-Hard rejects:
+硬性拒绝条件：
 
-- Pipelines that pool a single vector per scene. Multi-vector is required for the class distinctions to show.
-- Answers without (start, end) citations.
-- Reporting one overall accuracy without the counting/action subset breakdown.
-- VLM synthesis that does not receive scene frames directly (text-only inputs lose the visual grounding).
+- 每个场景仅使用单一向量的管道。多向量是展示类别区分所必需的。
+- 没有 (start, end) 引用的答案。
+- 只报告总体准确率而不提供计数/动作子集细分。
+- VLM 合成未直接接收场景帧（仅文本输入会失去视觉定位能力）。
 
-Refusal rules:
+拒绝规则：
 
-- Refuse to serve videos with unclear license provenance; require a license tag on every video_id.
-- Refuse to claim "real-time" response at ingest rates above the measured throughput.
-- Refuse to hide the counting/action hallucination number inside an overall accuracy figure.
+- 拒绝处理许可证来源不明的视频；每个 video_id 必须有许可证标签。
+- 拒绝在测量吞吐量以上的摄取速率下声称"实时"响应。
+- 拒绝将计数/动作幻觉率隐藏在总体准确率中。
 
-Output: a repo containing the scene segmentation + ASR + captioning pipeline, the multi-vector Qdrant collection, the temporal grounding adapter, the Next.js 15 viewer with timestamp deep-links, the three-benchmark eval results (ActivityNet-QA, NeXT-GQA, custom), and a write-up naming the three counting or action-type failure classes you observed and the retrieval or synthesis change that reduced each.
+输出：一个包含场景分割 + ASR + 描述管道、多向量 Qdrant 集合、时序定位适配器、带时间戳深层链接的 Next.js 15 查看器、三项基准评估结果（ActivityNet-QA、NeXT-GQA、自定义）的代码库，以及一份说明你观察到的三种计数或动作类型失败类别以及减少每种失败的检索或合成变更的报告。

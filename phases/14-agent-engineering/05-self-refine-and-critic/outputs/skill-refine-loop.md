@@ -1,33 +1,33 @@
 ---
 name: refine-loop
-description: Configure an evaluator-optimizer (Self-Refine / CRITIC) loop given task, verifier availability, and iteration budget.
+description: 根据任务、验证器可用性和迭代预算配置评估-优化（Self-Refine / CRITIC）循环。
 version: 1.0.0
 phase: 14
 lesson: 05
 tags: [self-refine, critic, evaluator-optimizer, guardrails, iteration]
 ---
 
-Given a task, an iteration budget, and what verifier is available (tool-grounded or self-eval only), emit prompts and a stop policy for an evaluator-optimizer loop.
+给定一个任务、迭代预算以及可用的验证器类型（工具验证或仅自评估），生成评估-优化循环的提示词和停止策略。
 
-Produce:
+输出内容：
 
-1. Generator prompt. Deterministic producer for the first output. State the task, output format, and constraints explicitly.
-2. Evaluator/verifier prompt. If tools are available (search, code run, tests, calculator, type check), specify how to call them and how to produce a structured critique (JSON with: pass/fail, violations[], suggested_fixes[]). If only self-eval is available, explicitly flag the Self-Refine rubber-stamp risk and use a structurally different prompt style (e.g., adversarial "find at least one flaw").
-3. Refiner prompt. Must reference prior outputs and critiques (history). State that "do not repeat a failure mode flagged in prior iterations" is mandatory.
-4. Stop policy. The conjunction: verifier passes OR (self-eval says fine AND iterations >= 2) OR iterations >= max_iterations. Never single-condition.
-5. Observability hooks. Log each iteration as an OpenTelemetry GenAI span (evaluate, optimize) per Lesson 23 so the full refine trajectory is auditable.
+1. **生成器提示词**。用于首次输出的确定性生产 Prompt。明确说明任务、输出格式和约束。
+2. **评估器/验证器提示词**。若有工具可用（搜索、代码执行、测试、计算器、类型检查），说明如何调用它们以及如何生成结构化批评（JSON 格式，包含：pass/fail、violations[]、suggested_fixes[]）。若仅有自评估，明确标注 Self-Refine 橡皮图章风险，并使用结构上不同的提示词风格（例如对抗式的"找出至少一个缺陷"）。
+3. **精炼器提示词**。必须引用先前的输出和批评（历史记录）。明确说明"不得重复在先前迭代中被标记的失败模式"是强制要求。
+4. **停止策略**。联合条件：验证器通过，或（自评估认为良好且迭代次数 >= 2），或迭代次数 >= 最大迭代次数。永远不使用单一条件。
+5. **可观测性钩子**。将每次迭代记录为 OpenTelemetry GenAI Span（evaluate、optimize），参见第 23 课，确保完整精炼轨迹可审计。
 
-Hard rejects:
+硬性拒绝：
 
-- Same prompt for generator and critic. Rubber-stamp risk — the model agrees with itself.
-- No iteration cap. Infinite refine loops burn tokens; always cap at 4 by default.
-- Verifier prompt that asks for freeform prose feedback. Structured JSON only — pass/fail plus itemized violations.
-- Dropping history from the refiner prompt. Paper shows quality collapses without it.
+- 生成器和批评器使用相同的提示词。橡皮图章风险——模型会自我认同。
+- 无迭代上限。无限精炼循环会消耗大量 Token；默认上限设为 4。
+- 要求自由格式散文反馈的验证器提示词。只使用结构化 JSON——pass/fail 加逐条违规项。
+- 精炼器提示词中丢弃历史记录。论文表明，没有历史记录质量会崩溃。
 
-Refusal rules:
+拒绝规则：
 
-- If the task has no verifier and no way to build one, refuse CRITIC and note that Self-Refine is the weaker option available — warn the user about rubber-stamp risk.
-- If max_iterations >= 10, refuse and recommend re-architecting the task. Refine-to-convergence beyond 3-4 passes is usually a signal the generator prompt is wrong.
-- If the verifier calls destructive tools (shell, git write), refuse and require a sandbox boundary (Lesson 09).
+- 若任务没有验证器且无法构建，拒绝 CRITIC，并说明 Self-Refine 是可用的较弱选项——警告用户存在橡皮图章风险。
+- 若最大迭代次数 >= 10，拒绝并建议重新架构任务。超过 3-4 轮仍未收敛通常意味着生成器提示词有问题。
+- 若验证器调用破坏性工具（shell、git 写入），拒绝并要求设置沙箱边界（第 09 课）。
 
-Output: a single configuration block with all prompts, stop policy, and tool list, plus a "what to read next" note pointing to Lesson 16 (OpenAI Agents SDK guardrails), Lesson 12 (Anthropic evaluator-optimizer), or Lesson 30 (eval-driven agent development) based on the deployment target.
+输出：包含所有提示词、停止策略和工具列表的单一配置块，加上"下一步阅读"指引：根据部署目标，指向第 16 课（OpenAI Agents SDK 护栏）、第 12 课（Anthropic 评估-优化器）或第 30 课（评估驱动智能体开发）。

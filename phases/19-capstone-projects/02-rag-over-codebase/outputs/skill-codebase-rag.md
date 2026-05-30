@@ -1,46 +1,46 @@
 ---
 name: codebase-rag
-description: Build a cross-repo semantic search system with AST-aware chunking, hybrid retrieval, incremental re-index, and cited answers.
+description: 构建一个跨代码库语义搜索系统，具备 AST 感知分块、混合检索、增量重建索引和引用式答案。
 version: 1.0.0
 phase: 19
 lesson: 02
 tags: [capstone, rag, code-search, tree-sitter, qdrant, bm25, hybrid-retrieval]
 ---
 
-Given 10+ repositories totaling at least 2M lines of code, build an ingestion pipeline, a hybrid index, and a citation-enforced query agent that answers cross-repo questions with verifiable file:line anchors.
+给定 10 个以上、总计至少 200 万行代码的代码库，构建一个摄取管道、混合索引和强制引用的查询智能体，以可验证的 file:line 锚点回答跨代码库问题。
 
-Build plan:
+构建计划：
 
-1. Parse every file with tree-sitter. Chunk at function and class node boundaries. Store `{repo, path, start_line, end_line, symbol, body}`.
-2. Summarize every chunk with Claude Haiku 4.5 or Gemini 2.5 Flash using prompt-cached system prompts. Store the one-sentence summary next to the chunk.
-3. Index into three structures: Qdrant (dense, Voyage-code-3 or nomic-embed-code), Tantivy (BM25 with field weights), and kuzu (symbol graph edges for imports, calls, inheritance).
-4. Build a LangGraph query agent with three nodes: retrieve (dense parallel BM25), rerank (Cohere rerank-3 or bge-reranker-v2-gemma-2b), synth (Claude Sonnet 4.7 with prompt caching and file:line citation requirement).
-5. Post-filter: reject any claim without a verifiable `(repo/path:start-end)` anchor; re-ask or drop.
-6. Wire a git push webhook that computes a symbol-level diff and re-embeds only the changed chunks. Target: 50-file commit searchable in under 60s on a 2M-LOC fleet.
-7. Evaluate with a 100-question held-out set. Report MRR@10, nDCG@10, citation faithfulness, and latency percentiles.
-8. Run a weekly drift job that re-executes the eval and alerts on MRR@10 drop > 5%.
+1. 使用 tree-sitter 解析每个文件，在函数和类节点边界处进行分块。存储 `{repo, path, start_line, end_line, symbol, body}`。
+2. 使用提示缓存系统提示，通过 Claude Haiku 4.5 或 Gemini 2.5 Flash 对每个代码块进行摘要。将一句话摘要与代码块一起存储。
+3. 建立三种索引结构：Qdrant（密集向量，使用 Voyage-code-3 或 nomic-embed-code）、Tantivy（带字段权重的 BM25）以及 kuzu（导入、调用、继承的符号图边）。
+4. 构建一个包含三个节点的 LangGraph 查询智能体：retrieve（密集并行 BM25）、rerank（Cohere rerank-3 或 bge-reranker-v2-gemma-2b）、synth（带提示缓存和 file:line 引用要求的 Claude Sonnet 4.7）。
+5. 后置过滤：拒绝任何没有可验证 `(repo/path:start-end)` 锚点的声明；重新请求或丢弃。
+6. 接入 git push webhook，计算符号级别的差异，仅重新嵌入更改的代码块。目标：在 200 万行代码库中，50 个文件的提交在 60 秒内可搜索。
+7. 使用包含 100 个问题的保留集进行评估。报告 MRR@10、nDCG@10、引用忠实度和延迟百分位数。
+8. 运行每周漂移任务，重新执行评估，并在 MRR@10 下降超过 5% 时发出告警。
 
-Assessment rubric:
+评估标准：
 
-| Weight | Criterion | Measurement |
+| 权重 | 评估项 | 度量方式 |
 |:-:|---|---|
-| 25 | Retrieval quality | MRR@10 and nDCG@10 on a 100-question held-out set |
-| 20 | Citation faithfulness | Fraction of answer claims with verifiable file:line anchors |
-| 20 | Latency and scale | p95 query latency at 10k QPS on the indexed corpus size |
-| 20 | Incremental indexing correctness | Time from git push to searchable on a 50-file commit |
-| 15 | UX and answer formatting | Citation clickability, snippet previews, follow-up affordance |
+| 25 | 检索质量 | 在 100 个问题保留集上的 MRR@10 和 nDCG@10 |
+| 20 | 引用忠实度 | 带有可验证 file:line 锚点的答案声明占比 |
+| 20 | 延迟与规模 | 在索引语料库规模下，10k QPS 时的 p95 查询延迟 |
+| 20 | 增量索引正确性 | 从 git push 到 50 个文件提交可搜索的时间 |
+| 15 | 用户体验与答案格式 | 引用可点击性、代码片段预览、追问能力 |
 
-Hard rejects:
+硬性拒绝条件：
 
-- Fixed-size token chunking instead of AST-aware chunking. Will poison generated-code-heavy corpora.
-- Cosine-only retrieval without BM25 or rerank. Known to fail on exact-symbol-name queries.
-- Answers without mandatory file:line citations.
-- Full-corpus re-embedding on every git push; must be incremental.
+- 使用固定大小 Token 分块而非 AST 感知分块。这会污染以生成代码为主的语料库。
+- 仅使用余弦相似度检索而不结合 BM25 或重排。已知对精确符号名查询效果差。
+- 答案缺少强制的 file:line 引用。
+- 每次 git push 都全量重新嵌入；必须是增量方式。
 
-Refusal rules:
+拒绝规则：
 
-- Refuse to index repos without reading their license. Some forbid embedding in third-party vector stores.
-- Refuse to answer queries that claim to cite files the index never saw; always verify the anchor before returning.
-- Refuse to serve an answer at p95 above 4s; return a partial result with a follow-up handle instead.
+- 拒绝在未读取其许可证的情况下索引代码库。某些许可证禁止在第三方向量存储中嵌入。
+- 拒绝回答声称引用了索引从未见过的文件的查询；在返回前始终验证锚点。
+- 拒绝在 p95 超过 4 秒时提供答案；改为返回带后续处理句柄的部分结果。
 
-Output: a repo containing the ingestion pipeline, the LangGraph query agent, the 100-question labeled eval set, a Langfuse dashboard link, and a write-up naming the three retrieval failure modes you fixed (generated-code poisoning, long-tail symbol recall, cross-repo symbol resolution) and the exact change that fixed each.
+输出：一个包含摄取管道、LangGraph 查询智能体、100 个问题标注评估集、Langfuse 仪表板链接的代码库，以及一份说明你修复了哪三种检索失败模式（生成代码污染、长尾符号召回、跨代码库符号解析）及每种修复方法的报告。

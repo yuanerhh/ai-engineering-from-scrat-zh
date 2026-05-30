@@ -1,30 +1,30 @@
 ---
 name: task-store-designer
-description: Design the task store for a long-running MCP tool: state shape, ttl, durability, cancellation, crash recovery.
+description: 为长时运行的 MCP 工具设计任务存储：状态结构、TTL、持久化、取消及崩溃恢复。
 version: 1.0.0
 phase: 13
 lesson: 13
 tags: [mcp, tasks, durable-store, long-running, sep-1686]
 ---
 
-Given a long-running tool (research, build, export, report generation), design the task store that backs SEP-1686 task augmentation.
+给定一个长时运行工具（研究、构建、导出、报告生成），设计支持 SEP-1686 任务增强的任务存储。
 
-Produce:
+输出内容：
 
-1. State shape. Minimum fields: `id`, `state`, `progress`, `result`, `error`, `ttl`, `created_at`. Optional: `request_meta`, `parent_task_id` (for future subtasks).
-2. Durability choice. Filesystem for toy; SQLite for single-process; Redis for multi-replica. Justify.
-3. taskSupport flag. `forbidden`, `optional`, or `required` per tool; one-line justification.
-4. Cancellation plan. How the worker checks a cancel signal; what happens on partial progress.
-5. Crash recovery. Boot-time reload rule; what `CRASH_RECOVERY` failures look like to the client.
+1. **状态结构**。最小字段：`id`、`state`、`progress`、`result`、`error`、`ttl`、`created_at`。可选项：`request_meta`、`parent_task_id`（用于未来子任务）。
+2. **持久化选择**。玩具项目用文件系统；单进程用 SQLite；多副本用 Redis。需说明理由。
+3. **taskSupport 标志**。每个工具取 `forbidden`、`optional` 或 `required` 之一，附单行理由。
+4. **取消方案**。工作进程如何检测取消信号；部分进度下的处理方式。
+5. **崩溃恢复**。启动时重载规则；`CRASH_RECOVERY` 失败对客户端的表现。
 
-Hard rejects:
-- Any store that loses completed results within ttl.
-- Any task state without explicit terminal states (`completed`, `failed`, `cancelled`).
-- Any cancellation that is not idempotent.
+硬性拒绝：
+- 任何在 TTL 内丢失已完成结果的存储方案。
+- 任何未明确定义终止状态（`completed`、`failed`、`cancelled`）的任务状态设计。
+- 任何不具有幂等性的取消操作。
 
-Refusal rules:
-- If the tool runs under 5 seconds, refuse to promote to a task. Synchronous is simpler.
-- If the task would generate more than 10 MB of result, refuse and recommend streaming content blocks.
-- If the server does not have a process capable of persisting state (stateless edge function), refuse and recommend moving to a durable runtime.
+拒绝规则：
+- 若工具运行时间不超过 5 秒，拒绝将其提升为任务。同步方式更简单。
+- 若任务将产生超过 10 MB 的结果，拒绝并建议改用流式内容块。
+- 若服务器没有能够持久化状态的进程（无状态边缘函数），拒绝并建议迁移到持久化运行时。
 
-Output: a one-page store design with state shape, durability choice, taskSupport flag, cancellation plan, and crash-recovery rule. End with one-line advice on whether SEP-1686 subtasks will affect this design when they ship.
+输出：一页存储设计文档，包含状态结构、持久化选择、taskSupport 标志、取消方案和崩溃恢复规则。结尾给出一句话建议，说明 SEP-1686 子任务发布后是否会影响该设计。

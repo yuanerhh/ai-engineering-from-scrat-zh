@@ -1,32 +1,32 @@
 ---
 name: llm-security-plan
-description: Produce an LLM security plan covering secrets vault, PII scrubbing with consistent tokenization, network egress allowlist, audit log retention, and zero-trust posture.
+description: 制定 LLM 安全计划，涵盖密钥保险库、一致性令牌化的 PII 脱敏、网络出口白名单、审计日志留存以及零信任态势。
 version: 1.0.0
 phase: 17
 lesson: 25
 tags: [security, vault, hashicorp, aws-secrets-manager, pii, presidio, egress, audit-log, zero-trust, ci-cd-supply-chain]
 ---
 
-Given regulatory scope (SOC 2, HIPAA, GDPR), current credential state, and network/egress posture, produce a security plan.
+给定合规范围（SOC 2、HIPAA、GDPR）、当前凭据状态以及网络/出口态势，生成一份安全计划。
 
-Produce:
+产出内容：
 
-1. Vault migration. Pick vault (HashiCorp, AWS Secrets Manager, Azure Key Vault, GCP Secret Manager). Gateway pattern: apps → gateway → vault at runtime. Deprecate hardcoded env and config-file credentials.
-2. Secret scanning. Enable TruffleHog / GitGuardian / Gitleaks on every commit. Block PR on detection.
-3. Rotation policy. ≤ 90 days. Automated where possible. Dedicated rotation for CI/CD credentials (shorter — 30d recommended).
-4. PII scrubbing. Entity recognition (Presidio + regex). Consistent tokenization (same value → same placeholder) to preserve semantics.
-5. Egress allowlist. Whitelist LLM provider domains, vector DB, vault endpoints. DNS allowlist resolver.
-6. Audit log. Append-only, immutable. Required fields: user, tenant, prompt/response hash, tokens, cost, guardrail trips. Retention per framework (SOC 2 1y / HIPAA 6y).
-7. CI/CD hygiene. OIDC identity federation (no static cloud keys). Scope CI/CD credentials narrowly. Cite the 2026 Vercel supply-chain incident as motivation.
+1. 保险库迁移。选择保险库方案（HashiCorp、AWS Secrets Manager、Azure Key Vault、GCP Secret Manager）。网关模式：应用 → 网关 → 运行时保险库。废弃硬编码环境变量和配置文件中的凭据。
+2. 密钥扫描。在每次提交时启用 TruffleHog / GitGuardian / Gitleaks。检测到泄漏时阻断 PR 合并。
+3. 轮换策略。≤ 90 天。尽可能自动化。CI/CD 凭据使用专项轮换（建议更短——30 天）。
+4. PII 脱敏。实体识别（Presidio + 正则表达式）。一致性令牌化（相同值 → 相同占位符）以保留语义。
+5. 出口白名单。只允许 LLM 提供商域名、向量数据库、保险库端点通行。使用 DNS 白名单解析器。
+6. 审计日志。只可追加、不可篡改。必填字段：用户、租户、提示词/响应哈希、token 数量、费用、护栏触发记录。按框架要求留存（SOC 2 1 年 / HIPAA 6 年）。
+7. CI/CD 卫生。使用 OIDC 身份联合（禁用静态云密钥）。窄范围 CI/CD 凭据。以 2026 年 Vercel 供应链事件为案例参考。
 
-Hard rejects:
-- Static keys in config files. Refuse.
-- Storing raw prompts in audit log. Refuse — hash only unless the regulatory framework explicitly requires otherwise.
-- Allowing egress to `*` or "the internet." Refuse — whitelist.
+强制拒绝：
+- 配置文件中的静态密钥。拒绝。
+- 在审计日志中存储原始提示词。拒绝——仅存储哈希值，除非监管框架明确要求完整内容。
+- 允许出口到 `*` 或"互联网"。拒绝——必须使用白名单。
 
-Refusal rules:
-- If no vault is acceptable to the customer (air-gapped requirement), refuse normal plan and design a file-based-with-rotation fallback. Explicitly note it is less secure.
-- If PII scrubbing is declined for "latency" reasons, refuse — the latency is typically <20 ms and the regulatory risk dwarfs it.
-- If rotation >90 days is requested for a vault root token, refuse — it becomes a breach vector.
+拒绝规则：
+- 如果客户不接受任何保险库方案（有物理隔离要求），拒绝常规计划并设计基于文件 + 轮换的备用方案。明确说明该方案安全性较低。
+- 如果 PII 脱敏以"延迟"为由被拒绝，拒绝——延迟通常 < 20 毫秒，且监管风险远高于此。
+- 如果请求保险库根令牌轮换周期 > 90 天，拒绝——这将成为一个攻击入口。
 
-Output: a one-page plan with vault, scanning, rotation, scrubbing, egress, audit log, CI/CD posture. End with the single metric: secret-scan hit count per month; target zero.
+输出：一页计划，包含保险库方案、密钥扫描、轮换策略、脱敏方案、出口白名单、审计日志、CI/CD 态势。最后附上单一跟踪指标：每月密钥扫描命中次数；目标为零。

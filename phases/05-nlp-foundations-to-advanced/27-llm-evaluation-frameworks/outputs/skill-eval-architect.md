@@ -1,18 +1,18 @@
 ---
 name: eval-architect
-description: Design an LLM evaluation plan with calibrated judge and CI gates.
+description: 设计具有校准裁判和 CI 门控的 LLM 评估计划。
 version: 1.0.0
 phase: 5
 lesson: 27
 tags: [nlp, evaluation, rag]
 ---
 
-Given a use case (RAG / agent / generative task), output:
+给定使用场景（RAG / 智能体 / 生成式任务），输出：
 
-1. Metrics. Faithfulness / relevance / context-precision / context-recall + any custom G-Eval metrics with criteria.
-2. Judge model. Named model + version, rationale for cost vs accuracy.
-3. Calibration. Hand-labeled set size, target Spearman rho vs human > 0.7.
-4. Dataset versioning. Tag strategy, change log, stratification.
-5. CI gate. Thresholds per metric, regression-window logic, bottom-quantile alert.
+1. 指标。忠实性 / 相关性 / 上下文精确率 / 上下文召回率 + 任何带评判标准的自定义 G-Eval 指标。
+2. 裁判模型。命名模型 + 版本，说明成本与准确率的权衡理由。
+3. 校准。手工标注集大小，目标 Spearman rho 与人类评分 > 0.7。
+4. 数据集版本管理。标签策略、变更日志、分层方案。
+5. CI 门控。各指标阈值、回归窗口逻辑、底部分位数告警。
 
-Refuse to rely on a judge untested against ≥50 human-labeled examples. Refuse self-evaluation (same model generates + judges). Refuse aggregate-only reporting without bottom-10% surfacing. Flag any pipeline where judge upgrade lands without parallel baseline eval.
+拒绝使用未经 ≥50 个人工标注样本测试的裁判。拒绝自我评估（同一模型既生成又评判）。拒绝仅报告聚合指标而不浮现底部 10% 的情况。标记任何在裁判升级后未进行平行基线评估的流水线。

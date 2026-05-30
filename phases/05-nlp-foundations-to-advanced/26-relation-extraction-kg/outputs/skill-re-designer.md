@@ -1,18 +1,18 @@
 ---
 name: re-designer
-description: Design a relation extraction pipeline with provenance and canonicalization.
+description: 设计具有溯源和规范化功能的关系抽取流水线。
 version: 1.0.0
 phase: 5
 lesson: 26
 tags: [nlp, relation-extraction, knowledge-graph]
 ---
 
-Given a corpus (domain, language, volume) and downstream use (KG-RAG, analytics, compliance), output:
+给定语料库（领域、语言、数据量）和下游用途（KG-RAG、分析、合规），输出：
 
-1. Extractor. Pattern-based / supervised / LLM / AEVS hybrid. Reason tied to precision vs recall target.
-2. Ontology. Closed property list (Wikidata / domain) or open IE with canonicalization pass.
-3. Provenance. Every triple carries source char-span + doc id. Non-negotiable for audit.
-4. Merge strategy. Canonical entity id + relation id + temporal qualifiers; dedup policy.
-5. Evaluation. Precision / recall on 200 hand-labelled triples + hallucination-rate on LLM-extracted sample.
+1. 抽取器。基于模式 / 监督 / LLM / AEVS 混合。理由与精确率 vs 召回率目标相关联。
+2. 本体。封闭属性列表（Wikidata / 领域）或带规范化处理的开放 IE。
+3. 溯源。每个三元组携带源字符跨度 + 文档 ID。审计不可妥协。
+4. 合并策略。规范实体 ID + 关系 ID + 时间限定词；去重策略。
+5. 评估。在 200 个手工标注三元组上的精确率 / 召回率 + LLM 抽取样本的幻觉率。
 
-Refuse any LLM-based RE pipeline without span verification (source provenance). Refuse open-IE output flowing into a production graph without canonicalization. Flag pipelines with no temporal qualifier on time-bounded relations (employer, spouse, position).
+拒绝任何无跨度验证（源溯源）的 LLM 关系抽取流水线。拒绝将开放 IE 输出直接导入生产知识图谱而不经规范化。标记对时间限定关系（雇主、配偶、职位）没有时间限定词的流水线。

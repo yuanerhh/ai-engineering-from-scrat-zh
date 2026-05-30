@@ -1,30 +1,30 @@
 ---
 name: mcp-threat-model
-description: Produce a threat model for an MCP deployment naming the applicable attack classes, defenses in place, and Rule-of-Two violations.
+description: 为 MCP 部署生成威胁模型，列出适用的攻击类别、现有防御措施及 Rule-of-Two 违规项。
 version: 1.0.0
 phase: 13
 lesson: 15
 tags: [mcp, security, tool-poisoning, threat-model, rule-of-two]
 ---
 
-Given an MCP deployment (list of servers, list of tools, list of permissions), produce a threat model.
+给定一个 MCP 部署（服务器列表、工具列表、权限列表），生成威胁模型。
 
-Produce:
+输出内容：
 
-1. Attack applicability. For each of the seven attack classes (tool poisoning, rug pull, shadowing, MPMA, parasitic toolchain, sampling attacks, supply-chain masquerade), rate applicability as high / medium / low with one-sentence rationale.
-2. Defense inventory. List defenses already in place (hash pinning, static detector, gateway, signed registry, MELON, Rule-of-Two enforcement).
-3. Rule of Two audit. For every tool, classify as untrusted / sensitive / consequential and flag any combination of all three in a single turn.
-4. Missing defenses. Name the highest-leverage defense not yet applied given the threat profile.
-5. Runbook. Three actions the team should take in the next week to improve the security posture.
+1. **攻击适用性**。针对七种攻击类别（工具投毒、掉包攻击、影子覆盖、MPMA、寄生工具链、采样攻击、供应链冒充），各评定高 / 中 / 低适用性，并附单句理由。
+2. **防御清单**。列出已部署的防御措施（哈希固定、静态检测器、网关、已签名注册表、MELON、Rule-of-Two 执行）。
+3. **Rule of Two 审计**。对每个工具，按"不可信 / 敏感 / 高危"分类，并标记同一轮次中同时具备三类特征的情况。
+4. **缺失防御**。根据威胁剖面，指出当前尚未部署的最高价值防御措施。
+5. **运行手册**。团队在下周应采取的三项行动以改善安全态势。
 
-Hard rejects:
-- Any threat model that says "attack class X does not apply because we trust this server". Assume one server will be compromised.
-- Any deployment that uses silent-overwrite namespace resolution.
-- Any deployment with sampling enabled but no per-session rate limiter.
+硬性拒绝：
+- 任何以"我们信任该服务器，因此攻击类别 X 不适用"为由的威胁模型。假设其中一台服务器将被攻陷。
+- 任何使用静默覆写命名空间解析的部署。
+- 任何启用采样但未设置每会话速率限制器的部署。
 
-Refusal rules:
-- If the deployment has no documentation of approved tool descriptions, refuse and mandate hash pinning first.
-- If the deployment uses public unsigned MCP registries, flag the supply-chain risk and recommend migration to a verified registry.
-- If any tool combines untrusted input, sensitive data, and consequential action, refuse to approve and demand a split.
+拒绝规则：
+- 若部署没有已批准工具描述的文档记录，拒绝并要求先实施哈希固定。
+- 若部署使用公共未签名 MCP 注册表，标记供应链风险并建议迁移到经过验证的注册表。
+- 若任何工具同时结合了不可信输入、敏感数据和高危操作，拒绝批准并要求拆分。
 
-Output: a one-page threat model with attack applicability table, defense inventory, Rule-of-Two flag list, and the three-action runbook. End with the single highest-value security addition for this deployment.
+输出：一页威胁模型，包含攻击适用性表格、防御清单、Rule-of-Two 标记列表和三项行动的运行手册。结尾给出该部署最具价值的单项安全改进措施。

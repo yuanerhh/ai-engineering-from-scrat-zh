@@ -1,29 +1,29 @@
 ---
 name: wmdp-eval
-description: Audit a dual-use capability claim against WMDP, unlearning evaluation, and elicitation studies.
+description: 对照 WMDP、遗忘评估和引发研究，审计双重用途能力声明。
 version: 1.0.0
 phase: 18
 lesson: 17
 tags: [wmdp, rmu, dual-use, biosecurity, cybersecurity, chemistry]
 ---
 
-Given a dual-use capability claim ("our model does not meaningfully help with bioweapons / cyberattack / chemistry"), audit the supporting evaluation.
+针对双重用途能力声明（"我们的模型在生物武器/网络攻击/化学领域不提供实质性帮助"），审计其支撑评估。
 
-Produce:
+产出内容：
 
-1. Benchmark coverage. Was WMDP (or an equivalent yellow-zone benchmark) run? Report per-domain scores (bio, cyber, chem). A claim without per-domain numbers cannot be evaluated.
-2. Unlearning trace. If unlearning was applied (RMU or alternative), report the general-capability delta (MMLU, HELM, HumanEval). Unlearning with no general-capability report is not credible.
-3. Refusal-path-audit. Was the benchmark administered via raw completion or via the production safety stack? A model that scores low only because of the safety stack is still dual-use capable when the stack is bypassed.
-4. Elicitation study. Multiple-choice capability does not equal elicitation-hardened capability. Are Anthropic-style acquisition trials, or equivalent novice-in-the-loop studies, referenced? If not, the claim is limited to WMDP-style evidence.
-5. Novice-vs-expert split. Novice-relative uplift and expert-absolute capability are different quantities. Are both addressed?
+1. 基准覆盖率。是否运行了 WMDP（或等效的黄区基准测试）？报告各领域得分（bio、cyber、chem）。缺少分领域数据的声明无法被评估。
+2. 遗忘追踪。若应用了遗忘技术（RMU 或其他方案），报告通用能力损耗（MMLU、HELM、HumanEval）。缺少通用能力报告的遗忘声明不可信。
+3. 拒绝路径审计。基准测试是通过原始补全方式还是通过生产安全栈运行的？仅因安全栈而得分偏低的模型，在绕过安全栈时仍具备双重用途能力。
+4. 引发研究。多项选择题形式的能力评估不等于具有引发抵抗力的能力评估。是否引用了 Anthropic 风格的获取试验，或等效的新手参与研究？若未引用，该声明仅具备 WMDP 级别的证据支撑。
+5. 新手与专家分类。新手相对提升和专家绝对能力是两个不同的量。两者是否均已评估？
 
-Hard rejects:
-- Any dual-use safety claim without WMDP-equivalent capability measurement.
-- Any unlearning claim without general-capability delta.
-- Any "no meaningful uplift" claim without novice-in-the-loop study.
+硬性拒绝条件：
+- 任何缺乏 WMDP 等效能力测量的双重用途安全声明。
+- 任何缺乏通用能力损耗数据的遗忘声明。
+- 任何缺乏新手参与研究的"无实质性提升"声明。
 
-Refusal rules:
-- If the user asks whether their model crosses ASL-3, refuse a direct answer; the thresholds are lab-specific (Lesson 18) and elicitation-dependent.
-- If the user asks for a WMDP cutoff that is "safe," refuse — the threshold depends on elicitation resistance, tacit-knowledge barriers, and the deployment surface.
+拒绝规则：
+- 若用户询问其模型是否达到 ASL-3，拒绝直接回答；阈值因实验室而异（第 18 课），且依赖于引发能力评估。
+- 若用户询问"安全的" WMDP 分数截止线，拒绝回答——阈值取决于引发抵抗力、隐性知识门槛和部署面。
 
-Output: a one-page audit that fills the five sections above, flags the most important missing evidence, and identifies whether the claim is WMDP-level or deployment-level. Cite Li et al. (arXiv:2403.03218) once as the benchmark source.
+输出：一页审计报告，填充上述五个部分，标出最重要的缺失证据，并判断该声明属于 WMDP 级别还是部署级别。引用 Li 等人（arXiv:2403.03218）一次作为基准来源。

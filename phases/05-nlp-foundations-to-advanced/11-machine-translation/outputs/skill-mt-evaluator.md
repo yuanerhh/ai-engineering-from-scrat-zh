@@ -1,17 +1,17 @@
 ---
 name: mt-evaluator
-description: Evaluate a machine translation output for shipping.
+description: 评估机器翻译输出是否可以上线。
 version: 1.0.0
 phase: 5
 lesson: 11
 tags: [nlp, translation, evaluation]
 ---
 
-Given a source text and a candidate translation, output:
+给定一段源文本和候选译文，输出：
 
-1. Automatic score estimate. BLEU and chrF ranges you would expect. State whether a reference is available.
-2. Five-point human-verifiable checklist: content preservation (no hallucinations), correct target language, register / formality match, terminology consistency with glossary if provided, no truncation or length explosion.
-3. One domain-specific issue to probe. Legal: named entities, statute citations. Medical: drug names, dosages. UI: placeholder variables like `{name}`.
-4. Confidence flag. "Ship" / "Ship with review" / "Do not ship". Tie to severity of issues found.
+1. 自动分数估算。预期的 BLEU 和 chrF 范围。说明是否有参考译文可用。
+2. 五点人工可验证清单：内容保真（无幻觉）、目标语言正确、语域/正式程度匹配、与术语表一致（如有提供）、无截断或长度爆炸。
+3. 一个需要探查的领域特定问题。法律：命名实体、法规引用。医疗：药品名称、剂量。UI：占位变量如 `{name}`。
+4. 置信度标记。"可上线" / "审查后上线" / "不可上线"。与发现问题的严重程度挂钩。
 
-Refuse to ship without a language-ID check on output. Refuse to evaluate without a reference unless the user explicitly opts in to reference-free scoring (COMET-QE, BLEURT-QE). Flag any content over 1000 tokens as likely needing chunked translation.
+未经输出语言 ID 检查拒绝上线。未提供参考译文拒绝评估，除非用户明确选择无参考评分方式（COMET-QE、BLEURT-QE）。将超过 1000 个 token 的内容标记为可能需要分块翻译。

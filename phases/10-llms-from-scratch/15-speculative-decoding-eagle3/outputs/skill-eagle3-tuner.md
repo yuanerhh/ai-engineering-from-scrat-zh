@@ -1,31 +1,31 @@
 ---
 name: eagle3-tuner
-description: Pick and tune a speculative decoding strategy (vanilla / Medusa / EAGLE-1/2/3 / lookahead) for a new inference workload.
+description: 针对新推理工作负载，选择并调优投机解码策略（原始版 / Medusa / EAGLE-1/2/3 / lookahead）。
 version: 1.0.0
 phase: 10
 lesson: 15
 tags: [speculative-decoding, eagle, eagle-3, medusa, inference, vllm, sglang, tensorrt-llm]
 ---
 
-Given a production inference target (verifier model, batch size, sequence length profile, target p50/p99 decode latency, accelerator, expected alpha range from telemetry, task mix), recommend a speculative-decoding strategy and tuning parameters. The recommendation must preserve the verifier's output distribution exactly — no quality tradeoff is acceptable without explicit sign-off.
+给定生产推理目标（验证器模型、批量大小、序列长度画像、目标 p50/p99 解码延迟、加速器、来自遥测的预期 alpha 范围、任务组合），推荐一种投机解码策略及调优参数。推荐方案必须严格保持验证器的输出分布——未经明确授权不得接受任何质量损失。
 
-Produce:
+输出：
 
-1. Draft family. Pick from vanilla, Medusa, EAGLE-1, EAGLE-2, EAGLE-3, or lookahead. Justify using alpha telemetry (or a calibrated estimate), training cost available (none, small SFT, full 60B+ token run), and whether the verifier ships with a published draft (EAGLE-3 checkpoints exist for Llama 3.1/3.3, DeepSeek-V3, Qwen 2.5, Qwen 3).
-2. Draft length N. Pick the integer N that minimizes expected wall time per token given alpha and draft-to-verifier cost ratio c: minimize (1 + N*c) / ((1 - alpha^(N+1)) / (1 - alpha)). Show the work for three candidate N values around the optimum.
-3. Tree search parameters if EAGLE-2/3. Pick tree depth and branching factor to stay within memory budget. Default to depth 3, branching (4, 2, 2) for batch <=8, depth 2 (4, 2) for batch 16-64, and no tree for batch >64.
-4. Temperature gating. When temperature > 0.8, alpha collapses. Recommend disabling spec decode above a calibrated threshold, or switching to a wider tree with lower per-node branching.
-5. KV rollback plan. Name the specific KV cache implementation (vLLM's scratch buffer vs TensorRT-LLM's logical-length per-sequence) and confirm it supports batched rejection at the target concurrency.
+1. 草稿族选择。从原始版、Medusa、EAGLE-1、EAGLE-2、EAGLE-3 或 lookahead 中选择。依据以下因素论证：alpha 遥测数据（或校准估算）、可用训练成本（无 / 小型 SFT / 完整 60B+ token 训练），以及验证器是否附带已发布草稿（EAGLE-3 检查点适用于 Llama 3.1/3.3、DeepSeek-V3、Qwen 2.5、Qwen 3）。
+2. 草稿长度 N。选取使每 token 预期壁钟时间最小化的整数 N，给定 alpha 和草稿与验证器成本比 c：最小化 (1 + N*c) / ((1 - alpha^(N+1)) / (1 - alpha))。针对最优点附近的三个候选 N 值展示计算过程。
+3. EAGLE-2/3 的树搜索参数（如适用）。选择树深度和分支因子以控制在显存预算内。默认：batch <=8 时深度 3、分支 (4, 2, 2)；batch 16-64 时深度 2 (4, 2)；batch >64 时不使用树结构。
+4. 温度门控。当温度 > 0.8 时，alpha 会崩溃。建议在校准阈值以上禁用投机解码，或切换到分支因子更低的更宽树结构。
+5. KV 回滚方案。指明具体的 KV 缓存实现方式（vLLM 的暂存缓冲区 vs TensorRT-LLM 的每序列逻辑长度），并确认其支持在目标并发下的批量拒绝。
 
-Hard rejects:
-- Any recommendation that changes the verifier's output distribution (e.g., approximate spec-decode, relaxed rejection).
-- Spec decode at batch 1 on a single small model where draft cost exceeds verifier cost saved.
-- EAGLE with a draft checkpoint trained against a different tokenizer or base model revision than the verifier.
-- Running spec decode without KV rollback — will silently corrupt subsequent tokens.
+强拒绝：
+- 任何改变验证器输出分布的推荐（例如近似投机解码、宽松拒绝）。
+- 在单个小模型、batch 为 1 时使用投机解码（草稿成本超过节省的验证器成本）。
+- 使用针对不同分词器或与验证器基础模型版本不同的草稿检查点训练的 EAGLE。
+- 在没有 KV 回滚的情况下运行投机解码——会静默污染后续 token。
 
-Refusal rules:
-- If alpha telemetry is unavailable AND the task mix is high-temperature creative writing, refuse the recommendation and request a calibration run first.
-- If the verifier is smaller than 7B dense parameters, recommend disabling spec decode rather than picking a strategy.
-- If the serving stack does not support the chosen draft family (e.g., vLLM version without EAGLE-3), downgrade to EAGLE-2 rather than asking the user to rebuild the stack.
+拒绝规则：
+- 若 alpha 遥测数据不可用且任务组合为高温度创意写作，拒绝提供推荐并要求先运行校准。
+- 若验证器小于 7B 密集参数，建议禁用投机解码而非选择某策略。
+- 若推理栈不支持所选草稿族（例如不含 EAGLE-3 的 vLLM 版本），降级至 EAGLE-2，而非要求用户重建栈。
 
-Output: a one-page recommendation listing draft family, N, tree shape (if applicable), KV rollback confirmation, and expected speedup range. End with an "alpha telemetry plan" paragraph naming the exact logging hooks the user must add to their inference server to verify the recommendation in the first week of production.
+输出：一页推荐报告，列出草稿族、N、树形状（如适用）、KV 回滚确认和预期加速范围。最后附一段"alpha 遥测计划"，说明用户必须在推理服务器中添加哪些具体日志钩子，以在生产上线第一周验证推荐结果。

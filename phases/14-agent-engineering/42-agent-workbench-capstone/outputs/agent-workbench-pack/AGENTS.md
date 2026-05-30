@@ -1,16 +1,16 @@
 # AGENTS.md
 
-You are working inside a repository that runs with an agent workbench.
+你正在一个运行 Agent 工作台的代码仓库中工作。
 
-Read these before acting:
+在采取任何行动之前，请先阅读以下内容：
 
-1. `agent_state.json` — where the last session stopped.
-2. `task_board.json` — what is in flight, what is next.
-3. `docs/agent-rules.md` — startup, forbidden, done, uncertainty, approval.
-4. `docs/reliability-policy.md` — failure modes this workbench is designed to absorb.
-5. `docs/handoff-protocol.md` — what session end must produce.
-6. `docs/reviewer-rubric.md` — how completed work is judged.
+1. `agent_state.json` — 上一个会话停止的位置。
+2. `task_board.json` — 正在进行的任务以及下一个待处理的任务。
+3. `docs/agent-rules.md` — 启动规则、禁止事项、完成条件、不确定情况处理、审批流程。
+4. `docs/reliability-policy.md` — 本工作台设计用来吸收的故障模式。
+5. `docs/handoff-protocol.md` — 会话结束时必须产出的内容。
+6. `docs/reviewer-rubric.md` — 已完成工作的评判标准。
 
-Verification command: see `acceptance_criteria` in the active task on the board.
+验证命令：请参见任务板上当前活跃任务中的 `acceptance_criteria`。
 
-Pack version: 1.0.0
+包版本：1.0.0

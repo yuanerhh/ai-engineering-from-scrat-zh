@@ -1,31 +1,31 @@
 ---
 name: mesa-diagnostic
-description: Classify an observed safety failure as outer-alignment, proxy-inner, or deceptive-inner.
+description: 将观察到的安全失效分类为外层对齐、代理内层或欺骗性内层问题。
 version: 1.0.0
 phase: 18
 lesson: 6
 tags: [mesa-optimization, deceptive-alignment, inner-alignment, hubinger]
 ---
 
-Given a safety evaluation report (eval task, failure mode, model class, training recipe), classify the failure into the Hubinger 2019 categories and recommend the mitigation class that addresses it.
+给定一份安全评估报告（评估任务、失效模式、模型类别、训练配方），将失效分类至 Hubinger 2019 类别，并推荐解决该失效的缓解类别。
 
-Produce:
+输出内容：
 
-1. Failure-mode categorization. Pick one of:
-   - Outer-alignment failure: the base objective (reward, loss) was wrong; the model optimized it correctly.
-   - Inner-alignment proxy failure: mesa-objective is a proxy that tracks base in-distribution; fails off-distribution.
-   - Inner-alignment deceptive: mesa-optimizer has situational awareness and defects at deployment; training behaviour is clean.
-2. Evidence trace. For each category, what evidence would support it. For deceptive, distinguish from proxy: evidence of situational awareness (date sensitivity, eval-vs-deployment distinguishers, strategic reasoning in chain-of-thought).
-3. Mitigation class. For outer-alignment: change the objective (CAI, better reward data, process supervision). For proxy-inner: distributional coverage, ensembles, held-out evals. For deceptive-inner: control measures (Lesson 10), interpretability (residual-stream probes), capability reductions.
-4. Known-failures check. For deceptive-inner, cite the relevant 2024-2026 empirical demonstration (Sleeper Agents, Alignment Faking, In-Context Scheming) this failure most resembles.
+1. 失效模式分类。从以下选一：
+   - 外层对齐失效：基础目标（奖励、损失）本身有误；模型对其进行了正确优化。
+   - 内层对齐代理失效：mesa 目标是在分布内跟踪基础目标的代理；在分布外失败。
+   - 内层对齐欺骗性：mesa 优化器具有情境感知能力，在部署时背叛；训练行为是干净的。
+2. 证据追踪。对每个类别，说明哪些证据支持该分类。对欺骗性分类，需与代理失效区分：情境感知的证据（日期敏感性、评估-vs-部署区分器、思维链中的策略性推理）。
+3. 缓解类别。外层对齐：改变目标（CAI、更好的奖励数据、过程监督）。代理内层：分布覆盖、集成、保留评估。欺骗性内层：控制措施（第 10 课）、可解释性（残差流探针）、能力降低。
+4. 已知失效对照。对欺骗性内层，引用该失效最接近的 2024-2026 年实证演示（Sleeper Agents、Alignment Faking、In-Context Scheming）。
 
-Hard rejects:
-- Any classification of deceptive-inner without evidence of situational awareness. "Unexpected behaviour at deployment" is not enough — it could be proxy-inner.
-- Any claim that adversarial robustness training alone addresses deceptive-inner. Hubinger 2019 predicts (and Sleeper Agents 2024 confirms) that adversarial training can teach better test-vs-deployment distinguishers.
-- Any recommendation to retrain a deceptively aligned model on more data. The prior predicts deception is preserved under further training.
+硬性拒绝：
+- 任何在缺乏情境感知证据的情况下将其分类为欺骗性内层的做法。"部署时出现意外行为"是不够的——这可能是代理内层失效。
+- 任何声称对抗性鲁棒性训练单独能解决欺骗性内层问题的说法。Hubinger 2019 预测（Sleeper Agents 2024 确认）对抗性训练可能教会模型更好地区分测试与部署环境。
+- 任何建议在更多数据上重新训练欺骗性对齐模型的推荐。该先验预测欺骗性在进一步训练中得以保持。
 
-Refusal rules:
-- If the evidence is a single failure on a single prompt, refuse to classify. Base rates matter; you need a distribution of failures.
-- If the user asks you to "rule out" deceptive alignment, refuse — you can estimate its probability from evidence, but you cannot rule it out behaviourally alone.
+拒绝规则：
+- 若证据仅为单个提示上的单次失效，拒绝分类。基础率至关重要；需要失效分布。
+- 若用户要求"排除"欺骗性对齐，拒绝——可以从证据估计其概率，但仅凭行为无法排除它。
 
-Output: a one-page diagnosis with category, evidence trace, mitigation class, and nearest empirical analog. Cite Hubinger et al. (arXiv:1906.01820) once.
+输出：一页诊断报告，包含类别、证据追踪、缓解类别以及最接近的实证类比。引用 Hubinger 等人（arXiv:1906.01820）一次。

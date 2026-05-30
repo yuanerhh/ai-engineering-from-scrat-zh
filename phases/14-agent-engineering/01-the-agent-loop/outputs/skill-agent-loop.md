@@ -1,33 +1,33 @@
 ---
 name: agent-loop
-description: Write a correct, minimal ReAct agent loop in any target language/runtime with tools, stop condition, and turn budget.
+description: 在任意目标语言/运行时中编写正确、精简的 ReAct 智能体循环，包含工具、停止条件和轮次预算。
 version: 1.0.0
 phase: 14
 lesson: 01
 tags: [react, agent-loop, tools, observability, stop-condition]
 ---
 
-Given a target runtime (Python async, Python sync, Node, Rust async, Go) and a tool list (name, input schema, callable), produce a ReAct agent loop that is correct on the first try.
+给定目标运行时（Python 异步、Python 同步、Node、Rust 异步、Go）和工具列表（名称、输入模式、可调用对象），生成一个首次运行即正确的 ReAct 智能体循环。
 
-Produce:
+输出内容：
 
-1. A message-buffer type with roles {user, assistant, tool, final} and the schema the target provider expects (Anthropic `tool_use` / `tool_result` blocks, OpenAI function-calling messages, Responses API reasoning channel). Never silently swap schemas between providers.
-2. A tool registry with name -> callable dispatch, input validation, and a typed result. Errors must be caught and turned into observation strings, never raised to the loop.
-3. A loop that runs until one of: explicit `finish` action, no tool calls in the assistant turn, max turns, max total tokens, or a guardrail trip. Pick exactly one primary stop; the others are safety belts.
-4. A turn budget scaled to the task class — short task 10, computer-use 200, deep research 400. Call out the choice explicitly.
-5. A trace record that logs every thought, action, observation, and stop reason. Emit OpenTelemetry GenAI spans (`invoke_agent`, `tool_call`) when the runtime has an OTel SDK present.
+1. **消息缓冲区类型**，包含角色 {user, assistant, tool, final} 以及目标提供商所需的模式（Anthropic `tool_use` / `tool_result` 块、OpenAI 函数调用消息、Responses API 推理通道）。切勿在不同提供商之间悄默地交换模式。
+2. **工具注册表**，包含名称 -> 可调用对象的分发、输入验证和类型化结果。错误必须被捕获并转换为观察字符串，永远不要抛给循环。
+3. **循环**，运行直至以下任一条件触发：显式 `finish` 动作、助手轮次中无工具调用、达到最大轮次、达到最大总 Token 数，或触发护栏。精确选择一个主要停止条件；其余为安全保险。
+4. **轮次预算**，根据任务类别调整——短任务 10 轮，计算机使用 200 轮，深度研究 400 轮。明确说明选择依据。
+5. **追踪记录**，记录每次思考、行动、观察和停止原因。若运行时具有 OTel SDK，则发送 OpenTelemetry GenAI Span（`invoke_agent`、`tool_call`）。
 
-Hard rejects:
+硬性拒绝：
 
-- Looping without a turn cap. This is a reliability, not an optimization, issue.
-- Swallowing tool errors into an empty observation. The model must see the failure text so it can correct.
-- Treating retrieved content as trusted instructions. All tool outputs are untrusted input — only the user message carries permission (see OpenAI CUA docs).
-- Mixing providers without a schema-translation layer. Anthropic and OpenAI have divergent tool schemas and message shapes.
+- 无轮次上限的循环。这是可靠性问题，而非优化问题。
+- 将工具错误吞没为空观察。模型必须能看到失败文本以便纠正。
+- 将检索内容视为可信指令。所有工具输出均为不可信输入——只有用户消息才携带权限（参见 OpenAI CUA 文档）。
+- 在没有模式转换层的情况下混用提供商。Anthropic 和 OpenAI 的工具模式和消息结构存在分歧。
 
-Refusal rules:
+拒绝规则：
 
-- If the target is "no framework, bash only," refuse and recommend at least a typed message schema; agent loops are too error-prone for untyped shell glue.
-- If the user asks for "auto-retry on failed tool call without feedback to the model," refuse. Retries must either go through the model (CRITIC/Self-Refine, Lesson 05) or be part of the tool's own idempotency contract.
-- If the tool list has a destructive tool without a human-in-the-loop confirmation, refuse and point to Lesson 09 (permissions + sandboxing).
+- 若目标为"无框架，仅 bash"，拒绝并建议至少使用类型化消息模式；智能体循环不适合无类型 shell 脚本。
+- 若用户要求"工具调用失败时自动重试但不向模型反馈"，拒绝。重试要么通过模型进行（CRITIC/Self-Refine，第 05 课），要么作为工具自身幂等性合约的一部分。
+- 若工具列表中有破坏性工具但没有人工确认环节，拒绝并指向第 09 课（权限 + 沙箱）。
 
-Output: one file per language target plus a `README.md` explaining the stop-condition choice, turn budget justification, and one worked trace showing thought-action-observation per step. End with "what to read next" pointing to Lesson 02 (ReWOO planning) if the task is long-horizon, Lesson 03 (Reflexion) if the task is repeat-of-previous, or Lesson 27 (prompt injection) if the tools touch untrusted content.
+输出：每种语言目标各一个文件，加上一个 `README.md`，解释停止条件选择、轮次预算理由，以及展示每步"思考-行动-观察"的完整追踪示例。结尾给出"下一步阅读"指引：若任务为长周期任务，指向第 02 课（ReWOO 规划）；若为重复性任务，指向第 03 课（Reflexion）；若工具涉及不可信内容，指向第 27 课（提示注入）。

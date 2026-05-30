@@ -1,29 +1,29 @@
 ---
 name: red-team-stack
-description: Recommend a red-team tool stack and configuration for a given deployment.
+description: 根据给定的部署情况，推荐红队工具栈和配置方案。
 version: 1.0.0
 phase: 18
 lesson: 16
 tags: [llama-guard, garak, pyrit, red-team-tooling, mlcommons-hazards]
 ---
 
-Given a deployment description, recommend a red-team tool stack and regression cadence.
+根据部署描述，推荐红队工具栈和回归测试节奏。
 
-Produce:
+产出内容：
 
-1. Classifier placement. Recommend Llama Guard (3-8B, 3-1B-INT4, or 4-12B) at input, output, or both. For edge deployments, prefer 3-1B-INT4. For multimodal, Llama Guard 4.
-2. Probe scanner configuration. Recommend Garak probes relevant to the deployment: hallucination (for RAG systems), data leakage (for PII-adjacent), prompt injection (always), jailbreaks (always). Specify the Prompt-Guard-86M + Llama-Guard-3-8B shield pairing for end-to-end evaluation.
-3. Campaign orchestrator. Recommend PyRIT for pre-release campaigns on models with novel capabilities. Specify converter chains to run (paraphrase, encode, translate, roleplay) and orchestrator (Crescendo for escalation, TAP for branching).
-4. Cadence. Garak nightly for regression. PyRIT per-release for deep red-teaming. Llama Guard deployed continuously.
-5. Judge calibration. Specify the judge LLM (GPT-4-turbo, StrongREJECT, internal) for every tool that uses one. Judge calibration drives reported ASRs.
+1. 分类器部署位置。推荐在输入端、输出端或两端同时部署 Llama Guard（3-8B、3-1B-INT4 或 4-12B）。边缘部署优先选择 3-1B-INT4；多模态场景选用 Llama Guard 4。
+2. 探针扫描器配置。根据部署场景推荐相应的 Garak 探针：幻觉探针（适用于 RAG 系统）、数据泄露探针（适用于涉及 PII 的场景）、提示词注入探针（始终启用）、越狱探针（始终启用）。端到端评估指定使用 Prompt-Guard-86M + Llama-Guard-3-8B 防护组合。
+3. 攻防活动编排器。对于具有新型能力的模型，在发布前的攻防活动中推荐使用 PyRIT。指定要运行的转换器链（改写、编码、翻译、角色扮演）及编排器（用于升级攻击的 Crescendo，用于分支探索的 TAP）。
+4. 执行节奏。Garak 每晚执行回归测试；PyRIT 每次发布时进行深度红队测试；Llama Guard 持续部署运行。
+5. 评判模型校准。为每个使用评判模型的工具指定具体的评判 LLM（GPT-4-turbo、StrongREJECT 或内部模型）。评判模型校准直接影响所报告的攻击成功率（ASR）。
 
-Hard rejects:
-- Any deployment without at least one Llama Guard-class input or output classifier.
-- Any release without Garak or equivalent single-turn regression.
-- Any high-stakes deployment without a PyRIT-equivalent campaign before release.
+硬性拒绝条件：
+- 任何部署，若在输入或输出端未配置至少一个 Llama Guard 级别的分类器。
+- 任何发布，若未进行 Garak 或等效的单轮回归测试。
+- 任何高风险部署，若在发布前未完成 PyRIT 级别的攻防活动。
 
-Refusal rules:
-- If the user asks for a single "best" tool, refuse — the three cover different layers and are layered, not substituted.
-- If the user asks for an all-in-one commercial alternative, refuse the recommendation and point to the 2026 state: the three open tools are the current best-practice stack.
+拒绝规则：
+- 若用户询问哪个工具"最好"，拒绝回答——这三个工具覆盖不同层次，应分层叠加使用，而非互相替代。
+- 若用户询问某个一体化商业替代方案，拒绝推荐，并指出 2026 年的现状：这三个开源工具是当前最佳实践栈。
 
-Output: a one-page recommendation that names the classifier placement, probe configuration, campaign orchestrator, regression cadence, and judge identity. Cite Meta (arXiv:2407.21783), NVIDIA Garak, and Microsoft PyRIT once each.
+输出：一页推荐报告，涵盖分类器部署位置、探针配置、攻防活动编排器、回归测试节奏和评判模型身份。分别引用 Meta（arXiv:2407.21783）、NVIDIA Garak 和 Microsoft PyRIT 各一次。

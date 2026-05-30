@@ -1,33 +1,33 @@
 ---
 name: search-policy
-description: Pick a search strategy (ReAct, ToT, LATS, evolutionary) given task shape, token budget, and evaluator quality.
+description: 根据任务形态、Token 预算和评估器质量选择搜索策略（ReAct、ToT、LATS、进化搜索）。
 version: 1.0.0
 phase: 14
 lesson: 04
 tags: [tree-of-thoughts, lats, mcts, search, value-function]
 ---
 
-Given a task shape (single-answer / multi-answer / open-ended), a token budget, and an available evaluator (scalar test / heuristic / self-eval), produce a search strategy recommendation with concrete parameters.
+给定任务形态（单答案 / 多答案 / 开放式）、Token 预算和可用评估器（标量测试 / 启发式 / 自评估），生成附具体参数的搜索策略建议。
 
-Produce:
+输出内容：
 
-1. Decision. One of: linear ReAct, beam ToT (with beam width k), BFS ToT (with max depth), DFS ToT with pruning, MCTS LATS (with iterations and UCT c), evolutionary search (only if evaluator is programmatic and checkable).
-2. Parameters. For every strategy, concrete numeric defaults: beam width, depth cap, branching factor K, rollouts per level, UCT c (default 1.4), timeout.
-3. Value function. Specify exactly what scores a node. Options: unit-test pass rate, numeric distance to target, prompted LLM score with format (sure/likely/impossible or 1..10 or vote), or environment reward.
-4. Token budget estimate. Worst-case tokens = branching_factor ^ depth * avg_prompt_tokens. Show the number. If it exceeds the user's budget, recommend a cheaper strategy.
-5. Failure modes. For each chosen strategy, list the top-two failure modes and their mitigations (e.g. LATS + noisy evaluator -> add tool-grounded verification per CRITIC, Lesson 05).
+1. **决策**。选择以下之一：线性 ReAct、束搜索 ToT（附束宽 k）、BFS ToT（附最大深度）、带剪枝的 DFS ToT、MCTS LATS（附迭代次数和 UCT c）或进化搜索（仅当评估器为可编程且可验证时）。
+2. **参数**。每种策略的具体数值默认值：束宽、深度上限、分支因子 K、每层展开次数、UCT c（默认 1.4）、超时时间。
+3. **价值函数**。明确指定节点的评分方式。可选：单元测试通过率、到目标的数值距离、带格式的 LLM 提示评分（sure/likely/impossible 或 1..10 或投票），或环境奖励。
+4. **Token 预算估算**。最差情况 Token 数 = 分支因子 ^ 深度 × 平均提示 Token 数。展示该数字。若超过用户预算，建议更廉价的策略。
+5. **失败模式**。针对所选策略，列出前两种失败模式及其缓解方法（例如 LATS + 噪声评估器 -> 每 CRITIC 添加工具验证，第 05 课）。
 
-Hard rejects:
+硬性拒绝：
 
-- Recommending search when the evaluator is unreliable (self-eval only, no ground truth). Fall back to ReAct + CRITIC.
-- Setting branching factor K higher than 5 without a compelling reason. K=3-5 is the paper default; K=10 explodes cost.
-- Applying LATS to chat-style tasks. Search does not help conversational Q&A with no programmatic target.
-- Evolutionary search without a machine-checkable fitness. AlphaEvolve is only interesting when fitness is programmatic (run tests, measure speed, verify theorem).
+- 当评估器不可靠时（仅自评估，无基准真值）推荐搜索。回退到 ReAct + CRITIC。
+- 在没有充分理由的情况下将分支因子 K 设置高于 5。K=3-5 是论文默认值；K=10 会导致成本爆炸。
+- 将 LATS 应用于聊天式任务。搜索对没有可编程目标的对话式问答没有帮助。
+- 在没有机器可检查适应度的情况下进行进化搜索。AlphaEvolve 只有在适应度可编程时才有意义（运行测试、测量速度、验证定理）。
 
-Refusal rules:
+拒绝规则：
 
-- If token budget < 5x single-trajectory cost, refuse search and recommend ReAct + Reflexion (Lesson 03).
-- If wall-clock latency budget < 10 seconds, refuse LATS and recommend ReAct.
-- If the task is pure information retrieval, refuse search and recommend ReWOO (Lesson 02).
+- 若 Token 预算 < 单轨迹成本的 5 倍，拒绝搜索并建议使用 ReAct + Reflexion（第 03 课）。
+- 若端到端延迟预算 < 10 秒，拒绝 LATS 并建议使用 ReAct。
+- 若任务为纯信息检索，拒绝搜索并建议使用 ReWOO（第 02 课）。
 
-Output: a recommendation block (chosen strategy, parameters, value function, budget estimate) plus a "what to read next" note pointing to Lesson 05 (CRITIC) for evaluator reliability, Lesson 11 (AlphaEvolve) for evolutionary variants, or Lesson 30 (eval-driven development) for benchmark-grade validation.
+输出：推荐块（所选策略、参数、价值函数、预算估算），加上"下一步阅读"指引：评估器可靠性问题指向第 05 课（CRITIC），进化变体指向第 11 课（AlphaEvolve），基准级验证指向第 30 课（评估驱动开发）。

@@ -1,45 +1,45 @@
 ---
 name: crew-or-flow
-description: Pick CrewAI Crew or Flow for a given task, and scaffold the minimal implementation.
+description: 针对给定任务选择 CrewAI Crew 或 Flow，并构建最小化实现脚手架。
 version: 1.0.0
 phase: 14
 lesson: 15
 tags: [crewai, crews, flows, multi-agent, role-based]
 ---
 
-Given a task description, pick Crew (autonomous) or Flow (deterministic), then scaffold.
+给定任务描述，选择 Crew（自主式）或 Flow（确定性），然后构建脚手架。
 
-Decision:
+决策逻辑：
 
-1. Does the task have SLA, compliance, or deterministic replay requirements? -> Flow.
-2. Is the task exploratory (research, first draft, brainstorm)? -> Crew.
-3. Does the task have 4+ specialists with LLM-picked ordering? -> Hierarchical Crew.
-4. Does the task have <=3 specialists in a fixed order? -> Sequential Crew or Flow — prefer Flow.
+1. 任务是否有 SLA、合规或确定性回放要求？-> Flow。
+2. 任务是否具有探索性（研究、初稿、头脑风暴）？-> Crew。
+3. 任务是否有 4 个以上专家且由 LLM 决定顺序？-> 层级式 Crew。
+4. 任务是否有不超过 3 个专家且顺序固定？-> 顺序式 Crew 或 Flow——优先选 Flow。
 
-For Crews, produce:
+对于 Crew，输出：
 
-1. Agent definitions: role, goal, backstory (tight, <=200 words), tools.
-2. Task definitions: description, expected_output, agent.
-3. Crew with the right Process (Sequential | Hierarchical).
-4. A test harness that runs the Crew on sample inputs and checks that expected_outputs are produced.
+1. 智能体定义：role、goal、backstory（简洁，不超过 200 字）、tools。
+2. 任务定义：description、expected_output、agent。
+3. 使用正确 Process（Sequential | Hierarchical）的 Crew。
+4. 一个测试用例，在样本输入上运行 Crew 并检查是否产出预期输出。
 
-For Flows, produce:
+对于 Flow，输出：
 
-1. `@start` entry function.
-2. `@listen(topic)` steps forming a DAG.
-3. Explicit event topics; no magical broadcast.
-4. A replay harness: given a kickoff payload, rerun deterministically.
+1. `@start` 入口函数。
+2. 构成 DAG 的 `@listen(topic)` 步骤。
+3. 显式事件主题；不使用魔法式广播。
+4. 一个回放测试用例：给定 kickoff 载荷，确定性地重新运行。
 
-Hard rejects:
+硬性拒绝：
 
-- Crews without backstories. Backstories are load-bearing.
-- Flows without explicit topic names. "Implicit chaining" defeats the audit purpose.
-- Hierarchical Crews with 2 specialists. The manager overhead is not earning cost.
+- 没有 backstory 的 Crew。Backstory 是承重构件。
+- 没有显式主题名称的 Flow。"隐式链式调用"会破坏审计目的。
+- 只有 2 个专家的层级式 Crew。管理者的开销无法收回成本。
 
-Refusal rules:
+拒绝规则：
 
-- If the user asks for a Crew on a prod-only compliance task, refuse and migrate to Flow.
-- If the user asks for a Flow on an open-ended research task, refuse and migrate to Crew.
-- If the backstory exceeds 200 words, refuse and require a trim. Context budget is finite.
+- 如果用户在纯合规生产任务上要求使用 Crew，拒绝并迁移到 Flow。
+- 如果用户在开放式研究任务上要求使用 Flow，拒绝并迁移到 Crew。
+- 如果 backstory 超过 200 字，拒绝并要求精简。上下文预算是有限的。
 
-Output: `agents.py`, `tasks.py`, `crew.py` or `flow.py`, plus `README.md` with the decision rationale. End with "what to read next" pointing to Lesson 24 (Langfuse/AgentOps) for observability, or Lesson 13 if the Flow needs durable resume semantics.
+输出：`agents.py`、`tasks.py`、`crew.py` 或 `flow.py`，以及 `README.md`（含决策依据）。末尾附"下一步阅读"，若需要可观测性指向第 24 课（Langfuse/AgentOps），若 Flow 需要持久化恢复语义指向第 13 课。

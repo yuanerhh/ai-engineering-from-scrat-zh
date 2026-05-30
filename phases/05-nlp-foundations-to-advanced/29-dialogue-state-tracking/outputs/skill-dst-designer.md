@@ -1,18 +1,18 @@
 ---
 name: dst-designer
-description: Design a dialogue state tracker — schema, extractor, update policy, evaluation.
+description: 设计对话状态跟踪器——模式、抽取器、更新策略、评估。
 version: 1.0.0
 phase: 5
 lesson: 29
 tags: [nlp, dialogue, task-oriented]
 ---
 
-Given a use case (domain, languages, vocab openness, compliance needs), output:
+给定使用场景（领域、语言、词汇开放度、合规需求），输出：
 
-1. Schema. Domain list, slots per domain, open vs closed vocabulary per slot.
-2. Extractor. Rule-based / seq2seq / LLM-with-Pydantic. Reason.
-3. Update policy. Regenerate-whole-state / incremental; correction handling; negation handling.
-4. Evaluation. Joint Goal Accuracy on a held-out dialogue set, slot-level precision/recall, confusion on the hardest slot.
-5. Confirmation flow. When to explicitly ask the user to confirm (destructive actions, low-confidence extractions).
+1. 模式。领域列表、每个领域的槽位、每个槽位的开放/封闭词汇。
+2. 抽取器。基于规则 / seq2seq / LLM+Pydantic。理由。
+3. 更新策略。重新生成完整状态 / 增量更新；纠错处理；否定处理。
+4. 评估。留出对话集上的联合目标准确率、槽位级别精确率/召回率、最难槽位的混淆分析。
+5. 确认流程。何时明确要求用户确认（破坏性操作、低置信度抽取）。
 
-Refuse LLM-only DST for compliance-sensitive slots without a rule-based secondary check. Refuse any DST that cannot roll back a slot on user correction. Flag schemas without version tags.
+拒绝在合规敏感槽位中单独使用 LLM 进行对话状态跟踪而不进行基于规则的二次校验。拒绝任何无法在用户纠错后回滚槽位的对话状态跟踪器。标记没有版本标签的模式。

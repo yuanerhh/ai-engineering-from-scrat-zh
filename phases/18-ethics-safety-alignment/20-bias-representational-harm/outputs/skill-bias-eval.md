@@ -1,29 +1,29 @@
 ---
 name: bias-eval
-description: Audit a bias evaluation report across metric categories, intersectionality, and debias mechanism.
+description: 从指标类别、交叉性和去偏机制三个维度审计偏见评估报告。
 version: 1.0.0
 phase: 18
 lesson: 20
 tags: [bias, fairness, weat, intersectionality, mechanistic-interpretability]
 ---
 
-Given a bias evaluation report or fairness claim, audit across the Gallegos et al. 2024 three-category framework and the 2024-2025 intersectionality literature.
+针对偏见评估报告或公平性声明，依据 Gallegos 等人 2024 年三类别框架和 2024-2025 年交叉性文献进行审计。
 
-Produce:
+产出内容：
 
-1. Metric coverage. Does the evaluation include at least one metric from each category: embedding-based (WEAT-style), probability-based (stereotype log-likelihood), generated-text-based (downstream-task measurement)? Flag missing categories.
-2. Harm-type separation. Does the evaluation distinguish representational harm from allocational harm? A report that measures only stereotype production is not measuring downstream resource allocation.
-3. Intersectionality coverage. Are intersectional axes evaluated, or only single-axis (gender alone, race alone)? Per An et al. 2025, intersectional effects are routinely missed by single-axis evaluation.
-4. Debias mechanism. If debiasing was applied, identify whether it operates on embeddings (projection), MLP neurons (Yu & Ananiadou 2025), SAE features (Ahsan & Wallace 2025), attention heads (UniBias 2024), or post-hoc output filtering. Estimate the general-capability cost.
-5. Axis diversity. Per the 2025 meta-critique, binary-gender bias is over-studied relative to other axes. Does the evaluation cover disability, religion, migration, or multi-lingual identity axes?
+1. 指标覆盖率。评估是否涵盖以下每类至少一项指标：基于嵌入的指标（WEAT 风格）、基于概率的指标（刻板印象对数似然）、基于生成文本的指标（下游任务测量）？标记缺失类别。
+2. 危害类型区分。评估是否区分了表征性危害与分配性危害？仅测量刻板印象生成的报告，并未衡量下游资源分配问题。
+3. 交叉性覆盖率。是否评估了交叉性轴，还是仅评估了单一轴（单独性别、单独种族）？根据 An 等人 2025 年的研究，单轴评估通常会遗漏交叉性效应。
+4. 去偏机制。若已应用去偏处理，确定其作用于哪个层面：嵌入（投影）、MLP 神经元（Yu & Ananiadou 2025）、SAE 特征（Ahsan & Wallace 2025）、注意力头（UniBias 2024）还是后处理输出过滤。估算通用能力损耗。
+5. 轴多样性。根据 2025 年元批评，二元性别偏见的研究过度集中，其他轴相对不足。评估是否覆盖了残障、宗教、移民或多语言身份等维度？
 
-Hard rejects:
-- Any "debiased" claim based on a single metric category.
-- Any fairness claim without intersectional evaluation.
-- Any debias intervention without a general-capability delta.
+硬性拒绝条件：
+- 任何仅基于单一指标类别的"已去偏"声明。
+- 任何缺乏交叉性评估的公平性声明。
+- 任何缺乏通用能力损耗数据的去偏干预措施。
 
-Refusal rules:
-- If the user asks whether their model is "bias-free," refuse the binary claim; bias is a continuous property with multiple metrics.
-- If the user asks for a recommended debias operation, refuse a single recommendation — choice depends on where the bias lives (embeddings, neurons, heads, outputs).
+拒绝规则：
+- 若用户询问其模型是否"无偏见"，拒绝二元声明；偏见是一个具有多种指标的连续属性。
+- 若用户要求推荐某种去偏操作，拒绝单一推荐——选择取决于偏见所在位置（嵌入、神经元、注意力头、输出）。
 
-Output: a one-page audit filling the five sections, flagging missing metric categories, and recommending the single highest-value additional evaluation. Cite Gallegos et al. 2024 and one 2024-2025 intersectionality paper once each.
+输出：一页审计报告，填充上述五个部分，标出缺失的指标类别，并推荐单一最具价值的补充评估。分别引用 Gallegos 等人 2024 和一篇 2024-2025 年交叉性研究论文各一次。

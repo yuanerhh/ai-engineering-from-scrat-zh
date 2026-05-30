@@ -1,31 +1,31 @@
 ---
 name: multimodal-agent-designer
-description: Design a multimodal agent (computer-use, GUI grounding, web or mobile) with action schema, memory strategy, and benchmark evaluation plan.
+description: 设计多模态智能体（计算机使用、GUI 定位、网页或移动端），包含动作模式、记忆策略和基准评估方案。
 version: 1.0.0
 phase: 12
 lesson: 25
 tags: [multimodal-agents, computer-use, gui-grounding, visualwebarena, agentvista]
 ---
 
-Given a computer-use product spec (domain, action set, evaluation target), design the agent loop, memory strategy, grounding mode, and evaluation.
+给定计算机使用产品规格（领域、动作集、评估目标），设计智能体循环、记忆策略、定位模式和评估方案。
 
-Produce:
+输出：
 
-1. Action schema. JSON definition of supported actions (click, type, scroll, drag, select, navigate, done, plus any visual tools).
-2. Input mode. Screenshot-only, accessibility-tree, or hybrid. Hybrid default for browsers; screenshot-only for desktop apps without accessibility hooks.
-3. Model pick. Qwen2.5-VL-72B (open), Claude Opus 4.7 computer-use (closed, strong), GPT-5 (closed, stronger). Justify by benchmark and cost.
-4. Memory strategy. Summary-chain every 5 steps + last-2 screenshots live; log-only for very long workflows.
-5. Error recovery. On action failure, re-ground via element_desc semantic hint; retry up to 2 times; fall back to replanning.
-6. Evaluation plan. ScreenSpot-Pro for grounding, VisualWebArena for end-to-end, AgentVista for hard multi-step workflows. Expected score tier.
+1. 动作模式。支持的动作 JSON 定义（click、type、scroll、drag、select、navigate、done，以及任何视觉工具）。
+2. 输入模式。仅截图、无障碍树或混合模式。浏览器默认使用混合模式；没有无障碍钩子的桌面应用使用仅截图模式。
+3. 模型选择。Qwen2.5-VL-72B（开源）、Claude Opus 4.7 计算机使用（闭源，性能强）、GPT-5（闭源，性能更强）。依据基准和成本进行论证。
+4. 记忆策略。每 5 步进行一次摘要链 + 保留最近 2 张实时截图；超长工作流仅保留日志。
+5. 错误恢复。动作失败时，通过 element_desc 语义提示重新定位；最多重试 2 次；回退到重新规划。
+6. 评估方案。ScreenSpot-Pro 用于定位评估，VisualWebArena 用于端到端评估，AgentVista 用于复杂多步骤工作流评估。给出预期分数层级。
 
-Hard rejects:
-- Using free-text action output. Always JSON-structured with explicit schema.
-- Claiming open 7B models match frontier on AgentVista. Gap is 10-20 points.
-- Relying on coordinate memory across screenshots. Coordinates drift between captures.
+强拒绝：
+- 使用自由文本动作输出。始终使用带显式模式的 JSON 结构化输出。
+- 声称开源 7B 模型在 AgentVista 上能与前沿模型媲美。差距为 10-20 分。
+- 依赖跨截图的坐标记忆。坐标在不同截图之间会漂移。
 
-Refusal rules:
-- If product requires >50 step workflows, refuse single-agent loop and recommend hierarchical planner + executor split.
-- If product works on a regulated platform without accessibility hooks, flag screenshot-only reliability limit and propose heavy verification.
-- If task category is outside trained distributions (specialized industrial software), refuse off-the-shelf and propose fine-tuning on domain screenshots.
+拒绝规则：
+- 若产品需要超过 50 步的工作流，拒绝单智能体循环，推荐层级规划器 + 执行器分离架构。
+- 若产品在无无障碍钩子的受监管平台上运行，标记仅截图可靠性限制并建议进行严格验证。
+- 若任务类别超出训练分布（专业工业软件），拒绝使用现成模型，建议在领域截图上进行微调。
 
-Output: one-page agent design with action schema, input mode, model pick, memory, recovery, evaluation. End with arXiv 2401.10935 (SeeClick), 2401.13649 (VisualWebArena), 2602.23166 (AgentVista).
+输出：一页智能体设计，包含动作模式、输入模式、模型选择、记忆策略、错误恢复和评估方案。最后附 arXiv 2401.10935（SeeClick）、2401.13649（VisualWebArena）、2602.23166（AgentVista）。

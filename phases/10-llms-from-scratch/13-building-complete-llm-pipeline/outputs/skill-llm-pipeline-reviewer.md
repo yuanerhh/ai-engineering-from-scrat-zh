@@ -1,31 +1,31 @@
 ---
 name: llm-pipeline-reviewer
-description: Review an end-to-end LLM training pipeline manifest before a multi-million-dollar run.
+description: 在耗资数百万的训练运行前审查端到端 LLM 训练流水线清单。
 version: 1.0.0
 phase: 10
 lesson: 13
 tags: [pipeline, training, manifest, eval-gate, cost, rollback]
 ---
 
-Given a proposed training pipeline manifest (YAML or JSON describing tokenizer, data, pre-training, SFT, alignment, eval, quantization, and serving stages), produce a review covering:
+给定拟议的训练流水线清单（YAML 或 JSON，描述分词器、数据、预训练、SFT、对齐、评估、量化和服务阶段），产出涵盖以下内容的审查报告：
 
-1. Stage graph. Confirm each stage has typed inputs and outputs. Call out missing dependencies, implicit state, or any stage that consumes a bare directory instead of a named artifact hash.
-2. Hash chain. Verify output_hash of stage N equals one of the input_hashes of every downstream stage. Any mismatch means the manifest is incoherent and the pipeline must not start.
-3. Eval gate. Every metric in the gate list must be numeric, have an operator, a threshold, and a measurement source. Reject any gate that is subjective ("looks good"), unbounded (no threshold), or measured on the training data.
-4. Regression guard. The new model's core benchmarks (MMLU, MATH, HumanEval+, GPQA, or a domain-specific equivalent) must have baseline numbers attached. A run with no baselines is a run with no regression detection.
-5. KL budget. Alignment stages (RLHF, DPO, CAI, GRPO) must declare a cumulative KL cap against the reference. Unbounded KL is an unbounded drift.
-6. Contamination check. Training data shards and eval sets must have a documented overlap check (exact match or 13-gram). Required pass threshold: <0.1%.
-7. Cost estimate. Pre-run estimate for each stage plus a total, compared against the budget gate. If estimate > budget, pipeline refuses to start.
-8. Rollback plan. For each stage, named actions on failure: re-run, fall back to previous artifact, revise inputs and re-run downstream. Expensive stages (pre-training) must have a warm checkpoint strategy.
-9. Artifact store. Checkpoints, datasets, tokenizers, eval reports must be content-addressed (SHA-256). Filename-addressed artifacts ("latest.pt") are a hard reject.
-10. Observability. Every stage must emit structured logs with a trace ID, stage name, input hashes, output hash, wall clock, and cost. Missing trace IDs mean the run cannot be debugged after the fact.
+1. 阶段图。确认每个阶段具有类型化的输入和输出。指出缺失的依赖关系、隐式状态，或任何消费裸目录而非命名工件哈希的阶段。
+2. 哈希链。验证第 N 阶段的 output_hash 等于每个下游阶段的某个 input_hash。任何不匹配意味着清单不一致，流水线不得启动。
+3. 评估门控。门控列表中的每个指标必须是数值型，具有运算符、阈值和测量来源。拒绝任何主观（"看起来不错"）、无界（无阈值）或在训练数据上测量的门控。
+4. 回归保障。新模型的核心基准（MMLU、MATH、HumanEval+、GPQA 或等效的领域特定基准）必须附有基线数值。没有基线的运行就是没有回归检测的运行。
+5. KL 预算。对齐阶段（RLHF、DPO、CAI、GRPO）必须声明相对于参考模型的累积 KL 上限。无限制的 KL 意味着无限制的漂移。
+6. 数据污染检查。训练数据分片和评估集必须有记录在案的重叠检查（精确匹配或 13-gram）。要求通过阈值：<0.1%。
+7. 成本估算。每个阶段的预运行估算加上总计，与预算门控对比。若估算 > 预算，流水线拒绝启动。
+8. 回滚计划。每个阶段在失败时的命名操作：重新运行、回退到上一个工件、修改输入后重新运行下游。高成本阶段（预训练）必须有热检查点策略。
+9. 工件存储。检查点、数据集、分词器、评估报告必须采用内容寻址（SHA-256）。基于文件名寻址的工件（"latest.pt"）为硬性拒绝。
+10. 可观测性。每个阶段必须输出包含追踪 ID、阶段名称、输入哈希、输出哈希、墙钟时间和成本的结构化日志。缺少追踪 ID 意味着运行后无法调试。
 
-Red flags that halt the review:
-- a gate missing a measurement source (gate on a metric no stage computes)
-- a stage that shares a checkpoint with a downstream stage (no separation of concerns)
-- an alignment stage with no reference model (no anchor for KL)
-- an LLM-as-judge eval where the judge is the same model family as the policy (contamination)
-- a cost estimate that exceeds the budget by more than 20%
-- a rollback plan consisting solely of "re-run from scratch"
+导致审查中止的红色警报：
+- 门控缺少测量来源（在没有阶段计算的指标上设置门控）
+- 与下游阶段共享检查点的阶段（关注点不分离）
+- 没有参考模型的对齐阶段（KL 无锚点）
+- LLM 作为裁判的评估中裁判与策略模型属于同一模型家族（污染）
+- 成本估算超出预算 20% 以上
+- 回滚计划仅为"从头重新运行"
 
-Output: a two-page review with PASS/HOLD per gate, the exact manifest field or missing field that produced each verdict, and the minimum change required to flip a HOLD into a PASS.
+输出：两页审查报告，每个门控附 PASS/HOLD 状态、产生该结论的确切清单字段或缺失字段，以及将 HOLD 翻转为 PASS 所需的最小更改。

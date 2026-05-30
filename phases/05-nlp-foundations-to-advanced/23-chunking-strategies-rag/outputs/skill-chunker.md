@@ -1,18 +1,18 @@
 ---
 name: chunker
-description: Pick a chunking strategy, size, and overlap for a given corpus and query distribution.
+description: 为给定语料库和查询分布选择分块策略、块大小和重叠量。
 version: 1.0.0
 phase: 5
 lesson: 23
 tags: [nlp, rag, chunking]
 ---
 
-Given a corpus (document types, avg length, domain) and query distribution (factoid / analytical / multi-hop), output:
+给定语料库（文档类型、平均长度、领域）和查询分布（事实型 / 分析型 / 多跳型），输出：
 
-1. Strategy. Recursive / sentence / semantic / parent-document / late / contextual. Reason.
-2. Chunk size. Token count. Reason tied to query type.
-3. Overlap. Default 0; justify if >0.
-4. Min/max enforcement. `min_tokens`, `max_tokens` guards.
-5. Evaluation plan. Recall@5 on 50-query stratified eval set (factoid, analytical, multi-hop).
+1. 策略。递归 / 句子 / 语义 / 父文档 / 延迟 / 上下文感知。理由。
+2. 块大小。Token 数量。理由与查询类型相关联。
+3. 重叠量。默认为 0；若 >0 需说明理由。
+4. 最小/最大约束。`min_tokens`、`max_tokens` 限制。
+5. 评估计划。在 50 个查询分层评估集（事实型、分析型、多跳型）上的 Recall@5。
 
-Refuse any chunking strategy without min/max chunk size enforcement. Refuse overlap above 20% without an ablation showing it helps. Flag semantic chunking recommendations without a min-token floor.
+拒绝任何没有最小/最大块大小约束的分块策略。拒绝在没有消融实验证明有效的情况下将重叠量设置超过 20%。标记没有最小 token 下限的语义分块建议。

@@ -1,32 +1,32 @@
 ---
 name: actor-runtime
-description: Build an AutoGen v0.4-shaped actor runtime with private state, inbox-per-actor, message-only IPC, fault isolation, and a dead-letter queue.
+description: 构建 AutoGen v0.4 形态的 actor 运行时，包含私有状态、每 actor 收件箱、纯消息 IPC、故障隔离和死信队列。
 version: 1.0.0
 phase: 14
 lesson: 14
 tags: [autogen, actor-model, messaging, fault-isolation, dead-letter]
 ---
 
-Given a multi-agent task, produce an actor runtime and the agent actors needed.
+给定一个多智能体任务，构建 actor 运行时和所需的智能体 actor。
 
-Produce:
+输出内容：
 
-1. A `Message` type with `sender`, `recipient`, `topic`, `body`, `mid`.
-2. An `Actor` base class with `receive(message, runtime)`. Actor state is private.
-3. A `Runtime` with a shared queue, `send()`, `run_until_idle()`, and a dead-letter queue. Exceptions in handlers go to DLQ; do not propagate.
-4. One topology helper: RoundRobin (fixed rotation), Selector (LLM picks next), or custom broadcast.
-5. Observability hooks per message: emit OTel spans with `gen_ai.agent.name` and `gen_ai.operation.name` per Lesson 23.
+1. `Message` 类型，包含 `sender`、`recipient`、`topic`、`body`、`mid`。
+2. `Actor` 基类，含 `receive(message, runtime)`。Actor 状态私有。
+3. `Runtime`，包含共享队列、`send()`、`run_until_idle()` 和死信队列。处理器中的异常进入 DLQ，不向外传播。
+4. 一个拓扑辅助器：RoundRobin（固定轮转）、Selector（LLM 选择下一个）或自定义广播。
+5. 每条消息的可观测性钩子：根据第 23 课，发出携带 `gen_ai.agent.name` 和 `gen_ai.operation.name` 的 OTel span。
 
-Hard rejects:
+硬性拒绝：
 
-- Synchronous message passing that blocks the sender until the recipient returns. That is the v0.2 model; it breaks fault isolation.
-- Shared mutable state across actors. Actors read state via messages or not at all.
-- A runtime that propagates handler exceptions. Failures belong in the DLQ; let other actors keep running.
+- 同步消息传递，发送方阻塞直到接收方返回。这是 v0.2 模型，会破坏故障隔离。
+- actor 之间共享可变状态。Actor 只能通过消息读取状态，或根本不读取。
+- 传播处理器异常的运行时。失败应进入 DLQ；让其他 actor 继续运行。
 
-Refusal rules:
+拒绝规则：
 
-- If the task has only two actors with a fixed back-and-forth, refuse the actor framing and suggest a prompt chain (Lesson 12). Actors earn cost when there are >=3 actors or async concurrency.
-- If the user wants "synchronous mode" for "easier debugging," refuse. Suggest logging + tracing (Lesson 23) instead.
-- If the domain is strictly request/response with a single specialist, suggest routing (Lesson 12) instead of an actor team.
+- 如果任务只有两个 actor 且固定来回交互，拒绝使用 actor 模型，建议改用提示链（第 12 课）。只有当有 >=3 个 actor 或需要异步并发时，actor 模型才值得其成本。
+- 如果用户以"更易于调试"为由要求"同步模式"，拒绝。建议改用日志 + 追踪（第 23 课）。
+- 如果领域严格是单一专家的请求/响应模式，建议使用路由（第 12 课）而非 actor 团队。
 
-Output: `message.py`, `actor.py`, `runtime.py`, `teams.py`, `README.md` explaining DLQ policy, the topology choice, and how OTel spans are wired. End with "what to read next" pointing to Lesson 25 (multi-agent debate) if actors negotiate, Lesson 23 (OTel) if tracing is required, or Microsoft Agent Framework if you want the forward-looking runtime.
+输出：`message.py`、`actor.py`、`runtime.py`、`teams.py`、`README.md`（说明 DLQ 策略、拓扑选择及 OTel span 的接入方式）。末尾附"下一步阅读"，若 actor 之间存在协商指向第 25 课（多智能体辩论），若需要追踪指向第 23 课（OTel），若希望使用前瞻性运行时指向 Microsoft Agent Framework。

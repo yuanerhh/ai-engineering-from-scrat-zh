@@ -1,31 +1,31 @@
 ---
 name: tool-schema-linter
-description: Audit a tool registry against production design rules for names, descriptions, parameters, and shape. Can run in CI on every tool-registry change.
+description: 针对名称、描述、参数和结构的生产设计规则审计工具注册表。可在每次工具注册表变更时在 CI 中运行。
 version: 1.0.0
 phase: 13
 lesson: 05
 tags: [tool-design, linter, selection-accuracy, naming]
 ---
 
-Given a tool registry (JSON or Python list), run a static audit against the design rules from Phase 13 · 05 and produce a fix list with severities.
+给定一个工具注册表（JSON 或 Python 列表），按照 Phase 13 · 05 的设计规则运行静态审计，并生成带严重性的修复列表。
 
-Produce:
+输出内容：
 
-1. Name audit. Check `snake_case`, verb-noun order, tense markers, embedded arguments, namespace prefix consistency.
-2. Description audit. Enforce length bounds (40 to 1024 chars), the `Use when X. Do not use for Y.` pattern, forbid common injection patterns (`<SYSTEM>`, `ignore previous instructions`, URL shorteners in-line).
-3. Schema audit. Typed properties, `required` list present, `additionalProperties: false` on objects, enums on closed sets, no `type: any`, descriptions on string fields.
-4. Shape audit. Flag monolithic `action: string` tools when enum exceeds three values. Suggest atomic split.
-5. Consistency audit. Same parameter names across related tools; same ID pattern; same unit conventions.
+1. 名称审计。检查 `snake_case`、动词-名词顺序、时态标记、嵌入参数、命名空间前缀一致性。
+2. 描述审计。强制长度限制（40 到 1024 个字符），要求 `在 X 情况下使用。不适用于 Y。` 模式，禁止常见注入模式（`<SYSTEM>`、`ignore previous instructions`、内联短链接）。
+3. Schema 审计。属性有类型、`required` 列表存在、对象上有 `additionalProperties: false`、封闭集使用枚举、无 `type: any`、字符串字段有描述。
+4. 结构审计。当枚举值超过三个时，标记单体 `action: string` 工具。建议拆分为原子工具。
+5. 一致性审计。相关工具间的参数名称相同；相同的 ID 模式；相同的单位约定。
 
-Hard rejects:
-- Any tool name that is not `snake_case`. Breaks provider serialization.
-- Any description under 40 chars or missing the "Use when" pattern. Selection accuracy tanks.
-- Any description containing indirect-injection patterns. Potential tool-poisoning vector.
-- Any untyped property. Hallucination bait.
+硬性拒绝：
+- 任何不是 `snake_case` 的工具名称。会破坏提供商序列化。
+- 任何描述不足 40 个字符或缺少"Use when"模式的工具。选择准确率会大幅下降。
+- 任何描述包含间接注入模式的工具。潜在的工具投毒向量。
+- 任何未类型化属性。幻觉诱饵。
 
-Refusal rules:
-- If a registry has more than 64 tools, warn about Anthropic / Gemini per-request limits and route to Phase 13 · 17 for routing.
-- If a tool takes untrusted input, reads sensitive data, AND has a consequential executor, refuse and cite Meta's Rule of Two.
-- If asked to approve a tool that wraps a production database without a read-only guard, refuse.
+拒绝规则：
+- 如果注册表有超过 64 个工具，警告 Anthropic / Gemini 每次请求的限制，并路由到 Phase 13 · 17 进行路由处理。
+- 如果工具接受不可信输入、读取敏感数据且具有后果型执行器，拒绝并引用 Meta 的双重原则。
+- 如果被要求批准一个封装生产数据库但没有只读保护的工具，拒绝。
 
-Output: one line per finding formatted as `[severity] path: message`, followed by a summary line and a pass/fail verdict. Severity levels: block (must fix before ship), warn (should fix), nit (style). End with the single rewrite that would reduce selection error fastest.
+输出：每个发现单独一行，格式为 `[severity] path: message`，随后是汇总行和通过/失败裁定。严重性级别：block（发布前必须修复）、warn（应当修复）、nit（风格问题）。以能最快降低选择错误率的单项重写建议作为结尾。

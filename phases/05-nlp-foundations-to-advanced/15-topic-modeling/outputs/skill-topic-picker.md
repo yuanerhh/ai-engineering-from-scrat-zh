@@ -1,17 +1,17 @@
 ---
 name: topic-picker
-description: Pick LDA or BERTopic for a corpus. Specify library, knobs, evaluation.
+description: 为语料库选择 LDA 或 BERTopic。指定库、参数和评估方式。
 version: 1.0.0
 phase: 5
 lesson: 15
 tags: [nlp, topic-modeling]
 ---
 
-Given a corpus description (document count, avg length, domain, language, compute budget), output:
+给定语料库描述（文档数量、平均长度、领域、语言、计算预算），输出：
 
-1. Algorithm. LDA / NMF / BERTopic / Top2Vec / FASTopic. One-sentence reason.
-2. Configuration. Number of topics (start at ~sqrt(n_docs)), `min_df` / `max_df` filters, embedding model for neural approaches.
-3. Evaluation. Topic coherence (c_v) via `gensim.models.CoherenceModel`, topic diversity, plus a 20-sample human read.
-4. Failure mode to probe. For LDA, "junk topics" absorbing stopwords and frequent terms. For BERTopic, -1 outlier cluster swallowing ambiguous documents.
+1. 算法。LDA / NMF / BERTopic / Top2Vec / FASTopic。一句话说明原因。
+2. 配置。主题数量（从约 `sqrt(n_docs)` 开始）、`min_df` / `max_df` 过滤器、神经方法的嵌入模型。
+3. 评估。通过 `gensim.models.CoherenceModel` 计算主题连贯性（c_v）、主题多样性，以及 20 个样本的人工阅读。
+4. 需要探查的失败模式。LDA：吸收停用词和高频词的"垃圾主题"。BERTopic：将歧义文档吞入的 -1 离群簇。
 
-Refuse BERTopic on documents longer than the embedding model's context window without a chunking strategy. Refuse LDA on very short text (tweets, reviews under 10 tokens) as coherence collapses. Flag any n_topics choice below 5 or above 200 as likely wrong for real data.
+对于超过嵌入模型上下文窗口长度的文档，拒绝使用 BERTopic，除非有分块策略。对于非常短的文本（推文、少于 10 个词的评论），拒绝使用 LDA，因为连贯性会崩溃。将主题数少于 5 或超过 200 的选择标记为对真实数据很可能不合适。

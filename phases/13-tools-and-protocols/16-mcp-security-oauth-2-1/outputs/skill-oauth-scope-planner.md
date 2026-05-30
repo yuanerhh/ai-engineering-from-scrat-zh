@@ -1,30 +1,30 @@
 ---
 name: oauth-scope-planner
-description: Design the OAuth 2.1 scope set, pinning rules, and step-up policy for a remote MCP server.
+description: 为远程 MCP 服务器设计 OAuth 2.1 权限范围集、固定规则和步进升级策略。
 version: 1.0.0
 phase: 13
 lesson: 16
 tags: [oauth, pkce, resource-indicators, step-up, sep-835]
 ---
 
-Given a remote MCP server with a tool list, design the authorization model.
+给定一个带有工具列表的远程 MCP 服务器，设计其授权模型。
 
-Produce:
+输出内容：
 
-1. Scope hierarchy. Graduated scope set (e.g. `read` -> `write` -> `delete` -> `admin`). One scope per operation class; do not explode the scope set.
-2. Scope-to-tool mapping. Each tool annotated with its required scope. Flag any tool that needs more than one scope.
-3. Step-up policy. Which operations require step-up rather than an initial consent. Typical: destructive operations require step-up.
-4. Resource indicator value. The canonical URL used in the `resource` parameter. Ensure the URL matches the `.well-known/oauth-protected-resource` resource field.
-5. Protected-resource metadata. Draft `.well-known/oauth-protected-resource` JSON with `authorization_servers`, `scopes_supported`, and `resource`.
+1. **Scope 层级**。分级的 scope 集合（例如 `read` -> `write` -> `delete` -> `admin`）。每个操作类别对应一个 scope；不要过度拆分 scope 集合。
+2. **Scope 到工具的映射**。每个工具标注其所需 scope。标记需要超过一个 scope 的工具。
+3. **步进升级策略**。哪些操作需要步进升级而非初始同意。通常：破坏性操作需要步进升级。
+4. **资源指示符值**。在 `resource` 参数中使用的规范 URL。确保该 URL 与 `.well-known/oauth-protected-resource` 的 resource 字段匹配。
+5. **受保护资源元数据**。起草包含 `authorization_servers`、`scopes_supported` 和 `resource` 的 `.well-known/oauth-protected-resource` JSON。
 
-Hard rejects:
-- Any tool that requires admin scope but is invoked without an explicit confirmation dialog. Needs step-up.
-- Any scope that covers more than one operation class. Privilege creep.
-- Any server that skips audience validation. Confused-deputy vulnerability.
+硬性拒绝：
+- 任何需要 admin scope 但在未显式确认对话框的情况下被调用的工具。需要步进升级。
+- 任何覆盖超过一个操作类别的 scope。权限蔓延。
+- 任何跳过受众验证的服务器。混淆代理漏洞。
 
-Refusal rules:
-- If the server is local (stdio), refuse OAuth and state that stdio inherits parent trust.
-- If the server depends on a legacy OAuth 2.0 implicit flow, refuse and mandate migration to 2.1 + PKCE.
-- If the user asks for passwordless "API key only" auth, refuse for remote servers; require OAuth 2.1 authorization code + PKCE with resource indicators for user-authorized access. Client credentials is only appropriate for machine-to-machine scenarios without user delegation.
+拒绝规则：
+- 若服务器为本地（stdio），拒绝使用 OAuth，并说明 stdio 继承父进程信任。
+- 若服务器依赖旧版 OAuth 2.0 隐式流，拒绝并要求迁移至 2.1 + PKCE。
+- 若用户要求仅使用"纯 API Key"鉴权，对远程服务器拒绝；对于用户授权访问，需使用带资源指示符的 OAuth 2.1 授权码 + PKCE。客户端凭据仅适用于无用户委托的机器间场景。
 
-Output: a one-page authorization plan with the scope hierarchy, scope-to-tool mapping, step-up policy, resource indicator, and the protected-resource metadata JSON. End with the step-up operation most likely to surprise users on first encounter.
+输出：一页授权方案，包含 scope 层级、scope 到工具的映射、步进升级策略、资源指示符和受保护资源元数据 JSON。结尾指出用户首次遇到时最可能感到意外的步进升级操作。

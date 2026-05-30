@@ -1,47 +1,47 @@
 ---
 name: llm-observability
-description: Build a self-hosted LLM observability dashboard that ingests OpenTelemetry GenAI spans, runs evals, and catches injected regressions in under five minutes.
+description: 构建一个自托管 LLM 可观测性仪表板，能够摄取 OpenTelemetry GenAI span、运行评估，并在五分钟内捕获注入的回退。
 version: 1.0.0
 phase: 19
 lesson: 11
 tags: [capstone, observability, otel, langfuse, phoenix, evals, drift, clickhouse]
 ---
 
-Given production LLM traffic across at least six SDK families (OpenAI, Anthropic, Google GenAI, LangChain, LlamaIndex, vLLM), deploy a self-hosted observability plane that ingests OTLP GenAI-semconv spans, runs evals, detects drift, and alerts.
+给定跨至少六个 SDK 家族（OpenAI、Anthropic、Google GenAI、LangChain、LlamaIndex、vLLM）的生产 LLM 流量，部署一个自托管的可观测性平面，能够摄取 OTLP GenAI 语义约定 span、运行评估、检测漂移并发出告警。
 
-Build plan:
+构建计划：
 
-1. OpenTelemetry Collector with OTLP HTTP receiver, tail-sampling processor (keep 100% errors, 10% success, 100% high-toxicity/PII), exporters to ClickHouse + S3.
-2. ClickHouse span schema mirroring GenAI semconv: gen_ai.system, gen_ai.request.model, usage.input/output_tokens, latency_ms, user_id, app_id, plus JSON bag for prompts/completions.
-3. Postgres metadata store for apps, users, sessions, annotation queue.
-4. OpenLLMetry auto-instrumentation on a client app per SDK family; verify canonical spans land.
-5. DeepEval + RAGAS + Phoenix evaluator pack scheduled over sampled traces; custom LLM-judge for PII and off-policy.
-6. Weekly PSI / KL drift detector on pooled prompt embeddings; alert threshold 0.2.
-7. Prometheus exporter for eval score aggregates and latency percentiles; Alertmanager to Slack (warning) + PagerDuty (critical).
-8. Next.js 15 App Router dashboard: overview, trace search + waterfall, eval trends, drift chart, alerts.
-9. Regression probe: inject a response pattern that leaks fake SSNs 1% of the time; measure MTTR (alert-fire time).
+1. OpenTelemetry Collector，配置 OTLP HTTP 接收器、尾部采样处理器（保留 100% 错误、10% 成功、100% 高毒性/PII），以及到 ClickHouse + S3 的导出器。
+2. ClickHouse span schema 镜像 GenAI 语义约定：gen_ai.system、gen_ai.request.model、usage.input/output_tokens、latency_ms、user_id、app_id，以及用于提示/补全的 JSON 包。
+3. Postgres 元数据存储，包含应用、用户、会话、标注队列。
+4. 在每个 SDK 家族的客户端应用上使用 OpenLLMetry 自动插桩；验证规范 span 落地。
+5. DeepEval + RAGAS + Phoenix 评估器包，按计划对采样追踪运行；针对 PII 和违反策略的内容使用自定义 LLM 裁判。
+6. 每周对汇总提示嵌入进行 PSI / KL 漂移检测；告警阈值 0.2。
+7. 用于评估分数聚合和延迟百分位数的 Prometheus 导出器；Alertmanager 接入 Slack（警告）+ PagerDuty（严重）。
+8. Next.js 15 App Router 仪表板：概览、追踪搜索 + 瀑布图、评估趋势、漂移图表、告警。
+9. 回退探测：注入 1% 的时间泄漏虚假 SSN 的响应模式；测量 MTTR（告警触发时间）。
 
-Assessment rubric:
+评估标准：
 
-| Weight | Criterion | Measurement |
+| 权重 | 评估项 | 度量方式 |
 |:-:|---|---|
-| 25 | Trace-schema coverage | Number of SDK families producing canonical GenAI spans (target 6+) |
-| 20 | Eval correctness | DeepEval / RAGAS scores vs hand-labeled set |
-| 20 | Dashboard UX | MTTR on injected regression (target under 5 minutes) |
-| 20 | Cost / scale | Sustained 1k spans/sec ingest without backlog |
-| 15 | Alerting + drift detection | Prometheus/Alertmanager chain exercised end to end |
+| 25 | 追踪 schema 覆盖率 | 生成规范 GenAI span 的 SDK 家族数量（目标 6+） |
+| 20 | 评估正确性 | DeepEval / RAGAS 分数与人工标注集的对比 |
+| 20 | 仪表板用户体验 | 注入回退的 MTTR（目标低于 5 分钟） |
+| 20 | 成本/规模 | 在无积压情况下持续摄取 1k span/秒 |
+| 15 | 告警 + 漂移检测 | Prometheus/Alertmanager 链路端到端验证 |
 
-Hard rejects:
+硬性拒绝条件：
 
-- Span schemas that invent attribute names not in the OpenTelemetry GenAI semconv.
-- Tail-sampling policies that drop errors (a well-known anti-pattern).
-- Evals that run at ingest rate without sampling (unacceptable cost).
-- Dashboards that show "latency" without p50/p95/p99 separation.
+- 使用 OpenTelemetry GenAI 语义约定以外的属性名称的 span schema。
+- 丢弃错误的尾部采样策略（这是已知的反模式）。
+- 以摄取速率运行评估而不进行采样（成本不可接受）。
+- 仅显示"延迟"而未区分 p50/p95/p99 的仪表板。
 
-Refusal rules:
+拒绝规则：
 
-- Refuse to persist prompts or completions without a PII redaction policy.
-- Refuse to claim "multi-SDK support" without a per-SDK canonical-span regression test.
-- Refuse to ship drift detection without a baseline window; zero-shot drift is useless.
+- 拒绝在没有 PII 脱敏策略的情况下持久化提示词或补全内容。
+- 拒绝声称"多 SDK 支持"而没有每个 SDK 的规范 span 回归测试。
+- 拒绝在没有基线窗口的情况下发布漂移检测；无基线的漂移检测毫无意义。
 
-Output: a repo containing the collector config, the ClickHouse schema, the Next.js 15 dashboard, the eval jobs, the drift detector, the alerting chain, the 10k-trace demo dataset with annotated regressions, and a write-up documenting MTTR for the injected PII regression plus the top three dashboard UX improvements that dropped MTTR over iteration.
+输出：一个包含 Collector 配置、ClickHouse schema、Next.js 15 仪表板、评估任务、漂移检测器、告警链路、带标注回退的 1 万追踪演示数据集的代码库，以及一份记录注入 PII 回退的 MTTR，以及迭代过程中降低 MTTR 的三大仪表板用户体验改进的报告。
