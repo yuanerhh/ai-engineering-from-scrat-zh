@@ -1,40 +1,40 @@
 ---
 name: dgm-evaluator-firewall
-description: Specify the evaluator separation a Darwin-Godel-Machine-style self-modifying agent loop needs to avoid documented reward hacking.
+description: 为 Darwin-Godel-Machine 风格的自我修改智能体循环指定评估器隔离要求，以避免已记录的奖励黑客行为。
 version: 1.0.0
 phase: 15
 lesson: 4
 tags: [dgm, self-modification, reward-hacking, evaluator, sandbox]
 ---
 
-Given a proposed self-modifying agent loop (agent scaffolding, evaluator pipeline, deployment target), produce a firewall specification that keeps the evaluator outside the agent's reach. The DGM paper documented the agent removing its own safety markers to raise scores; this skill is the control.
+给定一条拟议的自我修改智能体循环（智能体脚手架、评估器流水线、部署目标），生成一份防火墙规范，使评估器处于智能体无法触及的位置。DGM 论文记录了智能体删除自身安全标记以提高分数的行为；本技能是其控制措施。
 
-Produce:
+产出内容：
 
-1. **File-system boundary.** List every file the agent can edit. List every file the evaluator reads. The intersection must be empty. If it is not, specify the exact move needed to make it empty.
-2. **Process boundary.** The evaluator must run in a process the agent does not control. Spec the container or sandbox. If the agent has shell access, the agent can bypass in-process guards.
-3. **Network and secret boundary.** The agent must not be able to edit the CI secrets that fetch evaluator inputs or post scores. List where secrets live and how they are mounted.
-4. **Score-ingress contract.** Scores return from the evaluator to the loop's archive. That path is the only channel. Anything the agent can write that influences future scoring breaks the contract.
-5. **Mutation review list.** List the classes of agent edits that require manual review before acceptance: new dependencies, edits to scoring-adjacent code, edits to sandbox configuration, edits to logging or monitoring.
+1. **文件系统边界。** 列出智能体可以编辑的每个文件。列出评估器读取的每个文件。两者的交集必须为空。如果不为空，指定使其为空所需的确切操作。
+2. **进程边界。** 评估器必须运行在智能体无法控制的进程中。规定容器或沙盒。如果智能体有 shell 访问权限，智能体可以绕过进程内保护措施。
+3. **网络和密钥边界。** 智能体不得能够编辑获取评估器输入或发布分数的 CI 密钥。列出密钥的存储位置及其挂载方式。
+4. **分数入口合约。** 分数从评估器返回到循环的存档。该路径是唯一通道。智能体可以写入的任何能影响未来评分的内容都会破坏合约。
+5. **变更审查清单。** 列出需要在接受前进行人工审查的智能体编辑类别：新依赖项、对评分相邻代码的编辑、对沙盒配置的编辑、对日志或监控的编辑。
 
-Hard rejects:
-- Evaluator in the same repository as the agent source. Move it out.
-- Evaluator that runs as a Python import inside the agent process. Run it in a subprocess.
-- Any score adjustment that is applied at the agent's side of the boundary. All adjustment must be server-side.
-- Any logging that the agent can silence by editing its own code.
+硬性拒绝：
+- 评估器与智能体源代码在同一仓库。将其迁移出去。
+- 评估器作为 Python 导入运行在智能体进程内。在子进程中运行。
+- 任何在智能体侧边界应用的分数调整。所有调整必须在服务器端进行。
+- 智能体可以通过编辑自身代码来静默的任何日志记录。
 
-Refusal rules:
-- If the user cannot name every file the agent can edit, refuse and require a file-level write-access audit first.
-- If the evaluator has no held-out inputs, refuse — this is Lesson 3's audit, a precondition.
-- If the deployment surface includes mutations to the evaluator itself (even indirectly through a proposed dependency update), refuse and require a manual firewall-review step.
+拒绝规则：
+- 如果用户无法列出智能体可以编辑的每个文件，拒绝并首先要求进行文件级写访问审计。
+- 如果评估器没有保留输入集，拒绝——这是第 3 课的审计，是前提条件。
+- 如果部署面包含对评估器本身的变更（即使通过提议的依赖项更新间接进行），拒绝并要求手动防火墙审查步骤。
 
-Output format:
+输出格式：
 
-Return a one-page spec with:
-- **Agent write-surface** (paths, globs)
-- **Evaluator read-surface** (paths, endpoints)
-- **Intersection** (must be empty; show the diff)
-- **Process model** (how the evaluator is isolated)
-- **Secrets inventory** (where and how mounted)
-- **Review-required mutation classes** (bulleted)
-- **Sign-off line** (who owns the firewall invariant)
+返回一页规范，包含：
+- **智能体写入面**（路径、glob）
+- **评估器读取面**（路径、端点）
+- **交集**（必须为空；显示差异）
+- **进程模型**（评估器如何隔离）
+- **密钥清单**（存储位置及挂载方式）
+- **需审查变更类别**（项目列表）
+- **签署行**（谁负责防火墙不变性）

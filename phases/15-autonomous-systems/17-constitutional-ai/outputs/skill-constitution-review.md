@@ -1,40 +1,40 @@
 ---
 name: constitution-review
-description: Audit a deployment's constitutional layer — hardcoded prohibitions, soft-coded defaults, operator-adjustable bounds, and four-tier hierarchy resolution.
+description: 审核部署的宪法层——硬编码禁止、软编码默认值、运营商可调整边界和四层层级解析。
 version: 1.0.0
 phase: 15
 lesson: 17
 tags: [constitutional-ai, rule-override, hierarchy, cai, rlaif, hardcoded-prohibition]
 ---
 
-Given a deployment's constitutional layer (system prompt, operator config, declared principles), audit it against the Claude Constitution reference and flag missing hardcoded prohibitions, ambiguous principles, or misordered tiers.
+给定一个部署的宪法层（系统提示、运营商配置、声明原则），根据 Claude 宪法参考标准对其进行审核，并标记缺失的硬编码禁止、模糊的原则或层级顺序错误。
 
-Produce:
+产出内容：
 
-1. **Hardcoded prohibition inventory.** List every prohibition that must not bend regardless of operator or user instruction. Minimum floor: bioweapons / CBRN uplift, CSAM, critical infrastructure attack planning, false-identity-when-asked. Additions are deployment-specific (e.g., financial services adds specific fraud prohibitions).
-2. **Soft-coded defaults.** List every behaviour the operator can adjust. For each, state the declared bound. An "adjustable" setting with no bound is a back-door override.
-3. **Tier ordering.** Confirm the resolution order is: safety > ethics > guidelines > helpfulness. If helpfulness ever wins over ethics in the implemented resolver, flag as a deployment break.
-4. **Principle ambiguity flags.** Identify any principle whose text leaves room for materially different interpretations. Ambiguity compounds over training cycles (principle drift).
-5. **Layer completeness.** Confirm runtime-layer controls (Lessons 10, 13, 14) are present in addition to the constitutional layer. Constitution alone is insufficient; runtime alone is insufficient.
+1. **硬编码禁止清单。** 列出无论运营商或用户指令如何都不得弯曲的每项禁止。最低门槛：生化放射核武器（CBRN）提升、CSAM、关键基础设施攻击规划、被询问时虚假身份。附加内容针对特定部署（例如，金融服务添加特定欺诈禁止）。
+2. **软编码默认值。** 列出运营商可以调整的每种行为。对于每种，说明声明的边界。没有边界的"可调整"设置是后门覆盖。
+3. **层级顺序。** 确认解析顺序为：安全 > 伦理 > 指南 > 帮助性。如果帮助性在已实现的解析器中超过伦理，标记为部署破坏。
+4. **原则模糊性标记。** 识别任何文本留有实质性不同解释空间的原则。模糊性在训练周期中会累积（原则漂移）。
+5. **层级完整性。** 确认运行时层级控制（第 10、13、14 课）与宪法层一起存在。仅宪法是不够的；仅运行时也是不够的。
 
-Hard rejects:
-- Deployments without any hardcoded prohibition layer.
-- Operator config that claims to override a hardcoded prohibition (even by renaming).
-- Tier orders that place helpfulness above ethics.
-- Principle text so general it cannot be evaluated ("be good").
-- Treating Constitutional AI as a replacement for runtime controls.
+硬性拒绝：
+- 没有任何硬编码禁止层的部署。
+- 声称覆盖硬编码禁止的运营商配置（即使通过重命名）。
+- 将帮助性置于伦理之上的层级顺序。
+- 无法评估的过于笼统的原则文本（"做好事"）。
+- 将宪法 AI 视为运行时控制替代品的做法。
 
-Refusal rules:
-- If the user names a hardcoded prohibition but cannot point to a runtime-layer backstop for it, flag the deployment as single-layer and refuse production.
-- If the operator config includes an adjustable "safety" setting with no declared bound, refuse.
-- If the user treats the 2023 participatory-constitution findings as actionable in the current deployment, check: the 2026 Constitution did not incorporate them, so "inherits democratically" is a claim the deployment cannot back up.
+拒绝规则：
+- 如果用户列出了硬编码禁止但无法指向其运行时层支撑，将部署标记为单层并拒绝生产。
+- 如果运营商配置包含没有声明边界的可调整"安全"设置，拒绝。
+- 如果用户将 2023 年参与式宪法研究结果视为在当前部署中可操作，进行检查：2026 年宪法未纳入这些结果，因此"民主继承"是该部署无法支持的声明。
 
-Output format:
+输出格式：
 
-Return a constitutional audit with:
-- **Hardcoded floor** (prohibitions, enforcement layer: weights / inference / both)
-- **Soft-coded defaults** (setting, operator bound, user-visible y/n)
-- **Tier order** (listed; confirmed safety > ethics > guidelines > helpfulness)
-- **Ambiguity flags** (principle, specific ambiguity, proposed tightening)
-- **Layer completeness** (constitutional y/n, runtime controls y/n, both required)
-- **Readiness** (production / staging / research-only)
+返回宪法审核报告，包含：
+- **硬编码底线**（禁止事项、执行层：权重 / 推理 / 两者）
+- **软编码默认值**（设置、运营商边界、是否对用户可见）
+- **层级顺序**（已列出；确认安全 > 伦理 > 指南 > 帮助性）
+- **模糊性标记**（原则、具体模糊性、建议收紧）
+- **层级完整性**（宪法是否存在、运行时控制是否存在、两者均必需）
+- **就绪性**（生产 / 暂存 / 仅研究）

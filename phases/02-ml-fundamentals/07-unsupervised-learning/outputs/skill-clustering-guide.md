@@ -1,77 +1,77 @@
 ---
 name: skill-clustering-guide
-description: Choose the right clustering algorithm based on data shape, noise, and constraints
+description: 根据数据形状、噪声和约束条件选择合适的聚类算法
 version: 1.0.0
 phase: 2
 lesson: 7
 tags: [clustering, k-means, dbscan, hierarchical, gmm, unsupervised]
 ---
 
-# Clustering Algorithm Selection Guide
+# 聚类算法选择指南
 
-Clustering has no single best algorithm. The right choice depends on cluster shape, whether you know the number of clusters, how much noise is in the data, and how large the dataset is.
+聚类没有单一的最佳算法。正确的选择取决于簇的形状、是否知道簇的数量、数据中的噪声程度以及数据集的大小。
 
-## Decision Checklist
+## 决策清单
 
-1. Do you know the number of clusters?
-   - Yes: K-Means or GMM
-   - No: DBSCAN (finds clusters automatically), or hierarchical (cut the dendrogram at different levels)
+1. 是否知道簇的数量？
+   - 是：K-Means 或 GMM
+   - 否：DBSCAN（自动发现簇），或层次聚类（在不同高度切割树状图）
 
-2. What shape are the clusters?
-   - Roughly spherical (blob-like): K-Means
-   - Elliptical with different sizes: GMM
-   - Arbitrary shapes (crescents, rings, chains): DBSCAN
-   - Nested or hierarchical: hierarchical clustering
+2. 簇的形状是什么样的？
+   - 大致球形（团状）：K-Means
+   - 不同大小的椭圆形：GMM
+   - 任意形状（月牙形、环形、链状）：DBSCAN
+   - 嵌套或层次化：层次聚类
 
-3. Does the data contain noise or outliers?
-   - Yes: DBSCAN (labels noise points explicitly) or GMM (low-probability points are outliers)
-   - No: K-Means is fine
+3. 数据是否包含噪声或离群值？
+   - 是：DBSCAN（明确标记噪声点）或 GMM（低概率点是离群值）
+   - 否：K-Means 就可以
 
-4. Do you need soft assignments (probabilities)?
-   - Yes: GMM gives P(cluster | data point) for each cluster
-   - No: K-Means or DBSCAN give hard assignments
+4. 是否需要软分配（概率）？
+   - 是：GMM 给出每个簇的 P(cluster | data point)
+   - 否：K-Means 或 DBSCAN 给出硬分配
 
-5. How large is the dataset?
-   - Under 10,000: any algorithm works
-   - 10,000 to 1,000,000: K-Means (fast), Mini-Batch K-Means (faster)
-   - Over 1,000,000: Mini-Batch K-Means or BIRCH. Hierarchical is too slow.
+5. 数据集有多大？
+   - 10,000 以下：任何算法都可以
+   - 10,000 到 1,000,000：K-Means（快），Mini-Batch K-Means（更快）
+   - 超过 1,000,000：Mini-Batch K-Means 或 BIRCH。层次聚类太慢。
 
-## When to use each approach
+## 各方法的使用场景
 
-**K-Means**: the default starting point. Fast (O(n * k * iterations)), simple, and good enough for many problems. Use the elbow method or silhouette score to pick K. Limitations: assumes spherical clusters, sensitive to initialization (use K-Means++ or run multiple times), cannot handle varying cluster sizes well.
+**K-Means**：默认起始点。快速（O(n * k * 迭代次数)），简单，对许多问题足够好。用肘部法则或轮廓系数选择 K。局限性：假设球形簇，对初始化敏感（使用 K-Means++ 或多次运行），不能很好地处理大小不同的簇。
 
-**DBSCAN**: best for discovering clusters of arbitrary shape and automatically detecting outliers. Two parameters: eps (neighborhood radius) and min_samples (minimum density). Does not require specifying K. Limitations: struggles when clusters have very different densities, and tuning eps can be tricky. Use a k-distance plot to estimate eps: compute the distance to each point's k-th nearest neighbor, sort, and look for an elbow.
+**DBSCAN**：最适合发现任意形状的簇并自动检测离群值。两个参数：eps（邻域半径）和 min_samples（最低密度）。不需要指定 K。局限性：当簇的密度差异很大时效果不好，调整 eps 可能很棘手。使用 k-距离图估计 eps：计算每个点到其第 k 个最近邻的距离，排序，寻找肘部。
 
-**Hierarchical (Agglomerative)**: builds a tree of merges. Useful when you want to explore cluster structure at multiple granularities (cut the dendrogram at different heights). Ward's linkage works best for compact clusters. Single linkage finds elongated clusters but is sensitive to noise. Limitations: O(n^2) memory and O(n^3) time, so impractical for large datasets.
+**层次聚类（凝聚式）**：构建合并树。当想在多个粒度级别探索簇结构时很有用（在不同高度切割树状图）。Ward's 连接对紧凑簇效果最好。单连接找到细长簇但对噪声敏感。局限性：O(n^2) 内存和 O(n^3) 时间，对大数据集不实用。
 
-**GMM (Gaussian Mixture Models)**: soft clustering with probabilistic assignments. Models each cluster as a Gaussian distribution with its own mean and covariance. Better than K-Means when clusters are elliptical or overlapping. Use BIC (Bayesian Information Criterion) to select the number of components. Limitations: assumes Gaussian distributions, can fail on non-convex shapes, sensitive to initialization.
+**GMM（高斯混合模型）**：带概率分配的软聚类。将每个簇建模为具有各自均值和协方差的高斯分布。当簇是椭圆形或重叠时，比 K-Means 更好。使用 BIC（贝叶斯信息准则）选择成分数量。局限性：假设高斯分布，在非凸形状上可能失败，对初始化敏感。
 
-## Evaluating cluster quality (no labels)
+## 评估聚类质量（无标签）
 
-| Metric | What it measures | Range | Use when |
-|--------|-----------------|-------|----------|
-| Silhouette score | Cohesion vs separation | -1 to 1 (higher is better) | Comparing K values or algorithms |
-| Inertia (within-cluster SS) | Tightness of clusters | 0 to inf (lower is better) | Elbow method for K-Means |
-| BIC / AIC | Model fit with complexity penalty | Lower is better | Choosing number of GMM components |
-| Calinski-Harabasz index | Ratio of between to within variance | Higher is better | Quick comparison |
-| Davies-Bouldin index | Average similarity between clusters | Lower is better | Penalizes overlapping clusters |
+| 指标 | 衡量内容 | 范围 | 适用场景 |
+|------|---------|------|---------|
+| 轮廓系数 | 内聚性 vs 分离性 | -1 到 1（越高越好） | 比较 K 值或算法 |
+| 惯性（簇内平方和） | 簇的紧密度 | 0 到无穷（越低越好） | K-Means 的肘部法则 |
+| BIC / AIC | 带复杂度惩罚的模型拟合度 | 越低越好 | 选择 GMM 成分数量 |
+| Calinski-Harabasz 指数 | 簇间方差与簇内方差之比 | 越高越好 | 快速比较 |
+| Davies-Bouldin 指数 | 簇之间的平均相似度 | 越低越好 | 惩罚重叠簇 |
 
-## Common mistakes
+## 常见错误
 
-- Running K-Means without scaling features (features on larger scales dominate the distance calculation)
-- Picking K by eyeballing data in 2D when the actual data is high-dimensional (use silhouette scores)
-- Using K-Means on non-spherical clusters (crescent or ring-shaped data needs DBSCAN)
-- Setting DBSCAN eps too large (everything in one cluster) or too small (everything is noise)
-- Treating cluster labels as ground truth (clustering is exploratory; validate with domain knowledge)
-- Running hierarchical clustering on datasets with more than 20,000 points (memory and time explode)
+- 在不缩放特征的情况下运行 K-Means（尺度更大的特征主导距离计算）
+- 在二维投影数据中用肉眼判断 K，而实际数据是高维的（使用轮廓系数）
+- 在非球形簇上使用 K-Means（月牙形或环形数据需要 DBSCAN）
+- 将 DBSCAN 的 eps 设得太大（所有东西在一个簇里）或太小（所有东西都是噪声）
+- 将簇标签视为真实标签（聚类是探索性的，用领域知识验证）
+- 在超过 20,000 个点的数据集上运行层次聚类（内存和时间会爆炸）
 
-## Quick reference
+## 快速参考
 
-| Algorithm | Cluster shape | Finds K | Handles noise | Soft assignments | Scalability |
-|-----------|--------------|---------|---------------|-----------------|-------------|
-| K-Means | Spherical | No (you set K) | No | No | Millions |
-| Mini-Batch K-Means | Spherical | No | No | No | Tens of millions |
-| DBSCAN | Arbitrary | Yes | Yes | No | Hundreds of thousands |
-| Hierarchical | Any (linkage-dependent) | Flexible (cut dendrogram) | Depends on linkage | No | Under 20k |
-| GMM | Elliptical | No (you set K) | Partial (low probability) | Yes | Under 100k |
-| HDBSCAN | Arbitrary | Yes | Yes | Partial | Hundreds of thousands |
+| 算法 | 簇形状 | 自动找 K | 处理噪声 | 软分配 | 可扩展性 |
+|------|--------|---------|---------|--------|---------|
+| K-Means | 球形 | 否（你设定 K） | 否 | 否 | 百万级 |
+| Mini-Batch K-Means | 球形 | 否 | 否 | 否 | 千万级 |
+| DBSCAN | 任意 | 是 | 是 | 否 | 数十万级 |
+| 层次聚类 | 任意（取决于连接方式） | 灵活（切割树状图） | 取决于连接方式 | 否 | 2 万以下 |
+| GMM | 椭圆形 | 否（你设定 K） | 部分（低概率） | 是 | 10 万以下 |
+| HDBSCAN | 任意 | 是 | 是 | 部分 | 数十万级 |

@@ -1,27 +1,27 @@
 ---
 name: var-tokenizer-designer
-description: Design a multi-scale residual VQ tokenizer for next-scale visual autoregressive image generation.
+description: 为下一尺度视觉自回归图像生成设计多尺度残差 VQ 分词器。
 version: 1.0.0
 phase: 8
 lesson: 19
 tags: [var, next-scale-prediction, vq-vae, residual-vq, image-generation, tokenizer]
 ---
 
-Given the image target (resolution, channels, color vs grayscale, dataset size, downstream LM compute budget, target FID), output:
+给定图像目标（分辨率、通道数、彩色 vs 灰度、数据集大小、下游语言模型计算预算、目标 FID），输出以下内容：
 
-1. Scale schedule. List the K resolution levels from 1x1 up to (H/p) x (W/p). Default 10 scales for 256x256, 14 for 512x512. Justify K against the LM's effective sequence length (sum of scale areas) and the per-pass parallel-within-scale budget.
-2. Codebook. Single shared codebook size V across all scales (typical 4096 / 8192 / 16384). Pick V from dataset size and decoder capacity. Confirm codebook usage stays above 50 percent on a calibration batch or shrink V.
-3. Residual sharing. Confirm scales 1..K together reconstruct the latent via summed upsampled embeddings (residual VQ). State the patch size p and the VAE backbone (VQGAN-style discriminator on / off, perceptual loss weight).
-4. Decoder. VAE decoder mapping summed latent back to pixels. Pick from VQGAN decoder, VAR-paper decoder, or a lighter MAGVIT-style decoder. Justify against FID target and decoder VRAM.
-5. Position embedding. Confirm (scale_index, row, col) triple with a learned embedding per scale and a 2D sin-cos within scale. Reject flat 1D positions; the LM needs the scale label to apply the right conditional.
+1. 尺度调度。列出从 1×1 到 (H/p)×(W/p) 的 K 个分辨率级别。256×256 默认使用 10 个尺度，512×512 使用 14 个尺度。根据语言模型的有效序列长度（所有尺度面积之和）和每步并行处理预算来论证 K 的选择。
+2. 码本。所有尺度共享一个码本，大小 V（典型值 4096 / 8192 / 16384）。根据数据集大小和解码器容量选择 V。在校准批次上确认码本利用率高于 50%，否则缩小 V。
+3. 残差共享。确认尺度 1..K 通过对上采样嵌入求和来共同重建潜特征（残差 VQ）。说明图像块大小 p 和 VAE 骨干网络（VQGAN 风格的判别器开/关、感知损失权重）。
+4. 解码器。将求和后的潜特征映射回像素的 VAE 解码器。从 VQGAN 解码器、VAR 论文解码器或更轻量的 MAGVIT 风格解码器中选择。根据 FID 目标和解码器显存进行论证。
+5. 位置嵌入。确认使用 (尺度索引, 行, 列) 三元组，每个尺度有学习嵌入，尺度内使用 2D sin-cos 编码。拒绝使用一维平坦位置编码；语言模型需要尺度标签才能应用正确的条件。
 
-Refuse a non-residual multi-scale tokenizer for VAR. Without summed residuals the next-scale conditional becomes ill-defined and the LM optimizes a different objective than the paper proves. Refuse separate per-scale codebooks unless V is calibrated to the smaller scale's pixel count and codebook collapse is mitigated. Refuse next-scale prediction at all when K x average-scale-area exceeds the LM's max sequence length minus headroom for text conditioning.
+拒绝为 VAR 使用非残差多尺度分词器。没有求和残差，下一尺度条件就变得定义不清，语言模型会优化一个与论文证明不同的目标。除非 V 针对较小尺度的像素数进行了校准且码本崩溃得到缓解，否则拒绝使用独立的每尺度码本。当 K × 平均尺度面积超过语言模型的最大序列长度减去文本条件预留空间时，完全拒绝下一尺度预测。
 
-Example input: "ImageNet class-conditional 256x256, dataset 1.2M, LM budget 1.5B params, target FID under 5.0."
+示例输入："ImageNet 类条件 256×256，数据集 120 万张，语言模型预算 15 亿参数，目标 FID < 5.0。"
 
-Example output:
-- Scale schedule: K=10, sizes 1, 2, 3, 4, 5, 6, 8, 10, 13, 16. Total tokens 671.
-- Codebook: shared, V=4096. Expect 70-80 percent usage on ImageNet at 256.
-- Residual sharing: confirmed; p=16, VQGAN backbone with perceptual + adversarial losses, residual sum reconstructs f.
-- Decoder: VQGAN decoder, 4 upsampling blocks, no extra refiner.
-- Position embedding: (scale, row, col) triple, learned scale token + 2D sin-cos within scale.
+示例输出：
+- 尺度调度：K=10，尺寸 1, 2, 3, 4, 5, 6, 8, 10, 13, 16。总 token 数 671。
+- 码本：共享，V=4096。在 256 分辨率的 ImageNet 上预期利用率 70-80%。
+- 残差共享：已确认；p=16，VQGAN 骨干网络含感知 + 对抗损失，残差求和重建 f。
+- 解码器：VQGAN 解码器，4 个上采样块，无额外精炼器。
+- 位置嵌入：(尺度, 行, 列) 三元组，学习尺度 token + 尺度内 2D sin-cos。

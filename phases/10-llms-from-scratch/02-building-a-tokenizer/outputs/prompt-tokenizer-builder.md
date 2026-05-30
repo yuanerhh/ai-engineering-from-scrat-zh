@@ -1,66 +1,66 @@
 ---
 name: prompt-tokenizer-builder
-description: Build and debug production-quality tokenizers for LLM projects
+description: 为 LLM 项目构建和调试生产质量的分词器
 version: 1.0.0
 phase: 10
 lesson: 2
 tags: [tokenizer, bpe, byte-level, special-tokens, chat-template, multilingual]
 ---
 
-# Production Tokenizer Builder
+# 生产级分词器构建指南
 
-When building or debugging a tokenizer for an LLM project, follow this framework.
+在为 LLM 项目构建或调试分词器时，遵循以下框架。
 
-## Pipeline Checklist
+## 流水线检查清单
 
-Every production tokenizer needs these five stages. If one is missing, you will hit edge cases in production.
+每个生产级分词器都需要以下五个阶段。缺少任何一个阶段，都会在生产中遇到边界情况。
 
-1. **Normalize** -- Apply NFKC Unicode normalization. This collapses ligatures ("fi" -> "fi"), normalizes fullwidth characters, and standardizes whitespace. Skip this and the same word gets different token IDs depending on how it was typed.
+1. **标准化** -- 应用 NFKC Unicode 标准化。这会折叠连字（"fi" -> "fi"）、标准化全角字符，并统一空白符。跳过此步骤，同一个词会因输入方式不同而得到不同的 token ID。
 
-2. **Pre-Tokenize** -- Split text into chunks before BPE. Use GPT-2's regex pattern for English-centric models. Use SentencePiece's raw-byte approach for multilingual models. The choice determines whether BPE can merge across word boundaries.
+2. **预分词** -- 在 BPE 之前将文本分割成块。英语中心模型使用 GPT-2 的正则表达式模式。多语言模型使用 SentencePiece 的原始字节方案。这一选择决定 BPE 是否能跨词边界合并。
 
-3. **BPE Merge** -- Apply the learned merge table to byte sequences within each chunk. The merge table IS the tokenizer's learned knowledge. Everything else is plumbing.
+3. **BPE 合并** -- 在每个块内的字节序列上应用学习到的合并表。合并表是分词器学习到的知识。其他都是管道工程。
 
-4. **Special Token Injection** -- Match special tokens exactly before BPE runs. [BOS], [EOS], [PAD], chat template markers get fixed IDs. They never participate in merges.
+4. **特殊 token 注入** -- 在 BPE 运行之前精确匹配特殊 token。[BOS]、[EOS]、[PAD]、对话模板标记获得固定 ID。它们不参与合并。
 
-5. **ID Mapping** -- Convert token strings to integers. The model sees integers only.
+5. **ID 映射** -- 将 token 字符串转换为整数。模型只看到整数。
 
-## Debugging Tokenizer Issues
+## 调试分词器问题
 
-**Symptom: model produces garbage on chat input**
-- Check the chat template. Every model has a different format. Llama 3 uses `<|start_header_id|>` markers. ChatGPT uses `<|im_start|>` markers. A wrong template puts input outside the training distribution.
+**症状：模型在对话输入上产生乱码**
+- 检查对话模板。每个模型的格式都不同。Llama 3 使用 `<|start_header_id|>` 标记。ChatGPT 使用 `<|im_start|>` 标记。错误的模板会使输入偏离训练分布。
 
-**Symptom: non-English text uses too many tokens**
-- Check fertility (tokens per word). Above 2.0 means the tokenizer wastes context window on that language. Solutions: retrain with more multilingual data, increase vocabulary size, or use SentencePiece with Unigram.
+**症状：非英语文本使用过多 token**
+- 检查繁殖率（每词 token 数）。高于 2.0 意味着分词器在该语言上浪费了上下文窗口。解决方案：用更多多语言数据重新训练、增加词汇量，或使用 Unigram 的 SentencePiece。
 
-**Symptom: numbers and arithmetic fail**
-- Check how digits are tokenized. "1234" as one token means the model cannot do digit-level operations. Split digits individually during pre-tokenization.
+**症状：数字和算术失败**
+- 检查数字如何分词。"1234"作为一个 token 意味着模型无法进行数字级别的操作。在预分词时单独分割数字。
 
-**Symptom: code tokens are inefficient**
-- Check how indentation is handled. GPT-2's tokenizer wastes tokens on spaces. Codex and StarCoder use special indentation tokens (4 spaces = 1 token).
+**症状：代码 token 效率低下**
+- 检查缩进如何处理。GPT-2 的分词器会在空格上浪费 token。Codex 和 StarCoder 使用特殊缩进 token（4 个空格 = 1 个 token）。
 
-## Vocabulary Size Decision
+## 词汇量决策
 
-- 32K tokens: single-language, small model, limited compute. Embedding layer is 32K * d_model parameters.
-- 50K-64K: multilingual or code-heavy. Good balance for most projects.
-- 100K+ (GPT-4, Llama 3): only with massive training data. Shorter sequences but 100K * d_model embedding parameters.
+- 3.2 万 token：单语言、小模型、计算资源有限。嵌入层参数量为 32K × d_model。
+- 5 万-6.4 万：多语言或代码密集型。大多数项目的良好平衡点。
+- 10 万以上（GPT-4、Llama 3）：仅在有海量训练数据时使用。序列更短但嵌入参数为 100K × d_model。
 
-For a 4096-dimensional model: 32K vocab = 131M embedding params. 128K vocab = 524M embedding params. That is 400M parameters just in the embedding layer.
+对于 4096 维模型：3.2 万词汇 = 1.31 亿嵌入参数。12.8 万词汇 = 5.24 亿嵌入参数。仅嵌入层就多了 4 亿参数。
 
-## Speed Requirements
+## 速度要求
 
-- Training data tokenization: use Rust-backed libraries (tiktoken, HuggingFace tokenizers). Pure Python is 10-100x slower.
-- Inference tokenization: latency matters less (single sequence), but still use compiled implementations.
-- Benchmark: tokenize 1GB of text and measure wall clock time. If it takes more than 60 seconds, switch to a Rust backend.
+- 训练数据分词：使用 Rust 后端库（tiktoken、HuggingFace tokenizers）。纯 Python 慢 10-100 倍。
+- 推理分词：延迟影响较小（单序列），但仍使用编译实现。
+- 基准测试：对 1GB 文本计时。如果超过 60 秒，切换到 Rust 后端。
 
-## Chat Template Validation
+## 对话模板验证
 
-Before deploying any chat model, verify the template:
+在部署任何对话模型之前，验证模板：
 
-1. Encode a known conversation with the tokenizer
-2. Decode it back to text
-3. Compare character-by-character with the expected format from the model's documentation
-4. Pay attention to: newlines after header tokens, spaces before content, end-of-turn markers
-5. Test edge cases: empty system message, very long user message, multiple assistant turns
+1. 用分词器编码一段已知对话
+2. 解码回文本
+3. 与模型文档中的预期格式逐字符比较
+4. 注意：头部 token 后的换行符、内容前的空格、轮次结束标记
+5. 测试边界情况：空系统消息、超长用户消息、多轮助手回复
 
-Getting the chat template wrong is the most common source of degraded chat model performance.
+对话模板错误是导致聊天模型性能下降最常见的原因。

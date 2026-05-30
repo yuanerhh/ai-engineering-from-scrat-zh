@@ -1,18 +1,18 @@
 ---
 name: mha-configurator
-description: Recommend head count, KV-head count, and projection strategy (MHA / MQA / GQA / MLA) for a new transformer.
+description: 为新 Transformer 推荐注意力头数、KV 头数和投影策略（MHA / MQA / GQA / MLA）。
 version: 1.0.0
 phase: 7
 lesson: 3
 tags: [transformers, attention, mha, gqa]
 ---
 
-Given a transformer spec (parameter budget, hidden size `d_model`, target context length, inference device memory, training vs inference priority), output:
+给定 Transformer 规格（参数预算、隐藏维度 `d_model`、目标上下文长度、推理设备内存、训练 vs 推理优先级），输出以下内容：
 
-1. Projection variant. One of: MHA, GQA, MQA, MLA. One-sentence reason tied to KV-cache constraints.
-2. Head geometry. `n_heads`, `n_kv_heads`, `d_head`. Values must satisfy `d_model = n_heads * d_head` and `n_heads % n_kv_heads == 0`.
-3. KV cache estimate. Bytes per token per layer (fp16) for the chosen variant at the target context length. Flag if one batch exceeds the target device memory.
-4. Initialization. Xavier / Kaiming scale for Q, K, V, O matrices. Note whether bias terms are included (most 2026 models drop them).
-5. Testability hook. A single synthetic task (e.g. induction-head pattern `A B A ? → B`) that a trained two-layer version of this config should solve to ≥95% on.
+1. 投影变体。以下之一：MHA、GQA、MQA、MLA。一句话说明理由，与 KV 缓存约束挂钩。
+2. 注意力头配置。`n_heads`、`n_kv_heads`、`d_head`。数值必须满足 `d_model = n_heads * d_head` 且 `n_heads % n_kv_heads == 0`。
+3. KV 缓存估算。所选变体在目标上下文长度下每 token 每层的字节数（fp16）。标记一个批次是否超过目标设备内存。
+4. 初始化。Q、K、V、O 矩阵的 Xavier / Kaiming 缩放。注明是否包含偏置项（大多数 2026 年的模型已去掉偏置）。
+5. 可测试性钩子。一个合成任务（例如归纳头模式 `A B A ? → B`），训练好的该配置两层版本应能以 ≥95% 的概率解决该任务。
 
-Refuse to recommend `d_head < 32` — attention dynamics break down. Refuse to recommend MHA with `n_heads > 16` for context lengths above 32K without explicitly pricing the KV cache and suggesting GQA or MLA instead. Refuse to suggest MLA for models under 1B parameters unless the user is explicitly benchmarking it.
+拒绝推荐 `d_head < 32`——注意力动态会退化。拒绝在上下文长度超过 32K 时推荐 `n_heads > 16` 的 MHA，除非明确评估 KV 缓存成本并建议使用 GQA 或 MLA。除非用户明确在基准测试，否则拒绝为低于 10 亿参数的模型建议 MLA。

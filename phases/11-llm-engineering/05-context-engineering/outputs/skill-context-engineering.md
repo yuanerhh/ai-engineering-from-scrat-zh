@@ -1,77 +1,77 @@
 ---
 name: skill-context-engineering
-description: Decision framework for designing context assembly pipelines based on task type, window size, and latency budget
+description: 根据任务类型、窗口大小和延迟预算设计上下文组装流水线的决策框架
 version: 1.0.0
 phase: 11
 lesson: 05
 tags: [context-engineering, context-window, rag, memory, tool-selection, lost-in-the-middle]
 ---
 
-# Context Engineering
+# 上下文工程
 
-When building an LLM application, apply this framework to design the context assembly pipeline.
+在构建 LLM 应用时，使用此框架设计上下文组装流水线。
 
-## Core principles
+## 核心原则
 
-1. **Context is scarce.** A 128K window sounds large but fills fast. Budget every component explicitly.
-2. **Attention is uneven.** Models attend more to the start and end. Put critical information there. The middle is the dead zone.
-3. **Dynamic beats static.** Different queries need different context. Assemble per query, not once at startup.
-4. **Less is more.** A curated 10K context outperforms a dumped 100K context. Signal-to-noise ratio matters more than total information.
-5. **Measure everything.** You cannot optimize what you do not measure. Count tokens per component on every request.
+1. **上下文是稀缺的。** 128K 窗口听起来很大，但填充速度很快。明确为每个组件分配预算。
+2. **注意力分布不均。** 模型对开头和结尾的注意力更多。将关键信息放在那里。中间是死区。
+3. **动态优于静态。** 不同的查询需要不同的上下文。按查询组装，而非在启动时一次性组装。
+4. **少即是多。** 精心策划的 10K 上下文优于堆砌的 100K 上下文。信噪比比总信息量更重要。
+5. **度量一切。** 你无法优化你不测量的东西。在每次请求中按组件统计 token 数量。
 
-## Context budget guidelines
+## 上下文预算指南
 
-| Component | Typical Range | Priority | Compression Strategy |
-|-----------|-------------|----------|---------------------|
-| System prompt | 200-1,000 tokens | Fixed, high | Write tight, remove redundancy |
-| Tool definitions | 500-3,000 tokens | Dynamic, medium | Prune by query intent |
-| Retrieved context | 1,000-5,000 tokens | Dynamic, high | Rerank + threshold + deduplicate |
-| Conversation history | 500-5,000 tokens | Dynamic, medium | Summarize old turns |
-| Few-shot examples | 500-2,000 tokens | Dynamic, high | Select by task similarity |
-| User query | 50-500 tokens | Fixed, highest | N/A |
-| Generation reserve | 2,000-8,000 tokens | Fixed | Adjust by expected output length |
+| 组件 | 典型范围 | 优先级 | 压缩策略 |
+|------|---------|------|---------|
+| 系统提示 | 200-1,000 tokens | 固定，高 | 精简写作，去除冗余 |
+| 工具定义 | 500-3,000 tokens | 动态，中 | 按查询意图裁剪 |
+| 检索上下文 | 1,000-5,000 tokens | 动态，高 | 重排序 + 阈值 + 去重 |
+| 对话历史 | 500-5,000 tokens | 动态，中 | 摘要旧轮次 |
+| 少样本示例 | 500-2,000 tokens | 动态，高 | 按任务相似度选择 |
+| 用户查询 | 50-500 tokens | 固定，最高 | 无 |
+| 生成预留 | 2,000-8,000 tokens | 固定 | 根据预期输出长度调整 |
 
-## When to use each memory type
+## 各记忆类型适用时机
 
-**Short-term (conversation history):** The current session. Managed by summarization. Compress turns older than 5-10 exchanges. Keep the last 3-4 turns verbatim.
+**短期记忆（对话历史）：** 当前会话。通过摘要管理。压缩超过 5-10 轮的对话。保留最后 3-4 轮原文。
 
-**Long-term (facts database):** Preferences and project facts that persist across sessions. Retrieve on session start. Examples: "user prefers Python", "project uses PostgreSQL", "team follows trunk-based development". Store in CLAUDE.md, a database, or a structured memory system.
+**长期记忆（事实数据库）：** 跨会话持久存储的偏好和项目事实。在会话开始时检索。例如：「用户偏好 Python」、「项目使用 PostgreSQL」、「团队遵循 trunk-based 开发」。存储在 CLAUDE.md、数据库或结构化记忆系统中。
 
-**Episodic (past interactions):** Specific past conversations relevant to the current task. Store as embeddings, retrieve by similarity. "Last week we debugged a similar auth issue" is episodic memory.
+**情节记忆（历史交互）：** 与当前任务相关的具体历史对话。存储为嵌入，按相似度检索。「上周我们调试了一个类似的认证问题」就是情节记忆。
 
-## Tool selection strategy
+## 工具选择策略
 
-Do not include all tools in every request. This wastes tokens and confuses the model.
+不要在每次请求中包含所有工具。这会浪费 token 并让模型困惑。
 
-1. Classify the query intent (code, email, calendar, research, data)
-2. Map intents to tool categories
-3. Include only matching tools
-4. If intent is ambiguous, include tools from the top 2 categories
-5. Always include a "general" tool (like web search) as fallback
+1. 对查询意图进行分类（代码、邮件、日历、研究、数据）
+2. 将意图映射到工具类别
+3. 只包含匹配的工具
+4. 如果意图模糊，包含前 2 个类别的工具
+5. 始终包含一个「通用」工具（如网络搜索）作为备选
 
-Expected savings: 60-80% of tool definition tokens on queries with clear intent.
+预期节省：对于意图明确的查询，工具定义 token 节省 60-80%。
 
-## Retrieval best practices
+## 检索最佳实践
 
-- **Rerank after retrieval.** Vector similarity is a rough filter. A reranker (cross-encoder or LLM-based) improves precision significantly.
-- **Set a relevance threshold.** Do not include chunks below 0.3 cosine similarity. They add noise.
-- **Deduplicate.** If two chunks share 80%+ content, keep only the higher-scored one.
-- **Apply lost-in-the-middle ordering.** Place the most relevant chunks first and last.
-- **Limit total retrieval tokens.** 3-5 highly relevant chunks beat 15 mediocre ones.
+- **检索后重排序。** 向量相似度只是粗略过滤。重排序器（交叉编码器或基于 LLM 的）能显著提升精确度。
+- **设置相关性阈值。** 不要包含余弦相似度低于 0.3 的块，它们只会增加噪音。
+- **去重。** 如果两个块有 80% 以上的内容相同，只保留得分更高的那个。
+- **应用「中间丢失」排序。** 将最相关的块放在首位和末位。
+- **限制检索 token 总量。** 3-5 个高度相关的块胜过 15 个质量一般的块。
 
-## History management
+## 历史管理
 
-- Keep the last 3-4 turns verbatim (the model needs recent context)
-- Summarize older turns into a digest ("We discussed X, decided Y, and blocked on Z")
-- Drop system-generated turns that add no information (tool invocations with no user-facing content)
-- Trigger compression when history exceeds 30% of the available budget
+- 保留最后 3-4 轮原文（模型需要最近的上下文）
+- 将较旧的轮次摘要为摘要（「我们讨论了 X，决定了 Y，阻塞在 Z」）
+- 丢弃不包含面向用户内容的系统生成轮次（工具调用等）
+- 当历史超过可用预算的 30% 时触发压缩
 
-## Red flags
+## 红色警报
 
-- System prompt exceeds 2,000 tokens: probably includes information that should be dynamic
-- All tools included on every request: implement intent-based selection
-- No relevance filtering on retrieval: you are dumping noise into the window
-- History grows unbounded: summarization is not implemented
-- No generation reserve: the model truncates its responses
-- Same information in 3 places (system prompt, retrieved doc, history): deduplicate
-- Context utilization over 60%: you are leaving too little room for the model to "think"
+- 系统提示超过 2,000 tokens：可能包含应该动态提供的信息
+- 每次请求都包含所有工具：实现基于意图的选择
+- 检索没有相关性过滤：你在向窗口注入噪音
+- 历史无限增长：摘要功能未实现
+- 没有生成预留：模型会截断其响应
+- 同一信息出现在 3 处（系统提示、检索文档、历史）：去重
+- 上下文使用率超过 60%：给模型「思考」的空间太少

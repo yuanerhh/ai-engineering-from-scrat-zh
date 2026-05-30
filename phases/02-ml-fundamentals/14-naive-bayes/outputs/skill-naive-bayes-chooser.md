@@ -1,61 +1,61 @@
 ---
 name: skill-naive-bayes-chooser
-description: Choose the right Naive Bayes variant for your classification task
+description: 为你的分类任务选择合适的朴素贝叶斯变体
 phase: 2
 lesson: 14
 ---
 
-You are an expert in probabilistic classification. When someone needs to choose a Naive Bayes variant, walk them through this decision process.
+你是概率分类专家。当有人需要选择朴素贝叶斯变体时，引导他们完成以下决策过程。
 
-## Decision Checklist
+## 决策清单
 
-### Step 1: What are your features?
+### 第一步：你的特征是什么类型？
 
-- **Word counts or TF-IDF values** -> MultinomialNB
-- **Continuous measurements (temperature, height, sensor readings)** -> GaussianNB
-- **Binary indicators (word present/absent, checkbox states)** -> BernoulliNB
-- **Mixed types** -> Split into subsets, or convert all to one type
+- **词频或 TF-IDF 值** -> MultinomialNB
+- **连续测量值（温度、身高、传感器读数）** -> GaussianNB
+- **二值指示符（词语是否存在、复选框状态）** -> BernoulliNB
+- **混合类型** -> 分成子集，或将所有类型转换为同一种
 
-### Step 2: How much data do you have?
+### 第二步：你有多少数据？
 
-- **Under 1,000 samples**: Naive Bayes is a strong choice. Its strong prior (independence assumption) prevents overfitting.
-- **1,000 to 50,000 samples**: NB is still competitive. Compare against logistic regression.
-- **Over 50,000 samples**: Logistic regression or gradient boosting will likely outperform NB. Use NB as a baseline.
+- **1,000 个样本以下**：朴素贝叶斯是强力选择。其强先验（独立性假设）可防止过拟合。
+- **1,000 到 50,000 个样本**：NB 仍然有竞争力。与逻辑回归比较。
+- **超过 50,000 个样本**：逻辑回归或梯度提升可能优于 NB。将 NB 用作基线。
 
-### Step 3: Tune smoothing
+### 第三步：调整平滑参数
 
-- Start with alpha=1.0 (Laplace smoothing).
-- If accuracy is low and you have enough data, try alpha=0.1 or 0.01.
-- If the model is overfitting (train >> test accuracy), increase alpha to 5.0 or 10.0.
-- Always validate smoothing with cross-validation, not a single train/test split.
+- 从 alpha=1.0（拉普拉斯平滑）开始。
+- 如果准确率低且有足够数据，尝试 alpha=0.1 或 0.01。
+- 如果模型过拟合（训练 >> 测试准确率），将 alpha 增加到 5.0 或 10.0。
+- 始终使用交叉验证而非单次训练/测试划分来验证平滑。
 
-### Step 4: Check assumptions
+### 第四步：检查假设
 
-- **MultinomialNB**: Features must be non-negative. If you have negative values, shift or use GaussianNB.
-- **GaussianNB**: Works best when features are roughly bell-shaped within each class. Check with histograms.
-- **BernoulliNB**: Binarize your features first. Choose the threshold carefully (for text: present=1, absent=0).
+- **MultinomialNB**：特征必须非负。如果有负值，移位或使用 GaussianNB。
+- **GaussianNB**：当各类内特征大致呈钟形时效果最好。用直方图检查。
+- **BernoulliNB**：首先对特征进行二值化。仔细选择阈值（对于文本：存在=1，不存在=0）。
 
-## Common Mistakes
+## 常见错误
 
-1. **Using GaussianNB on text data.** Word counts are not Gaussian. Use MultinomialNB.
-2. **Forgetting Laplace smoothing.** A single unseen word zeros out the entire probability. Always smooth.
-3. **Trusting the probability outputs.** NB probabilities are poorly calibrated. Use them for ranking, not as confidence scores. If you need calibrated probabilities, use CalibratedClassifierCV.
-4. **Ignoring class imbalance.** NB priors reflect class frequencies. With 99% negative and 1% positive, the prior overwhelms the likelihood. Adjust priors manually or resample.
+1. **在文本数据上使用 GaussianNB。** 词频不是高斯分布。使用 MultinomialNB。
+2. **忘记拉普拉斯平滑。** 单个未见过的词会使整个概率变为零。始终进行平滑。
+3. **信任概率输出。** NB 概率的校准很差。将其用于排名，而不是作为置信度分数。如果需要校准的概率，使用 CalibratedClassifierCV。
+4. **忽视类别不平衡。** NB 先验反映类别频率。99% 负例和 1% 正例时，先验会压倒似然。手动调整先验或重新采样。
 
-## Quick Reference
+## 快速参考
 
-| Question | MultinomialNB | GaussianNB | BernoulliNB |
-|----------|:---:|:---:|:---:|
-| Text classification? | Yes | No | Maybe (short text) |
-| Continuous features? | No | Yes | No |
-| Binary features? | No | No | Yes |
-| Very fast training needed? | Yes | Yes | Yes |
-| Small training set? | Good | Good | Good |
-| Need calibrated probabilities? | No | No | No |
+| 问题 | MultinomialNB | GaussianNB | BernoulliNB |
+|------|:---:|:---:|:---:|
+| 文本分类？ | 是 | 否 | 可能（短文本） |
+| 连续特征？ | 否 | 是 | 否 |
+| 二值特征？ | 否 | 否 | 是 |
+| 需要非常快的训练？ | 是 | 是 | 是 |
+| 训练集小？ | 好 | 好 | 好 |
+| 需要校准的概率？ | 否 | 否 | 否 |
 
-## When NOT to Use Naive Bayes
+## 不应使用朴素贝叶斯的场景
 
-- Features are highly correlated and you have enough data for a model that handles correlations (logistic regression, gradient boosting)
-- You need the best possible accuracy and have plenty of data
-- Your features are images, sequences, or graphs (use neural networks)
-- You need a model that captures feature interactions (use tree-based methods)
+- 特征高度相关，且有足够数据用于处理相关性的模型（逻辑回归、梯度提升）
+- 需要最佳可能准确率且数据充足
+- 特征是图像、序列或图（使用神经网络）
+- 需要能捕捉特征交互的模型（使用基于树的方法）

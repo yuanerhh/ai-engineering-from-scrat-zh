@@ -1,39 +1,39 @@
 ---
 name: cross-policy-diff
-description: Produce a cross-policy comparison for a specific capability using the OpenAI Preparedness Framework v2, Anthropic RSP v3.0, and DeepMind FSF v3 as reference.
+description: 以 OpenAI Preparedness Framework v2、Anthropic RSP v3.0 和 DeepMind FSF v3 为参考，针对特定能力生成跨策略比较。
 version: 1.0.0
 phase: 15
 lesson: 20
 tags: [preparedness-framework, fsf, rsp, cross-policy, scaling-policy]
 ---
 
-Given a specific frontier capability (e.g., "long-range autonomy," "autonomous replication and adaptation," "R&D automation"), produce a cross-policy diff showing how each of the three frameworks classifies the capability and what mitigations trigger.
+给定一种特定的前沿能力（例如"长程自主"、"自主复制与适应"、"R&D 自动化"），生成一份跨策略差异报告，显示三个框架各自如何分类该能力以及触发哪些缓解措施。
 
-Produce:
+产出内容：
 
-1. **OpenAI PF v2 classification.** Tracked or Research. If Tracked, name the Capabilities + Safeguards Report triggers. If Research, note the policy language is "potential" mitigations.
-2. **Anthropic RSP v3.0 classification.** Which threshold (ASL-3, AI R&D-4, hardcoded prohibition)? Which mitigation (affirmative case, security + deployment)? Confirm whether the commitment lives in the Anthropic-unilateral tier or the industry-recommendation tier.
-3. **DeepMind FSF v3 classification.** Which domain (Cyber, Bio, ML R&D, CBRN)? Which CCL or Tracked Capability Level? Is deceptive alignment monitoring invoked?
-4. **Convergence summary.** Do the three policies agree on the capability's severity, or is there meaningful disagreement? Which classification is most rigorous, which least?
-5. **Measurement dependency.** Every classification depends on capability measurement. Name how the capability is measured and which eval provider (METR, Apollo, internal, third-party) owns that measurement.
+1. **OpenAI PF v2 分类。** 已追踪或研究中。如果已追踪，列出能力与保障措施报告触发条件。如果研究中，说明策略语言是"潜在"缓解措施。
+2. **Anthropic RSP v3.0 分类。** 哪个阈值（ASL-3、AI R&D-4、硬编码禁止）？哪种缓解措施（肯定性案例、安全 + 部署）？确认承诺是否位于 Anthropic 单方面层还是行业建议层。
+3. **DeepMind FSF v3 分类。** 哪个领域（网络、生物、ML R&D、CBRN）？哪个 CCL 或已追踪能力级别？是否调用了欺骗性对齐监控？
+4. **收敛摘要。** 三个策略是否对该能力的严重性达成一致，还是存在实质性分歧？哪种分类最严格，哪种最宽松？
+5. **测量依赖性。** 每种分类都依赖于能力测量。列出该能力的测量方式以及哪个评估提供商（METR、Apollo、内部、第三方）拥有该测量。
 
-Hard rejects:
-- Claims of cross-policy alignment based on announcement-language similarity without document-level evidence.
-- Any classification that cannot point to a specific clause in the source document.
-- Treating "Research Category" (OpenAI) as equivalent to "Tracked Category" — they have different operational consequences.
+硬性拒绝：
+- 基于公告语言相似性而非文档级证据的跨策略一致性声明。
+- 无法指向源文档中具体条款的任何分类。
+- 将"研究类别"（OpenAI）视为等同于"已追踪类别"——它们具有不同的操作后果。
 
-Refusal rules:
-- If the user cannot produce the source document passages for each classification, refuse and require citations first.
-- If the user treats policy-existence as evidence of mitigation-in-practice, refuse and require evidence of the specific mitigations firing.
-- If the capability is claimed to be "covered" by a framework but the word does not appear in the document, refuse and require a concrete clause reference.
+拒绝规则：
+- 如果用户无法为每种分类提供源文档段落，拒绝并要求先提供引用。
+- 如果用户将策略存在视为缓解措施实施的证据，拒绝并要求特定缓解措施触发的证据。
+- 如果声称能力被某框架"覆盖"但该词未出现在文档中，拒绝并要求具体条款引用。
 
-Output format:
+输出格式：
 
-Return a diff document with:
-- **Capability definition** (one sentence)
-- **OpenAI PF v2 row** (classification, trigger, source clause)
-- **Anthropic RSP v3.0 row** (classification, trigger, unilateral-vs-recommendation)
-- **DeepMind FSF v3 row** (domain, CCL / TCL, deceptive-alignment involvement)
-- **Convergence summary** (agreement + meaningful disagreement)
-- **Measurement ownership** (eval provider, eval cadence)
-- **Reader recommendation** (most rigorous, least rigorous, justified)
+返回差异文档，包含：
+- **能力定义**（一句话）
+- **OpenAI PF v2 行**（分类、触发条件、源文档条款）
+- **Anthropic RSP v3.0 行**（分类、触发条件、单方面 vs 建议）
+- **DeepMind FSF v3 行**（领域、CCL / TCL、欺骗性对齐涉及情况）
+- **收敛摘要**（一致性 + 实质性分歧）
+- **测量所有权**（评估提供商、评估周期）
+- **读者建议**（最严格的、最宽松的，含说明）

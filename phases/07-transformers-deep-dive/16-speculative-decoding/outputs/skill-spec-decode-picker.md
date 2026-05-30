@@ -1,55 +1,55 @@
 ---
 name: spec-decode-picker
-description: Pick a speculative decoding strategy (vanilla / Medusa / EAGLE / lookahead) and tuning parameters for a new LLM inference workload.
+description: 为新的 LLM 推理工作负载选择推测解码策略（普通 / Medusa / EAGLE / 前瞻解码）及调优参数。
 version: 1.0.0
 phase: 7
 lesson: 16
 tags: [inference, decoding, latency, speculative, optimization]
 ---
 
-# Speculative Decoding Picker
+# 推测解码选择器
 
-Help an engineer choose between vanilla speculative, Medusa, EAGLE, or lookahead decoding, and tune `N` (draft length) for a specific workload.
+帮助工程师在普通推测解码、Medusa、EAGLE 和前瞻解码之间做出选择，并针对特定工作负载调优草稿长度 `N`。
 
-## Inputs to gather
+## 需要收集的输入信息
 
-1. **Verifier model** — which LLM produces final output. Size matters (draft cost must be < verifier cost for speedup).
-2. **Workload type** — code, chat, structured output, summarization. Determines acceptance rate.
-3. **Sampling strategy** — greedy, low-T, high-T, beam. High-T sampling degrades acceptance.
-4. **Hardware target** — memory budget determines if you can fit a separate draft model.
-5. **Engineering budget** — Medusa and EAGLE need fine-tuning; vanilla and lookahead don't.
-6. **Latency target** — interactive chat (<500ms TTFT, <50ms per token) vs batch (throughput-first).
+1. **验证器模型** — 哪个 LLM 生成最终输出。规模很重要（草稿成本必须小于验证器成本才能加速）。
+2. **工作负载类型** — 代码、对话、结构化输出、摘要。决定接受率。
+3. **采样策略** — 贪心、低温度、高温度、束搜索。高温度采样会降低接受率。
+4. **硬件目标** — 内存预算决定是否能加载独立的草稿模型。
+5. **工程预算** — Medusa 和 EAGLE 需要微调；普通推测和前瞻解码不需要。
+6. **延迟目标** — 交互式对话（TTFT < 500ms，每 token < 50ms）vs 批处理（吞吐量优先）。
 
-## Decision rules
+## 决策规则
 
-- **Quick start, no training**: vanilla draft with a same-family 1B–3B model. 2× typical.
-- **You can fine-tune**: EAGLE-2 or EAGLE-3 using the verifier's hidden states. 3–4× typical.
-- **You can fine-tune but can't run two models**: Medusa (extra heads on verifier). 2–3×.
-- **No training budget, no draft model available**: lookahead decoding. 1.3–1.6×.
-- **Batch-heavy serving**: continuous batching matters more; speculative gains diminish as batch grows because the verifier is already saturated.
-- **High temperature or stochastic sampling**: acceptance drops sharply. Consider lower N (2–3) or disabling.
-- **Structured output (JSON, code)**: acceptance is high. Push N to 7+ for max speedup.
+- **快速启动，无需训练**：使用同家族 1B-3B 模型做普通草稿。典型加速 2×。
+- **可以微调**：使用验证器隐藏状态的 EAGLE-2 或 EAGLE-3。典型加速 3-4×。
+- **可以微调但无法运行两个模型**：Medusa（在验证器上添加额外头部）。典型加速 2-3×。
+- **无训练预算，无草稿模型**：前瞻解码。加速 1.3-1.6×。
+- **高批处理服务**：持续批处理更重要；随着批次增大推测收益减少，因为验证器已经饱和。
+- **高温度或随机采样**：接受率急剧下降。考虑降低 N（2-3）或禁用推测解码。
+- **结构化输出（JSON、代码）**：接受率高。将 N 推到 7+ 以获得最大加速。
 
-## Tuning
+## 调优
 
-- **N (draft length)**: start at 5. Measure acceptance. If α > 0.9, push to 7. If α < 0.6, drop to 3.
-- **Draft temperature**: match the verifier's temperature. Mismatched draft sampling loses α.
-- **Tree depth (EAGLE-2 / Medusa)**: 3–5 branches; wider trees help only at α > 0.8.
-- **Draft model size**: smallest that hits α > 0.7. A 1B draft for a 70B verifier is typical; don't go below the verifier's tokenizer / embedding compatibility.
+- **N（草稿长度）**：从 5 开始。测量接受率。如果 α > 0.9，推到 7。如果 α < 0.6，降到 3。
+- **草稿温度**：与验证器温度一致。不一致的草稿采样会损失 α。
+- **树深度（EAGLE-2 / Medusa）**：3-5 个分支；更宽的树只在 α > 0.8 时有帮助。
+- **草稿模型大小**：选中能达到 α > 0.7 的最小模型。1B 草稿对应 70B 验证器是典型配置；不要低于验证器的分词器 / 嵌入兼容性要求。
 
-## Always flag
+## 始终标记
 
-- Check that draft and verifier share the tokenizer. Different BPE splits break speculative guarantees.
-- Spec decoding interacts with continuous batching in vLLM: per-request speedup drops when the batch is already saturated.
-- EAGLE's hidden-state input requires verifier internals; not always exposed through HF APIs. Prefer vLLM or SGLang runtimes.
-- Medusa heads need a supervised fine-tune on the verifier's own outputs. Data-gathering step is often the dominant cost.
+- 检查草稿模型和验证器是否共享分词器。不同的 BPE 分割会破坏推测保证。
+- 推测解码与 vLLM 的持续批处理有交互：当批次已经饱和时，每请求的加速下降。
+- EAGLE 的隐藏状态输入需要访问验证器内部；不总是通过 HF API 暴露。优先使用 vLLM 或 SGLang 运行时。
+- Medusa 头部需要在验证器自己的输出上进行监督微调。数据收集步骤通常是主要成本。
 
-## Output format
+## 输出格式
 
-Return:
+返回：
 
-1. **Recommendation** — one strategy name and tuning parameters (e.g. "EAGLE-2, N=5, tree_depth=4").
-2. **Expected speedup** — with explicit α assumption.
-3. **Compatibility checks** — tokenizer match, runtime support, KV cache rollback support.
-4. **Fallback plan** — if the primary strategy underperforms, what to try next.
-5. **Measurement plan** — how to validate acceptance rate and speedup on a representative sample.
+1. **推荐方案** — 一个策略名称及调优参数（例如"EAGLE-2，N=5，tree_depth=4"）。
+2. **预期加速** — 带有明确的 α 假设。
+3. **兼容性检查** — 分词器匹配、运行时支持、KV 缓存回滚支持。
+4. **备选方案** — 如果主策略表现不佳，下一步尝试什么。
+5. **测量方案** — 如何在代表性样本上验证接受率和加速效果。

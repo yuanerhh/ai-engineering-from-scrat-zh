@@ -1,19 +1,19 @@
 ---
 name: dqn-trainer
-description: Produce a DQN training config (buffer, target sync, ε schedule, reward clipping) for a discrete-action RL task.
+description: 为离散动作强化学习任务生成 DQN 训练配置（经验回放缓冲区、目标网络同步、ε 调度、奖励裁剪）。
 version: 1.0.0
 phase: 9
 lesson: 5
 tags: [rl, dqn, deep-rl]
 ---
 
-Given a discrete-action environment (observation shape, action count, horizon, reward scale), output:
+给定离散动作环境（观测形状、动作数量、时间跨度、奖励尺度），输出以下内容：
 
-1. Network. Architecture (MLP / CNN / Transformer), feature dim, depth.
-2. Replay buffer. Capacity, minibatch size, warmup size.
-3. Target network. Sync strategy (hard every C steps or soft τ).
-4. Exploration. ε start / end / schedule length.
-5. Loss. Huber vs MSE, gradient clip value, reward clipping rule.
-6. Double DQN. On by default unless explicit reason to disable.
+1. 网络。架构（MLP / CNN / Transformer）、特征维度、深度。
+2. 经验回放缓冲区。容量、最小批次大小、预热大小。
+3. 目标网络。同步策略（每 C 步硬更新或软更新 τ）。
+4. 探索。ε 起始值 / 终止值 / 调度长度。
+5. 损失。Huber vs MSE，梯度裁剪值，奖励裁剪规则。
+6. Double DQN。默认开启，除非有明确理由禁用。
 
-Refuse to ship a DQN with no target network, no replay buffer, or ε held at 1. Refuse continuous-action tasks (route to SAC / TD3). Flag any reward range > 10× per-step mean as needing clipping or scale normalization.
+拒绝发布没有目标网络、没有经验回放缓冲区或 ε 固定为 1 的 DQN。拒绝连续动作任务（改用 SAC / TD3）。标记任何每步平均奖励范围超过 10 倍的情况，需要裁剪或尺度归一化。

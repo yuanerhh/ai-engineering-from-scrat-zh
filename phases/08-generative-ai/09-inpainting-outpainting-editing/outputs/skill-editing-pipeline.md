@@ -1,18 +1,18 @@
 ---
 name: editing-pipeline
-description: Plan an image-editing pipeline from source + edit description to a ready-to-ship output.
+description: 根据源图像 + 编辑描述规划图像编辑流水线，输出可发布的结果。
 version: 1.0.0
 phase: 8
 lesson: 09
 tags: [inpaint, outpaint, edit, sam]
 ---
 
-Given source image, target edit (remove X, replace Y with Z, extend canvas, restyle region, change season / time-of-day), and quality bar (draft / portfolio / print), output:
+给定源图像、目标编辑（移除 X、将 Y 替换为 Z、扩展画布、重新风格化区域、改变季节/时间）和质量要求（草稿 / 作品集 / 印刷品），输出以下内容：
 
-1. Mask strategy. Explicit brush mask, SAM 2 click / box prompt, Grounded-SAM on a text phrase, or RMBG (for background removal). One-sentence reason.
-2. Base model + mode. SD-Inpaint / SDXL-Inpaint / Flux-Fill / Flux-Kontext for instruction edits, or SDEdit noise-level (0.3 / 0.6 / 0.9) if no mask.
-3. Prompt scaffolding. Describe the whole image after edit, not only the new content. Include negative prompt.
-4. CFG + strength + feather. Mask feather 8-16 px; CFG ~5-7 for SDXL-inpaint, 3-4 for Flux. Strength 0.8-1.0 for full regenerate, 0.3-0.5 for preserve.
-5. Guardrails. NSFW / deepfake / trademark detection hook, face-swap policy gate, reversibility (save the mask + seed).
+1. 蒙版策略。手动笔刷蒙版、SAM 2 点击/框提示、Grounded-SAM 文本短语，或 RMBG（用于背景移除）。一句话说明理由。
+2. 基础模型 + 模式。SD-Inpaint / SDXL-Inpaint / Flux-Fill / Flux-Kontext（用于指令编辑），或无蒙版时的 SDEdit 噪声水平（0.3 / 0.6 / 0.9）。
+3. 提示词框架。描述编辑后的完整图像，而非仅描述新内容。包含负面提示词。
+4. CFG + 强度 + 羽化。蒙版羽化 8-16 像素；SDXL-inpaint 约 5-7 CFG，Flux 约 3-4。完全重新生成时强度 0.8-1.0，保留时 0.3-0.5。
+5. 保护措施。NSFW / 深度伪造 / 商标检测钩子、换脸政策门控、可逆性（保存蒙版 + 种子）。
 
-Refuse to ship identity edits on a recognizable public figure without explicit policy check. Refuse to outpaint an image without at least 30% of the original canvas as the anchor (too little context makes the model hallucinate). Flag any SDEdit run with t/T &gt; 0.7 and fidelity target "preserve subject" as a likely mismatch.
+拒绝在可识别公众人物上进行身份编辑，除非经过明确的政策检查。拒绝在没有至少 30% 原始画布作为锚点的情况下进行外绘（上下文太少模型会产生幻觉）。标记任何 t/T > 0.7 且质量目标为"保留主体"的 SDEdit 运行——这两者很可能不匹配。

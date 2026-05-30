@@ -1,61 +1,61 @@
 ---
 name: skill-structured-outputs
-description: Decision framework for choosing the right structured output strategy based on provider, reliability, and complexity
+description: 根据提供商、可靠性和复杂度选择正确结构化输出策略的决策框架
 version: 1.0.0
 phase: 11
 lesson: 03
 tags: [structured-output, json, schema, constrained-decoding, pydantic, function-calling]
 ---
 
-# Structured Output Strategy
+# 结构化输出策略
 
-When building an LLM application that requires structured data, apply this decision framework.
+在构建需要结构化数据的 LLM 应用时，请使用以下决策框架。
 
-## When to use each approach
+## 各方案适用时机
 
-**Prompt-based ("Return JSON"):** Prototyping only. Acceptable for internal tools where occasional parse failures are tolerable. Add a try/except with retry. Never use in production pipelines.
+**基于提示词（"返回 JSON"）：** 仅用于原型开发。可以接受偶发解析失败的内部工具中可以使用。添加 try/except 加重试机制。绝不用于生产流水线。
 
-**JSON mode (API flag):** You need guaranteed valid JSON but the schema is simple or flexible. Works when you validate the shape on the application side. Available: OpenAI, Anthropic (via tool use), Google.
+**JSON 模式（API 标志）：** 你需要保证有效 JSON，但 Schema 简单或灵活。在应用侧验证结构时有效。可用提供商：OpenAI、Anthropic（通过工具使用）、Google。
 
-**Schema mode (constrained decoding):** Production systems where every output must match a specific schema. Zero parse failures. Zero schema violations. Use this by default for any production extraction or classification task. Available: OpenAI structured outputs, Outlines, Guidance.
+**Schema 模式（约束解码）：** 每次输出都必须匹配特定 Schema 的生产系统。零解析失败，零 Schema 违规。对任何生产提取或分类任务默认使用此方法。可用提供商：OpenAI 结构化输出、Outlines、Guidance。
 
-**Function calling / tool use:** The model needs to choose which function to call, not just fill parameters. You have multiple schemas and the model selects the appropriate one. Also use when integrating with existing tool/function infrastructure.
+**函数调用/工具使用：** 模型需要选择调用哪个函数，而不仅仅是填充参数。你有多个 Schema，模型选择合适的一个。也用于与现有工具/函数基础设施集成时。
 
-**Instructor library:** You want Pydantic validation with automatic retry across any provider. Best DX for Python projects. Wraps OpenAI, Anthropic, Google, and open-source models.
+**Instructor 库：** 你想要跨任何提供商使用 Pydantic 验证和自动重试。Python 项目的最佳开发体验。支持 OpenAI、Anthropic、Google 和开源模型。
 
-## Provider-specific guidance
+## 提供商特定指南
 
-**OpenAI:** Use `response_format` with `json_schema` type. Constrained decoding is built in. Pydantic models work directly. Most reliable structured output implementation.
+**OpenAI：** 使用 `response_format` 配合 `json_schema` 类型。约束解码内置。Pydantic 模型直接支持。最可靠的结构化输出实现。
 
-**Anthropic:** Use tool use for structured output. Define a single tool with the desired schema. The model returns tool call arguments matching the schema. Reliable but requires the tool use API pattern.
+**Anthropic：** 使用工具使用实现结构化输出。定义一个具有所需 Schema 的单个工具。模型返回匹配 Schema 的工具调用参数。可靠，但需要工具使用 API 模式。
 
-**Open-source models (vLLM, Ollama):** Use Outlines or Guidance for constrained decoding. These libraries compile JSON Schemas into finite state machines that mask invalid tokens during generation. Requires running inference locally.
+**开源模型（vLLM、Ollama）：** 使用 Outlines 或 Guidance 进行约束解码。这些库将 JSON Schema 编译为有限状态机，在生成期间屏蔽无效 token。需要在本地运行推理。
 
-## Schema design guidelines
+## Schema 设计指南
 
-1. Keep schemas flat when possible. Nested objects beyond 2 levels increase extraction errors.
-2. Use enums for categorical fields. Do not rely on the model inventing the right string.
-3. Make ambiguous fields required with explicit null support rather than optional. Forces the model to make a decision.
-4. Add descriptions to schema properties. The model reads these as instructions.
-5. Avoid union types (oneOf/anyOf) unless necessary. They increase decoding complexity.
-6. Set minimum/maximum on numbers. Catches hallucinated extreme values.
-7. Use minItems/maxItems on arrays to prevent empty or unbounded outputs.
+1. 尽量保持 Schema 扁平。嵌套超过 2 层的对象会增加提取错误。
+2. 对分类字段使用枚举。不要依赖模型发明正确的字符串。
+3. 将不确定的字段设为必填且明确支持 null，而非可选。迫使模型做出决定。
+4. 为 Schema 属性添加描述。模型将这些描述作为指令读取。
+5. 除非必要，避免联合类型（oneOf/anyOf）。它们增加解码复杂度。
+6. 为数字设置 minimum/maximum。捕获幻觉出的极端值。
+7. 对数组使用 minItems/maxItems，防止空输出或无界输出。
 
-## Common failure patterns and fixes
+## 常见失败模式及修复
 
-- **Model wraps JSON in markdown fences**: switch from prompt-based to JSON mode or schema mode
-- **Schema-valid but factually wrong**: add an LLM-as-judge validation step after extraction
-- **Inconsistent enum values**: switch to constrained decoding or add post-processing normalization
-- **Missing optional fields**: make them required or add default values in application code
-- **Very slow extraction**: constrained decoding adds 5-15% latency, reduce schema complexity if latency-sensitive
-- **Large arrays with varied items**: chunk the input and extract per-chunk, then merge results
+- **模型用 Markdown 围栏包裹 JSON**：从基于提示词切换到 JSON 模式或 Schema 模式
+- **Schema 有效但事实错误**：在提取后添加 LLM 评判验证步骤
+- **枚举值不一致**：切换到约束解码，或添加后处理规范化
+- **缺少可选字段**：在应用代码中使其必填或添加默认值
+- **提取非常缓慢**：约束解码增加 5-15% 延迟，如果对延迟敏感则降低 Schema 复杂度
+- **含有多样化条目的大型数组**：分块输入并按块提取，然后合并结果
 
-## Reliability ladder
+## 可靠性阶梯
 
-| Approach | Parse Success | Schema Match | Setup Effort |
-|----------|-------------|-------------|-------------|
-| Prompt-based | ~90% | ~80% | 1 minute |
-| JSON mode | 100% | ~90% | 5 minutes |
-| Schema mode | 100% | ~99% | 15 minutes |
-| Constrained decoding | 100% | 100% | 30 minutes |
-| Instructor + retry | 100% | ~99.5% | 10 minutes |
+| 方案 | 解析成功率 | Schema 匹配率 | 配置工作量 |
+|------|-----------|-------------|----------|
+| 基于提示词 | ~90% | ~80% | 1 分钟 |
+| JSON 模式 | 100% | ~90% | 5 分钟 |
+| Schema 模式 | 100% | ~99% | 15 分钟 |
+| 约束解码 | 100% | 100% | 30 分钟 |
+| Instructor + 重试 | 100% | ~99.5% | 10 分钟 |

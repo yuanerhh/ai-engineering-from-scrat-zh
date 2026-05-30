@@ -1,35 +1,35 @@
 ---
 name: a2a-integrator
-description: Design an A2A integration between two agents — Agent Card, task schemas, auth, streaming or polling.
+description: 设计两个智能体之间的 A2A 集成——Agent Card、任务模式、认证、流式传输或轮询。
 version: 1.0.0
 phase: 16
 lesson: 12
 tags: [multi-agent, a2a, protocol, interoperability, google]
 ---
 
-Given two agent systems that need to interoperate, produce the A2A integration plan: Agent Card contents, task schemas, auth, transport mode.
+给定两个需要互操作的智能体系统，生成 A2A 集成计划：Agent Card 内容、任务模式、认证、传输模式。
 
-Produce:
+产出内容：
 
-1. **Agent Card.** Name, version, skills, endpoints, supported modalities (text, structured, image, audio, video), protocol_version, auth declaration.
-2. **Task schemas per skill.** Input JSON schema + artifact JSON schema. Be explicit — clients will validate.
-3. **Auth choice.** Bearer token (OAuth2 or opaque), mTLS, or signed requests. Justify given the threat model (public internet, VPC, mixed).
-4. **Transport mode.** Polling vs SSE streaming vs webhook callbacks. Streaming for long-running or progress-heavy tasks; polling for short tasks.
-5. **Rate limits.** Per-client and per-task limits. Protection from abuse.
-6. **Idempotency.** Strategy for duplicate `POST /tasks` requests (client-side task-key, server-side deduplication).
-7. **Failure handling.** Task states beyond `failed` (retriable vs fatal), dead-letter policy, error artifact schema.
-8. **MCP vs A2A split.** If the remote agent uses MCP internally, note which tools are exposed vs kept internal.
+1. **Agent Card。** 名称、版本、技能、端点、支持的模态（文本、结构化、图像、音频、视频）、protocol_version、认证声明。
+2. **每项技能的任务模式。** 输入 JSON 模式 + 工件 JSON 模式。要明确——客户端会进行验证。
+3. **认证选择。** Bearer 令牌（OAuth2 或不透明）、mTLS 或签名请求。根据威胁模型（公共互联网、VPC、混合）说明理由。
+4. **传输模式。** 轮询 vs SSE 流式传输 vs webhook 回调。流式传输用于长期运行或进度密集型任务；轮询用于短任务。
+5. **速率限制。** 每客户端和每任务限制。防止滥用。
+6. **幂等性。** 重复 `POST /tasks` 请求的处理策略（客户端侧任务键、服务器端去重）。
+7. **故障处理。** `failed` 之外的任务状态（可重试 vs 致命）、死信策略、错误工件模式。
+8. **MCP vs A2A 分割。** 如果远程智能体内部使用 MCP，说明哪些工具是暴露的，哪些保留在内部。
 
-Hard rejects:
+硬性拒绝：
 
-- Agent Cards without a declared protocol version.
-- Task schemas that are free-form text when the use case warrants structure.
-- Auth=none on public-internet deployments.
+- 没有声明协议版本的 Agent Card。
+- 在用例需要结构化时使用自由格式文本的任务模式。
+- 公共互联网部署上 Auth=none。
 
-Refusal rules:
+拒绝规则：
 
-- If both agents run in the same process, refuse A2A and recommend direct Python/JS calls. A2A is for cross-system boundaries.
-- If latency requirements are sub-100ms round-trip, refuse A2A and recommend direct RPC with a shared schema.
-- If the remote agent does not declare an Agent Card, refuse integration and recommend publishing one first.
+- 如果两个智能体在同一进程中运行，拒绝 A2A 并推荐直接 Python/JS 调用。A2A 用于跨系统边界。
+- 如果延迟要求是亚 100ms 往返，拒绝 A2A 并推荐使用共享模式的直接 RPC。
+- 如果远程智能体不声明 Agent Card，拒绝集成并推荐先发布 Agent Card。
 
-Output: a one-page integration brief. Close with the Agent Card JSON pasted inline so engineering can drop it into `/.well-known/agent.json`.
+输出：一页集成简报。结尾内联粘贴 Agent Card JSON，以便工程师可以直接放入 `/.well-known/agent.json`。

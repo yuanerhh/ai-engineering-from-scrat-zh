@@ -1,77 +1,77 @@
 ---
 name: prompt-tensor-debugger
-description: Step-by-step debugging prompt for tensor shape errors in deep learning code
+description: 深度学习代码中张量形状错误的逐步调试提示
 phase: 1
 lesson: 12
 ---
 
-I have a tensor shape error in my deep learning code. Help me fix it.
+我的深度学习代码中出现了张量形状错误。请帮我修复。
 
-**Error message:** [paste the error here]
+**错误信息：** [在此粘贴错误]
 
-**My tensor shapes:**
-- [name]: [shape]
-- [name]: [shape]
+**我的张量形状：**
+- [名称]：[形状]
+- [名称]：[形状]
 
-**The operation I'm trying to do:** [describe it]
+**我要执行的操作：** [描述操作]
 
 ---
 
-When debugging, follow this exact process:
+调试时，遵循以下精确流程：
 
-**Step 1: Identify the operation type.**
-What operation produced the error? Map it to one of these:
-- Matrix multiply / Linear layer (inner dimensions must match)
-- Broadcasting (align from right, each dim must be equal or 1)
-- Concatenation (all dims match except the cat dimension)
-- Convolution (expects specific rank and channel position)
-- Reshape (total elements must be preserved)
+**第一步：识别操作类型。**
+是哪种操作产生了错误？将其映射到以下之一：
+- 矩阵乘法 / 线性层（内部维度必须匹配）
+- 广播（从右对齐，每个维度必须相等或为 1）
+- 拼接（除拼接维度外所有维度匹配）
+- 卷积（需要特定的秩和通道位置）
+- 重塑（必须保留总元素数）
 
-**Step 2: Write out the shape contract.**
-For the identified operation, write the expected shapes explicitly:
+**第二步：写出形状约定。**
+对于识别的操作，明确写出期望形状：
 ```
-matmul(A, B): A is (..., m, k), B is (..., k, n) -> (..., m, n)
-broadcast(A, B): align right, each pair must be (equal) or (one is 1)
-cat([A, B], dim=d): all dims match except dim d
-Linear(in_f, out_f): input last dim must equal in_f
-Conv2d(in_c, out_c, k): input must be (B, in_c, H, W)
+matmul(A, B): A 是 (..., m, k)，B 是 (..., k, n) -> (..., m, n)
+broadcast(A, B): 从右对齐，每对必须是（相等）或（其中一个为 1）
+cat([A, B], dim=d): 除第 d 维外所有维度匹配
+Linear(in_f, out_f): 输入最后一维必须等于 in_f
+Conv2d(in_c, out_c, k): 输入必须是 (B, in_c, H, W)
 ```
 
-**Step 3: Find the mismatch.**
-Compare actual shapes against the contract. Identify the exact dimension that violates the rule.
+**第三步：找出不匹配。**
+将实际形状与约定对比。找出违反规则的具体维度。
 
-**Step 4: Choose the minimal fix.**
-Pick from this table:
+**第四步：选择最小修复。**
+从以下表格中选择：
 
-| Symptom | Fix |
-|---|---|
-| Missing batch dimension | `.unsqueeze(0)` |
-| Missing channel dimension | `.unsqueeze(1)` |
-| Extra size-1 dimension | `.squeeze(dim)` |
-| Inner dims wrong for matmul | `.transpose(-1, -2)` or check weight shape |
-| Need NCHW from NHWC | `.permute(0, 3, 1, 2)` |
-| Need NHWC from NCHW | `.permute(0, 2, 3, 1)` |
-| Flatten spatial dims for linear | `.flatten(1)` or `.reshape(B, -1)` |
-| Split heads: (B,T,D) to (B,H,T,D/H) | `.reshape(B, T, H, D//H).transpose(1, 2)` |
-| Merge heads: (B,H,T,D/H) to (B,T,D) | `.transpose(1, 2).reshape(B, T, H*(D//H))` |
-| Non-contiguous tensor with .view() | `.contiguous().view(...)` or use `.reshape(...)` |
+| 症状 | 修复方法 |
+|------|---------|
+| 缺少批次维度 | `.unsqueeze(0)` |
+| 缺少通道维度 | `.unsqueeze(1)` |
+| 多余的大小为 1 的维度 | `.squeeze(dim)` |
+| matmul 内部维度有误 | `.transpose(-1, -2)` 或检查权重形状 |
+| 需要从 NHWC 转为 NCHW | `.permute(0, 3, 1, 2)` |
+| 需要从 NCHW 转为 NHWC | `.permute(0, 2, 3, 1)` |
+| 将空间维度展平用于线性层 | `.flatten(1)` 或 `.reshape(B, -1)` |
+| 分割头部：(B,T,D) 转 (B,H,T,D/H) | `.reshape(B, T, H, D//H).transpose(1, 2)` |
+| 合并头部：(B,H,T,D/H) 转 (B,T,D) | `.transpose(1, 2).reshape(B, T, H*(D//H))` |
+| 非连续张量使用 .view() | `.contiguous().view(...)` 或使用 `.reshape(...)` |
 
-**Step 5: Verify the fix.**
-Show the resulting shapes at each step. Confirm total elements are preserved across any reshape. Confirm the operation's shape contract is now satisfied.
+**第五步：验证修复。**
+展示每步的结果形状。确认任何重塑操作都保留了总元素数。确认操作的形状约定现已满足。
 
-**Step 6: Check for silent bugs.**
-Even if shapes match, verify:
-- Broadcasting is happening along the intended axis (not accidentally)
-- Reduction is summing over the right dimension
-- The batch dimension (dim 0) survives through the entire forward pass
-- Transpose + reshape is used (not just reshape) when dimension ordering matters
+**第六步：检查静默 bug。**
+即使形状匹配，也要验证：
+- 广播是沿预期轴发生的（不是意外的）
+- 归约是对正确的维度求和
+- 批次维度（第 0 维）在整个前向传播中都保留
+- 当维度顺序重要时，使用了转置 + 重塑（而非仅重塑）
 
-Format your response as:
+按以下格式组织回答：
 ```
-OPERATION: [what operation failed]
-EXPECTED: [shape contract]
-ACTUAL: [what shapes were provided]
-MISMATCH: [which dimension, why]
-FIX: [exact code]
-RESULT: [shapes after fix]
+操作：[失败的操作]
+期望：[形状约定]
+实际：[提供的形状]
+不匹配：[哪个维度，原因]
+修复：[精确代码]
+结果：[修复后的形状]
 ```

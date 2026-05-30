@@ -1,94 +1,94 @@
 ---
 name: skill-ensemble-builder
-description: Choose the right ensemble method and configure it for your problem
+description: 为你的问题选择合适的集成方法并进行配置
 version: 1.0.0
 phase: 2
 lesson: 11
 tags: [ensemble, bagging, boosting, random-forest, xgboost, stacking]
 ---
 
-# Ensemble Method Selection Guide
+# 集成方法选择指南
 
-Ensembles combine multiple models to produce better predictions than any single model. The question is always: which kind of ensemble, and when?
+集成方法将多个模型组合起来，产生比任何单一模型都更好的预测。问题始终是：选择哪种集成，以及何时使用？
 
-## Decision Checklist
+## 决策清单
 
-1. What is the main problem with your current model?
-   - High variance (overfitting): use bagging (Random Forest)
-   - High bias (underfitting): use boosting (Gradient Boosting, XGBoost)
-   - Both, or you want maximum accuracy: use stacking
+1. 当前模型的主要问题是什么？
+   - 高方差（过拟合）：使用 bagging（随机森林）
+   - 高偏差（欠拟合）：使用 boosting（梯度提升、XGBoost）
+   - 两者都有，或需要最高准确率：使用 stacking
 
-2. How much data do you have?
-   - Under 1,000 rows: Random Forest (robust, hard to misconfigure)
-   - 1,000 to 100,000: XGBoost or LightGBM (best overall for tabular)
-   - Over 100,000: LightGBM (fastest gradient boosting, handles large data well)
+2. 你有多少数据？
+   - 1,000 行以下：随机森林（鲁棒，难以配置错误）
+   - 1,000 到 100,000：XGBoost 或 LightGBM（表格数据的最佳整体选择）
+   - 超过 100,000：LightGBM（最快的梯度提升，对大数据处理良好）
 
-3. How much tuning time can you invest?
-   - Minimal: Random Forest with defaults (almost always works)
-   - Moderate: XGBoost with learning_rate=0.1, tune n_estimators with early stopping
-   - Maximum: LightGBM or XGBoost with Bayesian hyperparameter search
+3. 能投入多少调参时间？
+   - 极少：使用默认值的随机森林（几乎总是有效）
+   - 适中：learning_rate=0.1 的 XGBoost，用早停调整 n_estimators
+   - 充足：LightGBM 或 XGBoost 配合贝叶斯超参数搜索
 
-4. Do you need interpretability?
-   - Yes: single decision tree or small Random Forest with feature importance
-   - Partial: gradient boosting with SHAP values
-   - No: stacking or deep ensembles
+4. 是否需要可解释性？
+   - 是：带特征重要性的单棵决策树或小型随机森林
+   - 部分：带 SHAP 值的梯度提升
+   - 否：stacking 或深度集成
 
-5. Is the data noisy with many outliers?
-   - Yes: Random Forest (bagging is robust to noise)
-   - No: gradient boosting (can push accuracy further on clean data)
+5. 数据是否有噪声且含有大量离群值？
+   - 是：随机森林（bagging 对噪声鲁棒）
+   - 否：梯度提升（在干净数据上能进一步提高准确率）
 
-## When to use each method
+## 各方法的使用场景
 
-**Random Forest (Bagging)**: your safe first choice. Trains many trees on bootstrap samples and averages. Reduces variance without increasing bias. Nearly impossible to overfit on moderate data. Minimal tuning needed: set n_estimators=100-500 and leave defaults.
+**随机森林（Bagging）**：你的安全首选。在自助样本上训练多棵树并取平均。在不增加偏差的情况下减少方差。在中等数据上几乎不可能过拟合。调参需求最低：设置 n_estimators=100-500，其余使用默认值。
 
-**AdaBoost**: sequential boosting with sample reweighting. Works well with simple base learners (decision stumps). Sensitive to outliers and noisy labels because it upweights misclassified points. Largely replaced by gradient boosting in practice.
+**AdaBoost**：通过样本重新加权的序列 boosting。与简单基础学习器（决策桩）配合良好。对离群值和噪声标签敏感，因为它会增加误分类点的权重。在实践中基本上被梯度提升取代。
 
-**Gradient Boosting**: fits each new tree to the residuals of the ensemble so far. Reduces bias. The most powerful method for tabular data. Requires tuning: learning_rate, n_estimators, max_depth, min_child_weight, subsample.
+**梯度提升**：将每棵新树拟合到当前集成的残差上。减少偏差。表格数据最强大的方法。需要调参：learning_rate、n_estimators、max_depth、min_child_weight、subsample。
 
-**XGBoost**: gradient boosting with regularization, second-order optimization, and systems-level speedups. Handles missing values natively. The default for Kaggle competitions and production ML on tabular data.
+**XGBoost**：带正则化、二阶优化和系统级加速的梯度提升。原生处理缺失值。Kaggle 竞赛和生产表格 ML 的默认选择。
 
-**LightGBM**: gradient boosting with leaf-wise growth (instead of level-wise). Faster than XGBoost on large datasets. Uses histogram-based splits. Best for datasets over 50k rows.
+**LightGBM**：按叶生长（而非按层）的梯度提升。在大数据集上比 XGBoost 更快。使用基于直方图的分裂。最适合 5 万行以上的数据集。
 
-**CatBoost**: gradient boosting with native categorical feature handling. No need to one-hot encode. Good when you have many categorical features.
+**CatBoost**：带原生分类特征处理的梯度提升。无需 one-hot 编码。当有许多分类特征时效果很好。
 
-**Stacking**: trains a meta-learner on the predictions of multiple diverse base models. Use when you need the absolute best accuracy and have compute to spare. Always generate base model predictions via cross-validation to avoid leakage.
+**Stacking**：在多个多样化基础模型的预测上训练元学习器。当需要最高准确率且有计算资源时使用。始终通过交叉验证生成基础模型预测以避免泄露。
 
-**Voting**: simplest ensemble. Hard voting (majority class) or soft voting (average probabilities). Quick way to combine 2-3 diverse models without a meta-learner.
+**投票**：最简单的集成。硬投票（多数类）或软投票（平均概率）。不需要元学习器的快速组合 2-3 个多样化模型的方式。
 
-## Common mistakes
+## 常见错误
 
-- Using gradient boosting without early stopping (it will overfit if you let it run too many rounds)
-- Setting learning_rate too high (above 0.3 usually causes instability)
-- Not tuning max_depth for gradient boosting (default of unlimited or very deep trees overfit)
-- Stacking with models that are all the same type (diversity is the point of stacking)
-- Using AdaBoost on noisy data (outliers get higher and higher weight each round)
-- Expecting Random Forest to fix underfitting (it reduces variance, not bias)
+- 在不使用早停的情况下使用梯度提升（如果运行太多轮会过拟合）
+- 将 learning_rate 设得太高（超过 0.3 通常会导致不稳定）
+- 不为梯度提升调整 max_depth（无限制或非常深的树会过拟合）
+- 用相同类型的模型进行 stacking（多样性才是 stacking 的意义）
+- 在噪声数据上使用 AdaBoost（离群值每轮都会获得更高的权重）
+- 期望随机森林修复欠拟合（它减少方差，不减少偏差）
 
-## Tuning priorities by method
+## 各方法调参优先级
 
-**Random Forest:**
-1. n_estimators: 100-500 (more is rarely worse, just slower)
-2. max_depth: None (let trees grow fully) or cap at 10-20 for speed
-3. max_features: "sqrt" for classification, "log2" or n/3 for regression
+**随机森林：**
+1. n_estimators：100-500（更多通常不会更差，只是更慢）
+2. max_depth：None（让树完全生长）或上限设为 10-20 以提高速度
+3. max_features："sqrt" 用于分类，"log2" 或 n/3 用于回归
 
-**XGBoost / LightGBM:**
-1. learning_rate: 0.01-0.3 (lower is better if you have compute for more trees)
-2. n_estimators: use early stopping on a validation set instead of guessing
-3. max_depth: 3-8 (start with 6)
-4. min_child_weight / min_data_in_leaf: 1-20 (higher prevents overfitting)
-5. subsample: 0.7-1.0
-6. colsample_bytree: 0.7-1.0
-7. reg_alpha (L1) and reg_lambda (L2): 0-10
+**XGBoost / LightGBM：**
+1. learning_rate：0.01-0.3（有计算资源时更低更好，可以有更多树）
+2. n_estimators：在验证集上使用早停而不是猜测
+3. max_depth：3-8（从 6 开始）
+4. min_child_weight / min_data_in_leaf：1-20（更高可防止过拟合）
+5. subsample：0.7-1.0
+6. colsample_bytree：0.7-1.0
+7. reg_alpha（L1）和 reg_lambda（L2）：0-10
 
-## Quick reference
+## 快速参考
 
-| Method | Reduces | Speed | Tuning effort | Best for |
-|--------|---------|-------|--------------|----------|
-| Random Forest | Variance | Fast | Low | Noisy data, quick baseline |
-| AdaBoost | Bias | Fast | Low | Simple base learners, clean data |
-| Gradient Boosting | Bias | Medium | High | Tabular data, competitions |
-| XGBoost | Both | Fast | High | Production tabular ML |
-| LightGBM | Both | Fastest | High | Large datasets (50k+ rows) |
-| CatBoost | Both | Medium | Medium | Many categorical features |
-| Stacking | Both | Slow | High | Maximum accuracy, diverse models |
-| Voting | Variance | Fast | None | Quick combination of 2-3 models |
+| 方法 | 减少 | 速度 | 调参工作量 | 最适合 |
+|------|------|------|----------|--------|
+| 随机森林 | 方差 | 快 | 低 | 噪声数据，快速基线 |
+| AdaBoost | 偏差 | 快 | 低 | 简单基础学习器，干净数据 |
+| 梯度提升 | 偏差 | 中 | 高 | 表格数据，竞赛 |
+| XGBoost | 两者 | 快 | 高 | 生产表格 ML |
+| LightGBM | 两者 | 最快 | 高 | 大数据集（5万+行） |
+| CatBoost | 两者 | 中 | 中 | 多分类特征 |
+| Stacking | 两者 | 慢 | 高 | 最高准确率，多样化模型 |
+| 投票 | 方差 | 快 | 无 | 快速组合 2-3 个模型 |

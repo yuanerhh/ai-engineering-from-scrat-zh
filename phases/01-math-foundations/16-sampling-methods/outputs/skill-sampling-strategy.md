@@ -1,84 +1,84 @@
 ---
 name: skill-sampling-strategy
-description: Choose the right sampling method for generation, estimation, or inference
+description: 为生成、估计或推断选择合适的采样方法
 version: 1.0.0
 phase: 1
 lesson: 16
 tags: [sampling, mcmc, generation]
 ---
 
-# Sampling Strategy Selection
+# 采样策略选择
 
-How to pick the right sampling method for text generation, Bayesian inference, Monte Carlo estimation, and training.
+如何为文本生成、贝叶斯推断、蒙特卡洛估计和训练选择合适的采样方法。
 
-## Decision Checklist
+## 决策清单
 
-1. Are you generating output (text, images) or estimating a quantity (integral, expectation)?
-2. Can you sample directly from the target distribution, or only evaluate its density?
-3. Is the target distribution discrete or continuous?
-4. What dimension is the sample space? Low (< 5), medium (5-100), or high (> 100)?
-5. Do you need exact samples or approximate ones?
-6. Do you need gradients through the sampling operation?
+1. 你是在生成输出（文本、图像）还是估计某个量（积分、期望）？
+2. 你能直接从目标分布采样，还是只能评估其密度？
+3. 目标分布是离散的还是连续的？
+4. 样本空间的维度是多少？低维（< 5）、中维（5-100）还是高维（> 100）？
+5. 你需要精确样本还是近似样本？
+6. 你是否需要通过采样操作传播梯度？
 
-## When to use each method
+## 各方法的使用场景
 
-| Method | When to use | Complexity | Exact? |
-|---|---|---|---|
-| Direct sampling | You have the CDF or can use a library function | O(1) per sample | Yes |
-| Inverse CDF | Known closed-form CDF inverse (exponential, Cauchy) | O(1) per sample | Yes |
-| Box-Muller | Need normal samples without a library | O(1) per sample | Yes |
-| Rejection sampling | Can evaluate target PDF, low dimension (1-3) | O(1/acceptance) per sample | Yes |
-| Importance sampling | Need expectations, not individual samples | O(n) for n samples | Approximate |
-| Stratified sampling | Monte Carlo estimation, want lower variance | O(n) for n samples | Approximate |
-| Metropolis-Hastings | High-dimensional, can evaluate unnormalized density | O(1) per step + burn-in | Asymptotically |
-| Gibbs sampling | Can sample from each conditional distribution | O(d) per full sweep | Asymptotically |
-| HMC/NUTS | High-dimensional continuous, smooth density | O(L * d) per step | Asymptotically |
-| Temperature sampling | LLM text generation, control creativity | O(V) for vocab size V | N/A |
-| Top-k sampling | LLM generation, remove unlikely tokens | O(V log k) | N/A |
-| Top-p (nucleus) | LLM generation, adaptive candidate set | O(V log V) | N/A |
-| Reparameterization | Need gradients through Gaussian sampling (VAEs) | O(d) | Yes |
-| Gumbel-Softmax | Need gradients through categorical sampling | O(k) for k classes | Approximate |
+| 方法 | 适用场景 | 复杂度 | 精确？ |
+|------|---------|--------|--------|
+| 直接采样 | 拥有 CDF 或可使用库函数 | 每样本 O(1) | 是 |
+| 逆 CDF | 已知闭合形式的 CDF 逆（指数分布、柯西分布） | 每样本 O(1) | 是 |
+| Box-Muller | 不用库函数需要正态样本 | 每样本 O(1) | 是 |
+| 拒绝采样 | 可评估目标 PDF，低维（1-3 维） | 每样本 O(1/接受率) | 是 |
+| 重要性采样 | 需要期望值，不需要单个样本 | n 个样本 O(n) | 近似 |
+| 分层采样 | 蒙特卡洛估计，需要降低方差 | n 个样本 O(n) | 近似 |
+| Metropolis-Hastings | 高维，可评估未归一化密度 | 每步 O(1) + 预热 | 渐近 |
+| Gibbs 采样 | 可从每个条件分布采样 | 每完整扫描 O(d) | 渐近 |
+| HMC/NUTS | 高维连续，平滑密度 | 每步 O(L * d) | 渐近 |
+| 温度采样 | LLM 文本生成，控制创意程度 | 词表大小 V 时 O(V) | 不适用 |
+| Top-k 采样 | LLM 生成，去除低概率 token | O(V log k) | 不适用 |
+| Top-p（核采样） | LLM 生成，自适应候选集 | O(V log V) | 不适用 |
+| 重参数化 | 需要通过高斯采样传播梯度（VAE） | O(d) | 是 |
+| Gumbel-Softmax | 需要通过分类采样传播梯度 | k 个类别时 O(k) | 近似 |
 
-## LLM generation settings
+## LLM 生成参数设置
 
-| Use case | Temperature | Top-p | Top-k | Notes |
-|---|---|---|---|---|
-| Factual Q&A | 0.0 (greedy) | -- | -- | Deterministic, no randomness |
-| Code generation | 0.2-0.5 | 0.9 | -- | Low creativity, high coherence |
-| General chat | 0.7 | 0.9 | -- | Balanced |
-| Creative writing | 0.9-1.2 | 0.95 | -- | Higher diversity |
-| Brainstorming | 1.0-1.5 | 0.95 | -- | Maximum diversity, may lose coherence |
+| 使用场景 | 温度 | Top-p | Top-k | 备注 |
+|---------|------|-------|-------|------|
+| 事实性问答 | 0.0（贪婪） | -- | -- | 确定性，无随机性 |
+| 代码生成 | 0.2-0.5 | 0.9 | -- | 低创意，高连贯性 |
+| 一般对话 | 0.7 | 0.9 | -- | 均衡 |
+| 创意写作 | 0.9-1.2 | 0.95 | -- | 更高多样性 |
+| 头脑风暴 | 1.0-1.5 | 0.95 | -- | 最大多样性，可能失去连贯性 |
 
-Temperature and top-p can be combined. Apply temperature first (scale logits), then apply top-p filtering.
+温度和 Top-p 可以组合使用。先应用温度（缩放 logits），再应用 Top-p 过滤。
 
-## MCMC method selection
+## MCMC 方法选择
 
-| Property | Metropolis-Hastings | Gibbs | HMC/NUTS |
-|---|---|---|---|
-| Dimension | Any | Any (best < 100) | High (100+) |
-| Requires conditionals | No | Yes | No |
-| Requires gradient | No | No | Yes |
-| Acceptance rate | Tune to ~23% | Always 100% | Tune to ~65% |
-| Correlation | High (random walk) | Moderate | Low |
-| Burn-in | Long | Moderate | Short |
-| Best for | Exploration, simple models | Conjugate models, Bayesian networks | Continuous posteriors, deep probabilistic models |
+| 属性 | Metropolis-Hastings | Gibbs | HMC/NUTS |
+|------|-------------------|-------|----------|
+| 维度 | 任意 | 任意（< 100 时最佳） | 高维（100+） |
+| 需要条件分布 | 否 | 是 | 否 |
+| 需要梯度 | 否 | 否 | 是 |
+| 接受率 | 调整至约 23% | 始终 100% | 调整至约 65% |
+| 自相关 | 高（随机游走） | 中等 | 低 |
+| 预热期 | 长 | 中等 | 短 |
+| 最适合 | 探索，简单模型 | 共轭模型，贝叶斯网络 | 连续后验，深度概率模型 |
 
-## Common mistakes
+## 常见错误
 
-- Using rejection sampling in high dimensions. Acceptance rate drops exponentially with dimension. Above 5 dimensions, switch to MCMC.
-- Setting MCMC proposal variance too high or too low. Too high: most proposals rejected, chain stuck. Too low: all proposals accepted, chain moves slowly. Target ~23% acceptance for random walk MH.
-- Forgetting burn-in. The first N samples from MCMC are biased by the starting point. Discard at least 1000 steps (or more for complex distributions).
-- Using importance sampling with a proposal very different from the target. A few samples get enormous weights, making the estimate unreliable. Monitor the effective sample size: ESS = (sum w_i)^2 / sum(w_i^2).
-- Using temperature > 0 for tasks that need deterministic output (e.g., classification, structured extraction). Use greedy (T=0) or beam search instead.
-- Not combining top-p with temperature. Temperature alone does not remove garbage tokens from the long tail. Top-p does.
-- Backpropagating through a standard sampling operation. Use reparameterization trick for continuous (Gaussian) and Gumbel-Softmax for discrete (categorical).
+- 在高维度使用拒绝采样。接受率随维度指数级下降。超过 5 维时切换到 MCMC。
+- 设置 MCMC 提案方差过高或过低。过高：大多数提案被拒绝，链卡住。过低：所有提案都被接受，链移动缓慢。目标约 23% 的接受率（随机游走 MH）。
+- 忘记预热期。MCMC 的前 N 个样本会受到起始点的偏差影响。至少丢弃 1000 步（复杂分布时更多）。
+- 使用与目标差异很大的提案进行重要性采样。少数样本会获得极大的权重，使估计不可靠。监控有效样本量：ESS = (sum w_i)^2 / sum(w_i^2)。
+- 对需要确定性输出的任务（如分类、结构化提取）使用温度 > 0。改用贪婪（T=0）或束搜索。
+- 不将 Top-p 与温度结合使用。单独使用温度不能从长尾中去除垃圾 token，Top-p 才能做到。
+- 通过标准采样操作进行反向传播。对连续（高斯）采样使用重参数化技巧，对离散（分类）采样使用 Gumbel-Softmax。
 
-## Quick reference: variance reduction techniques
+## 快速参考：方差缩减技术
 
-| Technique | How it works | Variance reduction |
-|---|---|---|
-| Stratified sampling | Divide space into strata, sample each | Always <= standard MC |
-| Antithetic variates | Use both U and 1-U | Works for monotone functions |
-| Control variates | Subtract a known-mean variable | Proportional to correlation |
-| Importance sampling | Reweight samples from a better proposal | Depends on proposal quality |
-| Latin hypercube | Stratify each dimension independently | Better than stratified in high-d |
+| 技术 | 原理 | 方差缩减效果 |
+|------|------|------------|
+| 分层采样 | 将空间划分为层，每层采样 | 始终 <= 标准 MC |
+| 对偶变量 | 同时使用 U 和 1-U | 适用于单调函数 |
+| 控制变量 | 减去一个已知均值的变量 | 与相关性成比例 |
+| 重要性采样 | 从更好的提案中重新加权样本 | 取决于提案质量 |
+| 拉丁超立方 | 独立地对每个维度分层 | 高维度下优于分层采样 |

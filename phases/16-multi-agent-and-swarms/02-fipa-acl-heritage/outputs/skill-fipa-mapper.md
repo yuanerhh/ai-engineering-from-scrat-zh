@@ -1,33 +1,33 @@
 ---
 name: fipa-mapper
-description: Map any 2026 agent-protocol spec (MCP, A2A, ACP, ANP, CA-MCP, NLIP, or a new one) onto FIPA-ACL performatives and interaction protocols to decide what is genuine novelty and what is reinvention.
+description: 将任何 2026 年智能体协议规范（MCP、A2A、ACP、ANP、CA-MCP、NLIP 或新规范）映射到 FIPA-ACL 会话行为和交互协议，以判断哪些是真正的创新，哪些是重新发明。
 version: 1.0.0
 phase: 16
 lesson: 02
 tags: [multi-agent, protocols, FIPA, speech-acts, interoperability]
 ---
 
-Given a new agent-protocol spec, produce the FIPA-ACL mapping so the reader can tell which parts are reinvention and which are genuine new structure.
+给定一份新的智能体协议规范，生成 FIPA-ACL 映射，使读者能够判断哪些部分是重新发明，哪些是真正的新结构。
 
-Produce:
+产出内容：
 
-1. **Envelope mapping.** For each message type the spec defines, name the nearest FIPA performative (`inform`, `request`, `query-if`, `query-ref`, `propose`, `accept-proposal`, `reject-proposal`, `cfp`, `subscribe`, `cancel`, `failure`, `not-understood`, or one of the other ~20). If no performative fits, describe the gap precisely.
-2. **Correlation model.** How does the spec correlate requests to replies, cancellation to the original request, and streamed events to the subscribe? Compare to FIPA's `:conversation-id` and `:reply-with` fields.
-3. **Content-language stance.** Does the spec mandate a content schema (typed artifacts, JSON-Schema), accept natural language, or leave it open? Compare to FIPA's SL0/SL1 and ontology fields.
-4. **Interaction-protocol library.** Which FIPA interaction protocols are implementable on top of the spec: contract-net, subscribe-notify, request-when, propose-accept? Name the messages that would implement each.
-5. **Discovery model.** How does an agent find counterparties and capabilities (MCP `listTools`, A2A Agent Card, ANP DID + meta-protocol)? Compare to FIPA's directory facilitator and yellow-pages service.
-6. **Reinvention vs novelty.** Produce a short table with three columns: [FIPA concept, modern spec equivalent, what changed]. Mark each row as [reinvention] or [novel-structure]. A row is "novel-structure" only when the spec introduces a primitive that FIPA did not have — decentralized identity, typed multimodal artifacts, and LLM-interpretable content are the common candidates.
+1. **信封映射。** 对于规范定义的每种消息类型，列出最接近的 FIPA 会话行为（`inform`、`request`、`query-if`、`query-ref`、`propose`、`accept-proposal`、`reject-proposal`、`cfp`、`subscribe`、`cancel`、`failure`、`not-understood` 或其他约 20 种之一）。如果没有会话行为匹配，精确描述差距。
+2. **关联模型。** 规范如何将请求与回复、取消与原始请求以及流式事件与订阅关联起来？与 FIPA 的 `:conversation-id` 和 `:reply-with` 字段进行比较。
+3. **内容语言立场。** 规范是否强制要求内容模式（类型化工件、JSON-Schema），接受自然语言，还是保持开放？与 FIPA 的 SL0/SL1 和本体字段进行比较。
+4. **交互协议库。** 哪些 FIPA 交互协议可以在该规范之上实现：合同网、订阅-通知、请求-当、提议-接受？列出实现每种的消息。
+5. **发现模型。** 智能体如何找到对方和能力（MCP `listTools`、A2A Agent Card、ANP DID + 元协议）？与 FIPA 的目录促进器和黄页服务进行比较。
+6. **重新发明 vs 创新。** 生成一个包含三列的简短表格：[FIPA 概念、现代规范等价物、变化内容]。将每行标记为 [重新发明] 或 [新结构]。只有当规范引入了 FIPA 没有的原语时，该行才是"新结构"——去中心化身份、类型化多模态工件和 LLM 可解读内容是常见候选。
 
-Hard rejects:
+硬性拒绝：
 
-- Any mapping that claims a spec is "revolutionary" without showing a primitive FIPA did not have. Speech-act theory + ontology overhead was the failure mode, not the primitives.
-- Framework comparisons that ignore the discovery layer. A spec without discovery is incomplete, not novel.
-- Statements like "Protocol X replaces FIPA" without addressing what happens when two agents disagree about content meaning (semantic drift).
+- 任何在没有显示 FIPA 没有的原语的情况下声称规范是"革命性的"的映射。语音行为理论 + 本体开销是失败模式，而非原语。
+- 忽略发现层的框架比较。没有发现的规范是不完整的，而非新颖的。
+- 类似"协议 X 取代 FIPA"的陈述，而不说明当两个智能体对内容含义意见不一致时会发生什么（语义漂移）。
 
-Refusal rules:
+拒绝规则：
 
-- If the spec is pre-standardization (draft < 6 months old, no public implementations), state that the mapping is provisional and flag the three most likely changes.
-- If the spec is closed-source or enterprise-only (some ACP flavors), map what is documented and name the gaps.
-- If the user supplies only a blog post (no spec document), ask for the spec before mapping.
+- 如果规范处于预标准化阶段（草案 < 6 个月，无公开实现），说明映射是暂定的，并标记三个最可能的变化。
+- 如果规范是闭源或仅限企业（某些 ACP 版本），映射已记录的内容并列出差距。
+- 如果用户只提供了博客文章（无规范文档），在映射之前要求提供规范。
 
-Output: a one-page brief. Start with a single-sentence summary ("Protocol X is FIPA `request`/`subscribe` with JSON syntax and a DID-based discovery layer."), then the six sections above, then a closing paragraph answering: "Which old FIPA failure mode will this spec rediscover?"
+输出：一页简报。从一句话摘要开始（"协议 X 是带有 JSON 语法和基于 DID 发现层的 FIPA `request`/`subscribe`。"），然后是以上六个部分，最后一段回答："这个规范会重新发现哪个旧的 FIPA 失败模式？"

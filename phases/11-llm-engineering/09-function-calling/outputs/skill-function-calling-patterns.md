@@ -1,145 +1,145 @@
 ---
 name: skill-function-calling-patterns
-description: Decision framework for implementing function calling in production -- tool design, error handling, security, and provider patterns
+description: 生产环境中函数调用的决策框架——工具设计、错误处理、安全性和提供商模式
 version: 1.0.0
 phase: 11
 lesson: 09
 tags: [function-calling, tool-use, agents, mcp, security, openai, anthropic]
 ---
 
-# Function Calling Patterns
+# 函数调用模式
 
-When building an LLM application that uses tools, apply this decision framework.
+在构建使用工具的 LLM 应用时，应用此决策框架。
 
-## When to use function calling
+## 何时使用函数调用
 
-**Use function calling when:**
-- The model needs real-time data (weather, stock prices, database queries)
-- The task requires side effects (sending emails, creating records, deploying code)
-- The model must choose between multiple actions based on user intent
-- You are building an agent that interacts with external systems
+**以下情况使用函数调用：**
+- 模型需要实时数据（天气、股价、数据库查询）
+- 任务需要副作用（发送邮件、创建记录、部署代码）
+- 模型必须根据用户意图在多个操作之间选择
+- 你在构建与外部系统交互的智能体
 
-**Use structured outputs instead when:**
-- You need data extraction from text (no external calls needed)
-- The output is the final product, not an intermediate step
-- You have a single schema, not multiple tools to choose from
+**以下情况改用结构化输出：**
+- 你需要从文本中提取数据（不需要外部调用）
+- 输出是最终产品，而非中间步骤
+- 你只有一个 Schema，而非多个工具可供选择
 
-**Use both when:**
-- The model calls a tool, then structures the tool result into a specific output format
+**以下情况两者都用：**
+- 模型调用工具，然后将工具结果结构化为特定输出格式
 
-## Tool design guidelines
+## 工具设计指南
 
-1. **One tool, one action.** A tool named `manage_database` that handles queries, inserts, updates, and deletes is too broad. Split into `query_records`, `insert_record`, `update_record`. The model selects better with specific tools.
+1. **一个工具，一个操作。** 名为 `manage_database` 且处理查询、插入、更新和删除的工具太宽泛。拆分为 `query_records`、`insert_record`、`update_record`。使用具体工具时，模型选择更准确。
 
-2. **Descriptions are prompts.** The model reads tool descriptions to decide selection. Write them like you would write instructions for a junior developer. Include what the tool returns, not just what it does.
+2. **描述就是提示词。** 模型通过阅读工具描述来决定选择。像给初级开发者写指令一样编写描述。不仅要说明工具做什么，还要说明它返回什么。
 
-3. **Constrain with enums.** If a parameter has 3-10 valid values, use an enum. The model will invent strings -- "celsius", "Celsius", "C", "metric" -- unless you constrain it.
+3. **使用枚举约束。** 如果参数有 3-10 个有效值，使用枚举。模型会发明字符串——「celsius」、「Celsius」、「C」、「metric」——除非你约束它。
 
-4. **Fewer tools is better.** GPT-4o handles 5-10 tools well. At 20+ tools, selection accuracy drops. At 50+ tools, expect 10-15% wrong tool selection. Group related functionality or use a routing layer.
+4. **更少的工具更好。** GPT-4o 处理 5-10 个工具表现良好。超过 20 个工具，选择准确率下降。超过 50 个工具，预计有 10-15% 的错误工具选择。对相关功能进行分组或使用路由层。
 
-5. **Required means required.** Only mark a parameter as required if the tool literally cannot function without it. Optional parameters with good defaults reduce tool call failures.
+5. **必填意味着真的必填。** 只有在工具字面上无法在没有该参数的情况下运行时，才将其标记为必填。有良好默认值的可选参数可以减少工具调用失败。
 
-## Provider-specific patterns
+## 提供商特定模式
 
-### OpenAI (GPT-4o, o3, GPT-4o-mini)
+### OpenAI（GPT-4o、o3、GPT-4o-mini）
 
 ```python
 tools=[{"type": "function", "function": {"name": ..., "parameters": ...}}]
-tool_choice="auto"       # model decides
-tool_choice="required"   # must call at least one tool
+tool_choice="auto"       # 模型决定
+tool_choice="required"   # 必须至少调用一个工具
 tool_choice={"type": "function", "function": {"name": "specific_tool"}}
 ```
 
-- Supports parallel tool calls (multiple `tool_calls` in one response)
-- Tool call IDs must be passed back with results
-- `gpt-4o-mini` is 10x cheaper and handles simple tool routing well
-- Structured outputs mode works with tool parameters for guaranteed schema compliance
+- 支持并行工具调用（一次响应中多个 `tool_calls`）
+- 工具调用 ID 必须与结果一起传回
+- `gpt-4o-mini` 便宜 10 倍，处理简单工具路由效果良好
+- 结构化输出模式适用于工具参数以保证 Schema 合规
 
-### Anthropic (Claude 3.5 Sonnet, Claude 4 Opus)
+### Anthropic（Claude 3.5 Sonnet、Claude 4 Opus）
 
 ```python
 tools=[{"name": ..., "description": ..., "input_schema": ...}]
-tool_choice={"type": "auto"}     # model decides
-tool_choice={"type": "any"}      # must call at least one tool
+tool_choice={"type": "auto"}     # 模型决定
+tool_choice={"type": "any"}      # 必须至少调用一个工具
 tool_choice={"type": "tool", "name": "specific_tool"}
 ```
 
-- Tool calls appear as content blocks with `type: "tool_use"`
-- Results go in user messages with `type: "tool_result"`
-- Field name is `input_schema`, not `parameters` (common migration bug)
-- Supports multiple tool calls per response
+- 工具调用以 `type: "tool_use"` 的内容块形式出现
+- 结果放在用户消息中，`type: "tool_result"`
+- 字段名是 `input_schema`，不是 `parameters`（常见迁移 bug）
+- 支持每次响应多个工具调用
 
-### Google (Gemini 2.0 Flash, Gemini 2.0 Pro)
+### Google（Gemini 2.0 Flash、Gemini 2.0 Pro）
 
 ```python
 function_declarations=[{"name": ..., "description": ..., "parameters": ...}]
-function_calling_config={"mode": "AUTO"}   # or "ANY" or "NONE"
+function_calling_config={"mode": "AUTO"}   # 或 "ANY" 或 "NONE"
 ```
 
-- Uses `function_declarations` at the top level
-- Results returned via `function_response` parts
-- Supports parallel function calling
+- 在顶层使用 `function_declarations`
+- 结果通过 `function_response` 部分返回
+- 支持并行函数调用
 
-### Open-source models (Llama 3, Hermes, Qwen)
+### 开源模型（Llama 3、Hermes、Qwen）
 
-- No standardized format -- varies by model and serving framework
-- Hermes format (NousResearch) is the most common fine-tuned convention
-- vLLM supports OpenAI-compatible tool calling for supported models
-- Ollama supports basic tool calling with compatible models
-- Test tool selection accuracy before production -- open models are 15-30% less accurate than GPT-4o on the Berkeley Function Calling Leaderboard
+- 没有标准化格式——因模型和服务框架而异
+- Hermes 格式（NousResearch）是最常见的微调约定
+- vLLM 为支持的模型提供兼容 OpenAI 的工具调用
+- Ollama 支持兼容模型的基本工具调用
+- 生产前测试工具选择准确率——开源模型在 Berkeley 函数调用排行榜上比 GPT-4o 准确率低 15-30%
 
-## Error handling patterns
+## 错误处理模式
 
-### Return structured errors
+### 返回结构化错误
 
 ```json
-{"error": true, "message": "City 'Toky' not found. Did you mean 'Tokyo'?", "code": "NOT_FOUND", "suggestions": ["Tokyo"]}
+{"error": true, "message": "找不到城市 'Toky'。你是否要找 'Tokyo'？", "code": "NOT_FOUND", "suggestions": ["Tokyo"]}
 ```
 
-Include actionable information. "Not found" is bad. "Not found, did you mean X?" is good. The model uses error messages to self-correct.
+包含可操作的信息。「未找到」很差。「未找到，你是否要找 X？」更好。模型使用错误消息进行自我纠正。
 
-### Retry strategy
+### 重试策略
 
-1. Tool call fails with a correctable error (typo, wrong enum value)
-2. Send the error back to the model as a tool result
-3. The model adjusts and retries
-4. Maximum 3 retries per tool call
-5. After 3 failures, return the error to the user
+1. 工具调用因可纠正的错误失败（拼写错误、错误的枚举值）
+2. 将错误作为工具结果发送回模型
+3. 模型调整并重试
+4. 每次工具调用最多重试 3 次
+5. 3 次失败后，将错误返回给用户
 
-### Timeout handling
+### 超时处理
 
-Set timeouts on all tool executions. 30 seconds is a reasonable default. If a tool times out, return a structured timeout error so the model can inform the user rather than hanging.
+对所有工具执行设置超时。30 秒是合理的默认值。如果工具超时，返回结构化超时错误，以便模型通知用户而不是挂起。
 
-## Security checklist
+## 安全检查清单
 
-| Check | Why | How |
-|-------|-----|-----|
-| Allowlist functions | Prevent arbitrary code execution | Only register tools the user needs |
-| Validate argument types | Prevent type confusion attacks | Check types before execution |
-| Sanitize string arguments | Prevent injection | Reject or escape special characters |
-| Parameterize database queries | Prevent SQL injection | Never pass model-generated SQL directly |
-| Filter tool results | Prevent data leakage | Remove API keys, PII, internal errors |
-| Rate limit tool calls | Prevent runaway loops | Max 10-20 calls per conversation |
-| Log all tool calls | Audit trail | Store tool name, arguments, result, timestamp |
-| Block path traversal | Prevent file system access | Reject `..` and absolute paths in file tools |
-| Sandbox code execution | Prevent system access | Use containers or restricted builtins |
-| Validate return size | Prevent context stuffing | Truncate results over 10KB |
+| 检查 | 原因 | 方法 |
+|------|------|------|
+| 函数白名单 | 防止任意代码执行 | 只注册用户需要的工具 |
+| 验证参数类型 | 防止类型混淆攻击 | 执行前检查类型 |
+| 净化字符串参数 | 防止注入 | 拒绝或转义特殊字符 |
+| 参数化数据库查询 | 防止 SQL 注入 | 绝不直接传递模型生成的 SQL |
+| 过滤工具结果 | 防止数据泄露 | 删除 API 密钥、PII、内部错误 |
+| 限制工具调用频率 | 防止失控循环 | 每次对话最多 10-20 次调用 |
+| 记录所有工具调用 | 审计追踪 | 存储工具名称、参数、结果、时间戳 |
+| 阻止路径遍历 | 防止文件系统访问 | 在文件工具中拒绝 `..` 和绝对路径 |
+| 沙箱代码执行 | 防止系统访问 | 使用容器或受限内置函数 |
+| 验证返回大小 | 防止上下文填充 | 截断超过 10KB 的结果 |
 
-## Performance optimization
+## 性能优化
 
-- **Parallel calls:** When the model requests multiple independent tools, execute them concurrently with `asyncio.gather()` or `concurrent.futures`
-- **Caching:** Cache tool results for identical arguments within the same session (weather does not change in 60 seconds)
-- **Streaming:** Stream the model's final response while tool results are being fetched
-- **Tool pruning:** If context is tight, only include tool definitions relevant to the current query (use a classifier to filter)
-- **Smaller models for routing:** Use `gpt-4o-mini` or `claude-3-5-haiku` for tool selection, then pass results to a stronger model for synthesis
+- **并行调用：** 当模型请求多个独立工具时，使用 `asyncio.gather()` 或 `concurrent.futures` 并发执行
+- **缓存：** 在同一会话中对相同参数的工具结果进行缓存（天气在 60 秒内不会改变）
+- **流式传输：** 在获取工具结果的同时流式传输模型的最终响应
+- **工具修剪：** 如果上下文紧张，只包含与当前查询相关的工具定义（使用分类器过滤）
+- **用更小的模型路由：** 使用 `gpt-4o-mini` 或 `claude-3-5-haiku` 进行工具选择，然后将结果传递给更强的模型进行综合
 
-## Common failure patterns
+## 常见失败模式
 
-| Failure | Cause | Fix |
-|---------|-------|-----|
-| Wrong tool selected | Ambiguous descriptions | Rewrite descriptions with specific trigger words |
-| Missing required args | Model forgot a parameter | Add clear examples in parameter descriptions |
-| Infinite tool loop | Model keeps calling same tool | Set max iterations (5-10) and detect repeated calls |
-| Hallucinated arguments | Model invents plausible but wrong values | Use enums, validate against known values |
-| Tool result too large | API returned 100KB of data | Truncate or summarize before feeding back |
-| Model ignores tool result | Result format confusing | Return clean JSON with clear field names |
+| 失败 | 原因 | 修复 |
+|------|------|------|
+| 选择了错误的工具 | 描述模糊 | 用具体的触发词重写描述 |
+| 缺少必填参数 | 模型遗忘了一个参数 | 在参数描述中添加清晰的示例 |
+| 无限工具循环 | 模型不断调用同一个工具 | 设置最大迭代次数（5-10），检测重复调用 |
+| 幻觉参数 | 模型发明合理但错误的值 | 使用枚举，根据已知值验证 |
+| 工具结果太大 | API 返回了 100KB 数据 | 截断或摘要后再反馈 |
+| 模型忽略工具结果 | 结果格式令人困惑 | 返回具有清晰字段名的干净 JSON |

@@ -1,97 +1,97 @@
 ---
 name: skill-fine-tuning-guide
-description: Decision tree for when and how to fine-tune LLMs with LoRA and QLoRA
+description: 使用 LoRA 和 QLoRA 微调 LLM 的决策树（何时微调以及如何微调）
 version: 1.0.0
 phase: 11
 lesson: 8
 tags: [fine-tuning, lora, qlora, peft, llm-engineering]
 ---
 
-# Fine-Tuning Decision Guide
+# 微调决策指南
 
-Before fine-tuning, try these in order:
+在微调之前，按顺序尝试以下方案：
 
 ```
-1. Prompt engineering (minutes, $0)
-2. Few-shot examples in prompt (minutes, $0)
-3. RAG for knowledge retrieval (days, $10-100/month)
-4. Fine-tuning with LoRA/QLoRA (days, $5-50 per experiment)
-5. Full fine-tuning (weeks, $100-10,000 per run)
+1. 提示词工程（分钟级，$0）
+2. 提示词中的少样本示例（分钟级，$0）
+3. 用于知识检索的 RAG（天级，$10-100/月）
+4. LoRA/QLoRA 微调（天级，每次实验 $5-50）
+5. 完全微调（周级，每次运行 $100-10,000）
 ```
 
-Only move to the next step if the previous one is measurably insufficient.
+只有在前一步明显不足时，才进入下一步。
 
-## When to fine-tune
+## 何时微调
 
-- Model needs a consistent output style or format that prompting cannot achieve
-- You're distilling a larger model (GPT-4 quality from an 8B model)
-- Latency matters and few-shot examples add too many tokens
-- You need the model to reliably follow a complex reasoning pattern
-- You have 1,000+ high-quality examples of the desired input-output behavior
+- 模型需要提示词工程无法实现的一致输出风格或格式
+- 你在提炼更大的模型（从 GPT-4 质量提炼到 8B 模型）
+- 延迟重要，少样本示例增加了太多 token
+- 你需要模型可靠地遵循复杂的推理模式
+- 你有 1,000 个以上期望输入-输出行为的高质量样本
 
-## When NOT to fine-tune
+## 何时不应该微调
 
-- The model already does what you want with the right prompt
-- You need the model to know facts (use RAG instead)
-- You have fewer than 500 training examples (likely to overfit)
-- The task changes frequently (retraining is expensive)
-- You need to audit which data influenced a specific output (fine-tuning is a black box)
+- 使用正确的提示词，模型已经能做你想要的
+- 你需要模型了解事实（改用 RAG）
+- 你的训练样本少于 500 个（可能会过拟合）
+- 任务频繁变化（重新训练代价高昂）
+- 你需要审计哪些数据影响了特定输出（微调是黑盒）
 
-## Method selection
+## 方法选择
 
-| GPU VRAM | 7B model | 13B model | 70B model |
-|----------|----------|-----------|-----------|
-| 16GB (T4) | QLoRA | Not feasible | Not feasible |
-| 24GB (3090/4090) | QLoRA or LoRA | QLoRA | Not feasible |
-| 40GB (A100) | LoRA or Full | QLoRA or LoRA | QLoRA |
-| 80GB (A100/H100) | Full | LoRA or Full | QLoRA or LoRA |
+| GPU 显存 | 7B 模型 | 13B 模型 | 70B 模型 |
+|---------|---------|---------|---------|
+| 16GB (T4) | QLoRA | 不可行 | 不可行 |
+| 24GB (3090/4090) | QLoRA 或 LoRA | QLoRA | 不可行 |
+| 40GB (A100) | LoRA 或完全微调 | QLoRA 或 LoRA | QLoRA |
+| 80GB (A100/H100) | 完全微调 | LoRA 或完全微调 | QLoRA 或 LoRA |
 
-## LoRA configuration checklist
+## LoRA 配置检查清单
 
-1. Start with r=16, alpha=32 (safe default for most tasks)
-2. Target q_proj and v_proj first (minimum viable LoRA)
-3. Use learning rate 2e-4 for QLoRA, 5e-5 for LoRA fp16
-4. Set lora_dropout=0.05
-5. Train for 1-3 epochs (more risks overfitting)
-6. Evaluate every 100 steps on a held-out set
-7. Save checkpoints and pick the best by eval loss
+1. 从 r=16、alpha=32 开始（大多数任务的安全默认值）
+2. 先以 q_proj 和 v_proj 为目标（最小可行 LoRA）
+3. QLoRA 使用学习率 2e-4，LoRA fp16 使用 5e-5
+4. 设置 lora_dropout=0.05
+5. 训练 1-3 个 epoch（更多可能导致过拟合）
+6. 每 100 步在留出集上评估
+7. 保存检查点，按评估损失选择最佳
 
-## Common mistakes
+## 常见错误
 
-- Training for too many epochs (overfitting after epoch 2-3 on small datasets)
-- Using the same learning rate as full fine-tuning (LoRA needs higher LR)
-- Forgetting to set the pad token (causes NaN losses with Llama models)
-- Not freezing the base model (defeats the purpose of LoRA)
-- Evaluating only on training data (always hold out 10-20% for eval)
-- Skipping the prompt engineering baseline (fine-tuning a problem that prompting already solves)
+- 训练 epoch 过多（小数据集在第 2-3 个 epoch 后过拟合）
+- 使用与完全微调相同的学习率（LoRA 需要更高的学习率）
+- 忘记设置 pad token（导致 Llama 模型出现 NaN 损失）
+- 不冻结基础模型（违背了 LoRA 的目的）
+- 只在训练数据上评估（始终留出 10-20% 用于评估）
+- 跳过提示词工程基准（微调了一个提示词已经能解决的问题）
 
-## Quality verification
+## 质量验证
 
-After training, compare on 200+ held-out examples:
-1. Base model with best prompt (baseline)
-2. Base model with LoRA adapter (your fine-tuned model)
-3. GPT-4 or Claude with same prompt (ceiling)
+训练后，在 200 个以上的留出样本上进行比较：
+1. 使用最佳提示词的基础模型（基准）
+2. 带 LoRA 适配器的基础模型（你的微调模型）
+3. 使用相同提示词的 GPT-4 或 Claude（上限）
 
-If the LoRA model does not beat the prompted baseline, your training data or configuration needs work, not more compute.
+如果 LoRA 模型没有超过提示词调优的基准，你的训练数据或配置需要改进，而不是增加算力。
 
-## Adapter management
+## 适配器管理
 
-- Keep adapters separate for multi-task serving (swap adapters per request)
-- Merge adapters into base weights for single-task deployment
-- Store adapters on Hugging Face Hub (10-100MB, easy to version and share)
-- Test merged model outputs match unmerged outputs before deploying
-- Use TIES-Merging or DARE to combine multiple adapters into one
+- 为多任务服务保持适配器独立（按请求切换适配器）
+- 合并适配器到基础权重用于单任务部署
+- 将适配器存储在 Hugging Face Hub（10-100MB，易于版本管理和分享）
+- 部署前测试合并后的模型输出与未合并的一致
+- 使用 TIES-Merging 或 DARE 将多个适配器合并为一个
 
-## Debugging training
+## 调试训练
 
-If loss does not decrease:
-1. Check learning rate (too low for LoRA, try 2e-4)
-2. Verify LoRA layers are actually receiving gradients
-3. Confirm base model weights are frozen
-4. Check data formatting (tokenizer must match model's expected format)
+如果损失不下降：
+1. 检查学习率（LoRA 可能太低，尝试 2e-4）
+2. 验证 LoRA 层实际上在接收梯度
+3. 确认基础模型权重已被冻结
+4. 检查数据格式（分词器必须匹配模型的预期格式）
 
-If loss decreases but eval quality is bad:
-1. Training data quality issue (garbage in, garbage out)
-2. Overfitting (reduce epochs, increase dropout, add more data)
-3. Wrong target modules (add MLP layers for complex tasks)
-4. Rank too low (try r=32 or r=64)
+如果损失下降但评估质量不好：
+1. 训练数据质量问题（垃圾进，垃圾出）
+2. 过拟合（减少 epoch，增加 dropout，添加更多数据）
+3. 目标模块错误（对复杂任务添加 MLP 层）
+4. 秩太低（尝试 r=32 或 r=64）

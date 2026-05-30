@@ -1,94 +1,94 @@
 ---
 name: skill-imbalanced-data
-description: Decision checklist for handling imbalanced classification problems
+description: 处理不平衡分类问题的决策清单
 version: 1.0.0
 phase: 2
 lesson: 17
 tags: [imbalanced-data, smote, class-weights, threshold-tuning, evaluation]
 ---
 
-# Imbalanced Data Strategy
+# 不平衡数据策略
 
-A decision checklist for handling imbalanced classification. Follow this sequence to pick the right approach for your problem.
+处理不平衡分类问题的决策清单。按此顺序操作，为你的问题选择正确的方法。
 
-## Step 1: Measure the imbalance
+## 第一步：测量不平衡程度
 
-- Count samples per class
-- Compute the imbalance ratio (majority / minority)
-- Mild: ratio < 3:1 (e.g., 70/30)
-- Moderate: ratio 3:1 to 20:1 (e.g., 95/5)
-- Severe: ratio > 20:1 (e.g., 99/1)
+- 统计每个类别的样本数
+- 计算不平衡比例（多数类 / 少数类）
+- 轻度：比例 < 3:1（如 70/30）
+- 中度：比例 3:1 到 20:1（如 95/5）
+- 严重：比例 > 20:1（如 99/1）
 
-## Step 2: Pick the right metric
+## 第二步：选择正确的指标
 
-Prefer precision/recall/F1 over accuracy for imbalanced datasets. Choose based on your problem:
+对于不平衡数据集，精确率/召回率/F1 优于准确率。根据问题选择：
 
-| Situation | Primary Metric | Secondary Metric |
-|-----------|---------------|-----------------|
-| Missing positives is very costly (fraud, disease) | Recall | F2 score |
-| False alarms are costly (spam filter, recommendations) | Precision | F0.5 score |
-| Both matter roughly equally | F1 score | MCC |
-| Need a single ranking metric | AUPRC | AUC-ROC |
-| Need to compare across datasets | MCC | AUPRC |
+| 场景 | 主要指标 | 次要指标 |
+|------|---------|---------|
+| 漏掉正例代价很高（欺诈、疾病） | 召回率 | F2 分数 |
+| 误报代价高（垃圾邮件过滤、推荐） | 精确率 | F0.5 分数 |
+| 两者大致同等重要 | F1 分数 | MCC |
+| 需要单一排名指标 | AUPRC | AUC-ROC |
+| 需要跨数据集比较 | MCC | AUPRC |
 
-## Step 3: Choose a rebalancing strategy
+## 第三步：选择重平衡策略
 
-### By imbalance severity
+### 按不平衡严重程度
 
-| Imbalance | First Try | Second Try | Avoid |
-|-----------|-----------|------------|-------|
-| Mild (< 3:1) | Class weights | Threshold tuning | Oversampling (unnecessary) |
-| Moderate (3:1 to 20:1) | SMOTE + class weights | Threshold tuning on top | Undersampling (too much data loss) |
-| Severe (> 20:1) | SMOTE + class weights + threshold | Ensemble with balanced bagging | Undersampling alone |
+| 不平衡程度 | 首选 | 次选 | 避免 |
+|---------|------|------|------|
+| 轻度（< 3:1） | 类别权重 | 阈值调整 | 过采样（不必要） |
+| 中度（3:1 到 20:1） | SMOTE + 类别权重 | 叠加阈值调整 | 欠采样（数据损失过多） |
+| 严重（> 20:1） | SMOTE + 类别权重 + 阈值调整 | 平衡 bagging 集成 | 单独欠采样 |
 
-### By dataset size
+### 按数据集大小
 
-| Dataset Size | Preferred Strategy | Reason |
-|-------------|-------------------|--------|
-| < 1,000 samples | Oversampling or SMOTE | Cannot afford to lose majority data |
-| 1,000 - 10,000 | SMOTE + threshold tuning | Enough minority samples for k-NN |
-| > 10,000 | Class weights or undersampling | Fast, sufficient minority data |
+| 数据集大小 | 首选策略 | 原因 |
+|----------|---------|------|
+| < 1,000 个样本 | 过采样或 SMOTE | 不能承受丢失多数类数据 |
+| 1,000 - 10,000 | SMOTE + 阈值调整 | 有足够少数类样本用于 k-NN |
+| > 10,000 | 类别权重或欠采样 | 快速，少数类数据足够 |
 
-## Step 4: Apply the technique
+## 第四步：应用技术
 
-### Class weights (always try first)
-- In sklearn: `class_weight='balanced'`
-- No data modification needed
-- Works with any loss-based model
-- Equivalent to oversampling in expectation
+### 类别权重（始终首先尝试）
+- 在 sklearn 中：`class_weight='balanced'`
+- 不需要修改数据
+- 适用于任何基于损失的模型
+- 从期望上等价于过采样
 
 ### SMOTE
-- Apply only to training data (never test/validation)
-- Use k=5 neighbors (default)
-- Combine with class weights for best results
-- Watch for noisy synthetic points near the boundary
+- 只对训练数据应用（绝不对测试/验证集应用）
+- 使用 k=5 个邻居（默认值）
+- 与类别权重结合可获得最佳效果
+- 注意边界附近嘈杂的合成点
 
-### Threshold tuning
-- Train model, get predicted probabilities on validation set
-- Sweep thresholds from 0.05 to 0.95
-- Pick threshold maximizing your chosen metric
-- Always tune on validation data, never test data
+### 阈值调整
+- 训练模型，在验证集上获取预测概率
+- 从 0.05 到 0.95 扫描阈值
+- 选择使所选指标最大化的阈值
+- 始终在验证数据上调整，绝不在测试数据上
 
-## Step 5: Validate properly
+## 第五步：正确验证
 
-- Use stratified cross-validation (preserves class ratios in each fold)
-- Report metrics on the original (non-resampled) test set
-- Never apply SMOTE before splitting -- only on training folds
-- Compare against the "always predict majority" baseline
+- 使用分层交叉验证（保持每折中的类别比例）
+- 在原始（未重采样的）测试集上报告指标
+- 绝不在划分数据之前应用 SMOTE——只在训练折上应用
+- 与"始终预测多数类"基线进行比较
 
-## Step 6: Common mistakes to avoid
+## 第六步：需要避免的常见错误
 
-- Applying SMOTE to the entire dataset before train/test split (data leakage)
-- Using accuracy as the evaluation metric
-- Not trying class weights first (simplest approach, often sufficient)
-- Oversampling and then cross-validating (synthetic points leak across folds)
-- Ignoring threshold tuning (free performance, no retraining needed)
-- Using random undersampling on small datasets (throws away too much data)
+- 在训练/测试划分之前对整个数据集应用 SMOTE（数据泄露）
+- 使用准确率作为评估指标
+- 不先尝试类别权重（最简单的方法，通常就足够了）
+- 过采样后再做交叉验证（合成点会跨折泄漏）
+- 忽视阈值调整（免费提升性能，无需重新训练）
+- 在小数据集上使用随机欠采样（丢弃了太多数据）
 
-## Quick Decision Tree
+## 快速决策树
 
-1. Is the imbalance ratio < 3:1? -> Try class weights only
-2. Is the dataset > 10,000 samples? -> Class weights + threshold tuning
-3. Is the dataset < 1,000 samples? -> SMOTE + class weights
-4. Otherwise -> SMOTE + class weights + threshold tuning
-5. Still not good enough? -> Balanced bagging ensemble
+1. 不平衡比例 < 3:1？-> 只尝试类别权重
+2. 数据集 > 10,000 个样本？-> 类别权重 + 阈值调整
+3. 数据集 < 1,000 个样本？-> SMOTE + 类别权重
+4. 否则 -> SMOTE + 类别权重 + 阈值调整
+5. 仍然不够好？-> 平衡 bagging 集成

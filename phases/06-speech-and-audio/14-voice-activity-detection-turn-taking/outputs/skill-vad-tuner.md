@@ -1,27 +1,27 @@
 ---
 name: vad-tuner
-description: Pick VAD model, threshold, silence hangover, pre-roll, and turn-detection strategy for a voice agent.
+description: 为语音代理选择 VAD 模型、阈值、静音挂起时间、预卷时间和轮次检测策略。
 version: 1.0.0
 phase: 6
 lesson: 14
 tags: [vad, silero, cobra, turn-detection, flush-trick]
 ---
 
-Given the workload (consumer / call-center / edge / accessibility; noise profile; language mix; latency), output:
+给定工作负载（消费者 / 呼叫中心 / 边缘端 / 无障碍；噪声特征；语言组合；延迟），输出以下内容：
 
-1. VAD. Silero VAD (default) · Cobra (commercial accuracy) · pyannote segmentation (diarization-grade) · WebRTC VAD (legacy / tiny). One-sentence reason.
-2. Parameters. Threshold (0.3-0.5), min speech (200-300 ms), silence hangover (400-800 ms), pre-roll (250-500 ms).
-3. Semantic turn detection. Enabled (LiveKit turn-detector or custom MLP) or not. Reason tied to expected user speech patterns.
-4. Flush trick. Enabled (if STT supports it — Kyutai / Deepgram) or not. Expected latency savings.
-5. Guards. Reject speech shorter than min duration; always keep pre-roll; cap per-user silence-hangover override; fail-open if VAD service is down (treat everything as speech).
+1. VAD。Silero VAD（默认）· Cobra（商业精度）· pyannote 分割（日志化级别）· WebRTC VAD（遗留 / 轻量）。一句话说明理由。
+2. 参数。阈值（0.3-0.5）、最小语音时长（200-300 ms）、静音挂起时间（400-800 ms）、预卷时间（250-500 ms）。
+3. 语义轮次检测。是否启用（LiveKit 轮次检测器或自定义 MLP）。理由与预期用户语音模式挂钩。
+4. 刷新技巧。是否启用（如果 STT 支持——Kyutai / Deepgram）。预期节省的延迟。
+5. 保护措施。拒绝短于最小时长的语音；始终保留预卷时间；限制用户自定义静音挂起时间上限；VAD 服务宕机时进行 fail-open 处理（将所有内容视为语音）。
 
-Refuse energy-only VAD for production — too noisy. Refuse zero silence-hangover — will interrupt users. Refuse Whisper-based VAD when dedicated Silero is available (slower, less accurate).
+拒绝生产环境使用纯能量检测 VAD——噪声太多。拒绝零静音挂起时间——会打断用户。拒绝在 Silero 专用 VAD 可用时使用基于 Whisper 的 VAD（速度更慢，准确率更低）。
 
-Example input: "Call-center IVR for airline rebooking. Noisy background (airport). English + Spanish. &lt; 500 ms turn detection."
+示例输入："航空公司重新订票的呼叫中心 IVR。嘈杂背景（机场）。英语 + 西班牙语。轮次检测 < 500 ms。"
 
-Example output:
-- VAD: Cobra (commercial) for the noise-resistance advantage. Fall-back to Silero if cost prohibitive.
-- Parameters: threshold 0.4 (airport noise floor is high); min speech 300 ms; silence hangover 600 ms (users often pause during IVR to read flight numbers); pre-roll 400 ms.
-- Semantic turn: LiveKit turn-detector enabled — mid-sentence pauses common ("I need to change my flight... to tomorrow").
-- Flush trick: enabled on Deepgram streaming. Expected savings: 400 ms → 150 ms turn-end latency.
-- Guards: fail-open if Cobra/Deepgram unreachable; audit log every VAD-fire event for tuning.
+示例输出：
+- VAD：Cobra（商业）以获得抗噪优势。成本过高时回退到 Silero。
+- 参数：阈值 0.4（机场噪声底板较高）；最小语音 300 ms；静音挂起 600 ms（用户在 IVR 中查看航班号时经常停顿）；预卷 400 ms。
+- 语义轮次检测：启用 LiveKit 轮次检测器——句中停顿很常见（"我需要改航班……改到明天"）。
+- 刷新技巧：在 Deepgram 流式上启用。预期节省：轮次结束延迟从 400 ms → 150 ms。
+- 保护措施：Cobra / Deepgram 不可达时进行 fail-open；记录每次 VAD 触发事件用于调优。

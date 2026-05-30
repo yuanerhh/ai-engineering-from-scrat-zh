@@ -1,34 +1,34 @@
 ---
 name: llava-vibes-eval
-description: Run a 10-prompt vibes-eval on a LLaVA-family VLM and produce a human-readable scorecard.
+description: 对 LLaVA 系列 VLM 运行 10 个提示词的感官评估，生成人类可读的评分卡。
 version: 1.0.0
 phase: 12
 lesson: 05
 tags: [llava, vlm, vibes-eval, instruction-tuning]
 ---
 
-Given a LLaVA-family VLM (LLaVA-1.5, LLaVA-NeXT, LLaVA-OneVision, or a community fork) and a test image set, run a 10-prompt smoke test covering captioning, VQA, reasoning, refusal, and format compliance. Produce a scorecard that confirms the projector and LLM are connecting correctly.
+给定一个 LLaVA 系列 VLM（LLaVA-1.5、LLaVA-NeXT、LLaVA-OneVision 或社区分支）和一组测试图像，运行涵盖图像描述、VQA、推理、拒绝和格式合规的 10 个提示词冒烟测试。生成一份评分卡，确认投影器和 LLM 是否正确连接。
 
-Produce:
+输出：
 
-1. Ten prompts with expected-behavior descriptions:
-   - Three captioning (short, detailed, creative).
-   - Three VQA (counting, color, presence of object).
-   - Two reasoning (compare two regions, cause-and-effect).
-   - Two refusal (private individual, PII-identifying).
-2. Per-prompt score. Pass / partial / fail with one-line justification.
-3. Overall pattern diagnosis. If captioning passes but VQA fails, suspect stage-2 data mix. If detailed captioning shows hallucination, suspect insufficient ShareGPT4V-style data. If refusals fail, flag a safety-data gap.
-4. Resolution check. Run one OCR-requiring prompt at 336x336 base and again at AnyRes; note the delta. Low-res failure is expected; high-res failure means AnyRes is mis-configured.
-5. Suggested follow-up. Three specific training-data additions the caller could run if specific categories fail.
+1. 十个提示词及预期行为描述：
+   - 三个图像描述（简短、详细、创意）。
+   - 三个 VQA（计数、颜色、对象存在）。
+   - 两个推理（比较两个区域、因果关系）。
+   - 两个拒绝（私人个体、PII 识别）。
+2. 每个提示词的分数。通过/部分通过/失败，附一行理由。
+3. 整体模式诊断。如果图像描述通过但 VQA 失败，怀疑第二阶段数据混合。如果详细描述出现幻觉，怀疑 ShareGPT4V 风格的数据不足。如果拒绝失败，标记安全数据缺口。
+4. 分辨率检查。在 336x336 基础分辨率下运行一个需要 OCR 的提示词，然后在 AnyRes 下再次运行；记录差异。低分辨率失败是预期的；高分辨率失败意味着 AnyRes 配置错误。
+5. 建议的后续步骤。如果特定类别失败，调用者可以添加的三个具体训练数据。
 
-Hard rejects:
-- Scoring VLMs on benchmark numbers without also running the vibes suite. Benchmarks can be gamed; vibes reveal real deployment readiness.
-- Conflating hallucination with stylistic verbosity. Flag specifically which objects are invented vs merely elaborately described.
-- Claiming a pass on reasoning prompts without checking the reasoning chain, not just the final answer.
+硬性拒绝：
+- 仅用基准数字评估 VLM 而不运行感官测试套件。基准可以被刷分；感官测试揭示真实的部署准备情况。
+- 将幻觉与文体冗长混淆。具体标注哪些对象是凭空捏造的，哪些只是被详细描述的。
+- 声称推理提示词通过，但未检查推理链，只检查最终答案。
 
-Refusal rules:
-- If the caller asks to vibes-eval a proprietary VLM (Gemini, Claude, GPT-5V) without API access, refuse — the test needs actual inference.
-- If the target use case is medical diagnosis or legal advice, refuse — vibes-eval is not a certification and must not be used for high-stakes domains.
-- If no images are provided, refuse — the test is image-grounded by definition.
+拒绝规则：
+- 如果调用者要求在没有 API 访问的情况下对专有 VLM（Gemini、Claude、GPT-5V）进行感官评估，拒绝——测试需要实际推理。
+- 如果目标用例是医疗诊断或法律建议，拒绝——感官评估不是认证，不得用于高风险领域。
+- 如果没有提供图像，拒绝——测试在定义上是基于图像的。
 
-Output: a scorecard with 10 rows (prompt, image, expected, actual, pass/partial/fail), an overall pattern diagnosis, and a three-item follow-up list. End with a "what to read next" paragraph pointing to Lesson 12.06 (AnyRes) for resolution-related failures or Lesson 12.07 (ablations) for data-mixture tuning.
+输出：包含 10 行（提示词、图像、预期、实际、通过/部分通过/失败）的评分卡、整体模式诊断和三项后续清单。结尾附上「下一步阅读」段落，指向第 12.06 课（AnyRes）了解分辨率相关失败，或第 12.07 课（消融实验）了解数据混合调优。

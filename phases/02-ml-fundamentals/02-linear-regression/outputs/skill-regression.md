@@ -1,65 +1,65 @@
 ---
 name: skill-regression
-description: Choose the right regression approach based on data characteristics and problem constraints
+description: 根据数据特性和问题约束选择合适的回归方法
 version: 1.0.0
 phase: 2
 lesson: 2
 tags: [regression, linear-regression, polynomial-regression, ridge, regularization]
 ---
 
-# Regression Strategy Guide
+# 回归策略指南
 
-Regression predicts continuous values. The right approach depends on the relationship between features and target, the number of features, and the risk of overfitting.
+回归用于预测连续值。正确的方法取决于特征与目标之间的关系、特征数量以及过拟合风险。
 
-## Decision Checklist
+## 决策清单
 
-1. Is the relationship between features and target approximately linear?
-   - Yes: start with ordinary linear regression
-   - No: try polynomial features or a nonlinear model
+1. 特征与目标之间的关系是否近似线性？
+   - 是：从普通线性回归开始
+   - 否：尝试多项式特征或非线性模型
 
-2. How many features do you have relative to samples?
-   - Few features, many samples: ordinary linear regression works fine
-   - Many features, few samples: use regularization (Ridge or Lasso)
-   - More features than samples: Lasso (L1) to select features, or Ridge (L2) to shrink all weights
+2. 相对于样本数，你有多少特征？
+   - 特征少，样本多：普通线性回归就能很好地工作
+   - 特征多，样本少：使用正则化（Ridge 或 Lasso）
+   - 特征比样本还多：Lasso（L1）进行特征选择，或 Ridge（L2）缩小所有权重
 
-3. Do you need interpretability?
-   - Yes: linear regression with few features, or Lasso for automatic feature selection
-   - No: polynomial features, or move to tree-based models or neural networks
+3. 是否需要可解释性？
+   - 是：使用少量特征的线性回归，或使用 Lasso 进行自动特征选择
+   - 否：多项式特征，或转向基于树的模型或神经网络
 
-4. Is your dataset small (under 10,000 rows)?
-   - Use the normal equation (closed-form solution) for speed
-   - Cross-validation is essential for reliable evaluation
+4. 数据集是否较小（不足 10,000 行）？
+   - 使用正规方程（闭合形式解）以获得速度
+   - 可靠评估必不可少，需要交叉验证
 
-5. Is your dataset large (millions of rows)?
-   - Use stochastic gradient descent (SGD) or mini-batch gradient descent
-   - The normal equation is too slow due to O(n^3) matrix inversion
+5. 数据集是否较大（百万行）？
+   - 使用随机梯度下降（SGD）或小批量梯度下降
+   - 正规方程因 O(n^3) 矩阵求逆而过慢
 
-## When to use each approach
+## 各方法的使用场景
 
-**Ordinary Linear Regression**: baseline for any regression task. Start here. If R-squared is acceptable and the model is simple, stop here.
+**普通线性回归**：任何回归任务的基线。从这里开始。如果 R 方可接受且模型简单，就在这里停止。
 
-**Polynomial Regression**: the scatter plot shows a curve, not a line. Start with degree 2. Increase only if justified by validation performance. Degree > 5 almost always overfits.
+**多项式回归**：散点图显示曲线而非直线时使用。从 2 次开始。只有在验证性能有理由时才提高次数。次数 > 5 几乎总是过拟合。
 
-**Ridge Regression (L2)**: many correlated features. All weights shrink toward zero but none become exactly zero. Good when you believe all features contribute.
+**Ridge 回归（L2）**：有许多相关特征时使用。所有权重向零收缩但不会变为零。当你认为所有特征都有贡献时效果好。
 
-**Lasso Regression (L1)**: many features and you suspect only a few matter. Lasso drives irrelevant feature weights to exactly zero, performing automatic feature selection.
+**Lasso 回归（L1）**：有许多特征且怀疑只有少数重要时使用。Lasso 将不相关的特征权重精确地压为零，执行自动特征选择。
 
-**Elastic Net**: combines L1 and L2 penalties. Use when you have many correlated features and want some feature selection.
+**弹性网**：结合 L1 和 L2 惩罚。当有许多相关特征且需要部分特征选择时使用。
 
-## Common mistakes
+## 常见错误
 
-- Skipping feature scaling before gradient descent (convergence becomes extremely slow)
-- Using test set performance to tune hyperparameters (use validation set or cross-validation)
-- Fitting high-degree polynomials without checking validation error (training R^2 always increases with degree)
-- Ignoring residual plots (R^2 can be misleading if residuals show patterns)
-- Treating R^2 as the only metric (check residual distribution, MAE, and domain-specific thresholds)
+- 梯度下降前跳过特征缩放（收敛速度会极慢）
+- 用测试集性能来调整超参数（应使用验证集或交叉验证）
+- 拟合高次多项式而不检查验证误差（训练 R^2 总是随次数增加而提高）
+- 忽视残差图（如果残差显示出规律性，R^2 可能具有误导性）
+- 将 R^2 视为唯一指标（检查残差分布、MAE 和领域特定阈值）
 
-## Quick reference
+## 快速参考
 
-| Method | When to use | Regularization | Feature selection |
-|--------|------------|---------------|-------------------|
-| OLS | Baseline, few features | None | Manual |
-| Ridge | Many features, all relevant | L2 (shrink) | No |
-| Lasso | Many features, few relevant | L1 (zero out) | Automatic |
-| Elastic Net | Many correlated features | L1 + L2 | Partial |
-| Polynomial | Nonlinear relationship | Add Ridge/Lasso on top | Manual degree choice |
+| 方法 | 适用场景 | 正则化 | 特征选择 |
+|------|---------|--------|---------|
+| 普通最小二乘 | 基线，少量特征 | 无 | 手动 |
+| Ridge | 多特征，全部相关 | L2（收缩） | 否 |
+| Lasso | 多特征，少数相关 | L1（清零） | 自动 |
+| 弹性网 | 多个相关特征 | L1 + L2 | 部分 |
+| 多项式 | 非线性关系 | 在顶层加 Ridge/Lasso | 手动选择次数 |

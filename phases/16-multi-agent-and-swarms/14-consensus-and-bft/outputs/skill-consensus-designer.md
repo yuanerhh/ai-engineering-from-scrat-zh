@@ -1,35 +1,35 @@
 ---
 name: consensus-designer
-description: Design a BFT-aware consensus protocol for a multi-agent ensemble. Picks clustering, weighting, threshold, and escalation policy; attack-tests the design against byzantine, sycophancy, and monoculture patterns.
+description: 为多智能体集成设计 BFT 感知共识协议。选择聚类、权重、阈值和升级策略；针对拜占庭、奉承和单一文化模式对设计进行攻击测试。
 version: 1.0.0
 phase: 16
 lesson: 14
 tags: [multi-agent, consensus, BFT, voting, confidence]
 ---
 
-Given an ensemble of N agents answering a common question, design a consensus protocol that is robust to the three canonical LLM-agent attacks: byzantine lie, sycophantic conformity, correlated-error monoculture.
+给定一个回答共同问题的 N 个智能体集成，设计一个对三种典型 LLM 智能体攻击具有鲁棒性的共识协议：拜占庭谎言、奉承一致性、相关错误单一文化。
 
-Produce:
+产出内容：
 
-1. **Clustering strategy.** How are answers grouped? String canonicalization (lowercase + strip punct), embedding similarity with threshold, or explicit structural canonicalization (JSON schema). State the expected cluster-granularity error rate.
-2. **Weighting strategy.** Plurality (counts), confidence-probe weighted (CP-WBFT), quality-plus-trust (WBFT), or score-based with geometric-median robustness (DecentLLMs). Justify the choice from the attack profile.
-3. **Threshold.** What fraction of total weight triggers acceptance? What happens below threshold: retry, escalate, or abstain?
-4. **Diversity requirement.** How many base models, prompt families, or temperature settings does the ensemble require? Monoculture is the attack plurality cannot recover from; diversity is the structural mitigation.
-5. **Independent verifier.** Is there a read-only agent that fetches ground truth (when available) or applies a rubric? Where does the verifier's output go? It must not re-enter the voting pool.
-6. **Round bounding.** Max rounds before escalating. Default 2-3 for most tasks. Longer rounds amplify sycophancy.
-7. **Attack-test table.** For each of (byzantine, sycophancy, monoculture), show the expected protocol behavior and residual risk. If the protocol admits a known failure mode, state it in one sentence.
+1. **聚类策略。** 答案如何分组？字符串规范化（小写 + 去标点）、带阈值的嵌入相似度，还是显式结构化规范化（JSON 模式）。说明预期的聚类粒度错误率。
+2. **加权策略。** 多数（计数）、置信度探测加权（CP-WBFT）、质量加信任（WBFT），还是带几何中位数鲁棒性的基于分数的方法（DecentLLMs）。根据攻击概况说明选择理由。
+3. **阈值。** 总权重的什么比例触发接受？低于阈值时会发生什么：重试、升级还是弃权？
+4. **多样性要求。** 集成需要多少个基础模型、提示系列或温度设置？单一文化是多数投票无法从中恢复的攻击；多样性是结构性缓解措施。
+5. **独立验证器。** 是否有获取真实来源（如果可用）或应用评分标准的只读智能体？验证器的输出去哪里？它不能重新进入投票池。
+6. **轮次限制。** 升级前的最大轮次。大多数任务默认 2-3 轮。更多轮次会放大奉承效应。
+7. **攻击测试表格。** 对于（拜占庭、奉承、单一文化）中的每种情况，显示预期的协议行为和残余风险。如果协议存在已知失败模式，用一句话说明。
 
-Hard rejects:
+硬性拒绝：
 
-- Any design that does plurality-only on a single base model. Monoculture makes this fail silently.
-- Any design with unbounded rounds or "keep debating until agreement." This rewards conformity.
-- Any design where the verifier's output feeds back into the voting pool. That poisons the verifier.
-- Claims that BFT "solves" disagreement. BFT aligns outputs; correctness is a separate problem.
+- 任何在单一基础模型上仅做多数投票的设计。单一文化使其静默失败。
+- 任何有无限轮次或"持续辩论直到一致"的设计。这会奖励一致性。
+- 任何验证器输出回到投票池的设计。这会毒化验证器。
+- 声称 BFT "解决"了分歧的说法。BFT 对齐输出；正确性是一个独立的问题。
 
-Refusal rules:
+拒绝规则：
 
-- If the task has no ground truth (opinion, synthesis, creative), say so and recommend "consensus as advisory, human as decider."
-- If fewer than 3 agents are available, consensus is not applicable; recommend single agent plus verifier instead.
-- If all agents share a base model and the user cannot change this, flag the monoculture ceiling explicitly.
+- 如果任务没有真实值（意见、综合、创意），说明这一点并推荐"共识作为建议，人工作为决策者"。
+- 如果可用的智能体少于 3 个，共识不适用；推荐改为单智能体加验证器。
+- 如果所有智能体共享一个基础模型且用户无法改变这一点，明确标记单一文化上限。
 
-Output: a one-page design brief. Start with a single-sentence summary ("Confidence-weighted voting over 5 agents (3 base models), semantic-cluster threshold 0.55, independent verifier re-fetches sources, max 2 rounds."), then the seven sections above. End with the attack-test table.
+输出：一页设计简报。从一句话摘要开始（"5 个智能体（3 个基础模型）的置信度加权投票，语义聚类阈值 0.55，独立验证器重新获取来源，最多 2 轮。"），然后是以上七个部分。结尾给出攻击测试表格。

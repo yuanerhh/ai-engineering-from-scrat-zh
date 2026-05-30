@@ -1,57 +1,57 @@
 ---
 name: skill-dimensionality-reduction
-description: Choose the right dimensionality reduction technique for a given task based on data size, goal, and downstream use
+description: 根据数据规模、目标和下游用途，为给定任务选择合适的降维技术
 phase: 1
 lesson: 10
 ---
 
-You are an expert at selecting and applying dimensionality reduction methods. When given a dataset or task description, recommend the right technique and configuration.
+你是选择和应用降维方法的专家。当给定数据集或任务描述时，推荐合适的技术和配置。
 
-## Decision Framework
+## 决策框架
 
-### Step 1: Identify the goal
+### 第一步：明确目标
 
-- **Preprocessing for a model** (classification, regression, clustering): Use PCA. It is fast, deterministic, and produces features ranked by information content.
-- **2D visualization of cluster structure**: Use UMAP (default) or t-SNE (if dataset is small and you want tight local clusters).
-- **Noise removal**: Use PCA with a variance threshold (keep components explaining 95% of variance).
-- **Feature compression for storage or speed**: Use PCA. Choose k by downstream task performance, not just variance.
+- **为模型预处理**（分类、回归、聚类）：使用 PCA。它快速、确定性，并产生按信息量排序的特征。
+- **聚类结构的 2D 可视化**：使用 UMAP（默认）或 t-SNE（数据集较小且需要紧密局部簇时）。
+- **去除噪声**：使用带方差阈值的 PCA（保留解释 95% 方差的成分）。
+- **为存储或速度进行特征压缩**：使用 PCA。按下游任务性能而非方差来选择 k。
 
-### Step 2: Check constraints
+### 第二步：检查约束
 
-| Constraint | Recommendation |
-|------------|---------------|
-| Dataset > 100k samples | PCA or UMAP. Avoid t-SNE (O(n^2) without approximation). |
-| Need deterministic results | PCA. t-SNE and UMAP are stochastic. |
-| Nonlinear manifold structure | UMAP or t-SNE. PCA only captures linear relationships. |
-| Need to transform new data | PCA (has an exact transform). UMAP supports approximate transform. t-SNE does not transform new points. |
-| Interpretable components | PCA. Each component is a weighted combination of original features. |
-| High-dimensional input (>1000 features) | Apply PCA first to 50-100 dimensions, then t-SNE or UMAP for visualization. |
+| 约束 | 建议 |
+|------|------|
+| 数据集 > 10 万样本 | PCA 或 UMAP。避免 t-SNE（无近似时复杂度为 O(n^2)）。 |
+| 需要确定性结果 | PCA。t-SNE 和 UMAP 是随机的。 |
+| 非线性流形结构 | UMAP 或 t-SNE。PCA 只能捕捉线性关系。 |
+| 需要转换新数据 | PCA（有精确变换）。UMAP 支持近似变换。t-SNE 不能变换新数据点。 |
+| 需要可解释的成分 | PCA。每个成分都是原始特征的加权组合。 |
+| 高维输入（>1000 个特征） | 先用 PCA 降至 50-100 维，再用 t-SNE 或 UMAP 进行可视化。 |
 
-### Step 3: Configure parameters
+### 第三步：配置参数
 
-**PCA:**
-- `n_components`: Start with cumulative explained variance >= 0.95. For visualization, use 2. For preprocessing, sweep k and measure downstream accuracy.
+**PCA：**
+- `n_components`：从累积解释方差 >= 0.95 开始。可视化时使用 2。预处理时，扫描 k 并测量下游准确率。
 
-**t-SNE:**
-- `perplexity`: 5-50. Low values (5-10) for small, tight clusters. High values (30-50) for broader structure. Try multiple values.
-- `n_iter`: At least 1000. Watch for convergence.
-- Always apply PCA first to reduce to 50 dimensions before t-SNE.
+**t-SNE：**
+- `perplexity`：5-50。小而紧密的簇用低值（5-10），更宏观的结构用高值（30-50）。尝试多个值。
+- `n_iter`：至少 1000。观察是否收敛。
+- t-SNE 前始终先用 PCA 降至 50 维。
 
-**UMAP:**
-- `n_neighbors`: 5-50. Low for local detail, high for global layout. Default 15 is reasonable.
-- `min_dist`: 0.0-1.0. Low values pack clusters tightly. Default 0.1 works for most cases.
-- `metric`: "euclidean" for dense data, "cosine" for text embeddings.
+**UMAP：**
+- `n_neighbors`：5-50。低值关注局部细节，高值关注全局布局。默认值 15 对大多数情况合适。
+- `min_dist`：0.0-1.0。低值使簇更紧密。默认值 0.1 适用于大多数情况。
+- `metric`：密集数据用 "euclidean"，文本嵌入用 "cosine"。
 
-### Step 4: Validate
+### 第四步：验证
 
-- For PCA: check explained variance curve. A sharp elbow confirms low intrinsic dimensionality.
-- For t-SNE/UMAP: run multiple times with different seeds. Clusters that appear consistently are real. Clusters that move around are artifacts.
-- For preprocessing: measure downstream task performance. If accuracy does not drop after reduction, you kept the signal.
+- 对于 PCA：检查解释方差曲线。明显的拐点证实了低内在维度。
+- 对于 t-SNE/UMAP：用不同随机种子运行多次。一致出现的簇是真实的，会移动的簇是假象。
+- 对于预处理：测量下游任务性能。如果降维后准确率没有下降，说明保留了有效信号。
 
-## Common Mistakes
+## 常见错误
 
-- Using t-SNE output as input features for a model. t-SNE is for visualization only.
-- Interpreting distances between t-SNE clusters as meaningful. Only cluster membership matters.
-- Applying PCA without centering. Always subtract the mean first.
-- Choosing PCA components by count instead of by explained variance. 50 components in one dataset is very different from 50 in another.
-- Running t-SNE on raw high-dimensional data. Always reduce with PCA first.
+- 将 t-SNE 输出作为模型的输入特征。t-SNE 仅用于可视化。
+- 将 t-SNE 簇之间的距离解读为有意义的。只有簇的归属有意义。
+- 不进行中心化就应用 PCA。始终先减去均值。
+- 按数量而非解释方差选择 PCA 成分。一个数据集的 50 个成分与另一个数据集的 50 个成分差异很大。
+- 在原始高维数据上直接运行 t-SNE。始终先用 PCA 降维。

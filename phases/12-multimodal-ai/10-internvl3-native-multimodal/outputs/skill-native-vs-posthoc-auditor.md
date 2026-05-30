@@ -1,31 +1,31 @@
 ---
 name: native-vs-posthoc-auditor
-description: Audit a proposed VLM training plan and recommend native multimodal pretraining or post-hoc adapter-on-LLM, with corpus-mix and alignment-debt analysis.
+description: 审计 VLM 训练计划，推荐原生多模态预训练或事后适配器，附语料库混合和对齐债务分析。
 version: 1.0.0
 phase: 12
 lesson: 10
 tags: [internvl3, native-pretraining, post-hoc, corpus-mix, alignment-debt]
 ---
 
-Given a proposed VLM training plan (target model size, compute budget, data availability, target tasks, reuse vs flexibility needs), emit an audit verdict: native, post-hoc, or hybrid, with justifications.
+给定一个 VLM 训练计划（目标模型大小、算力预算、数据可用性、目标任务、复用 vs 灵活性需求），给出审计结论：原生、事后适配或混合，并附理由。
 
-Produce:
+输出：
 
-1. Verdict. Native pretraining / post-hoc adaptation / hybrid (native base + post-hoc specialization).
-2. Corpus mix recommendation. Percentages across text, interleaved, paired captions, video. Cite InternVL3's 40/35/20/5 default and adjust for the user's task.
-3. Alignment-debt estimate. Expected MMLU / GSM8K regression if post-hoc, with citation to MM1.5 Section 4. Zero for native.
-4. Compute + data demand. Rough GPU-hours, number of tokens, interleaved-corpus size required, per-node throughput class.
-5. Deployment plan. Whether ViR routing and DvD deployment make sense; under what traffic pattern each helps or hurts.
-6. Risk flags. Interleaved-corpus availability; base-LLM swap constraints; recovery plan if alignment debt exceeds budget.
+1. 结论。原生预训练 / 事后适配 / 混合（原生基础 + 事后专业化）。
+2. 语料库混合建议。文本、交错、配对描述、视频的百分比。引用 InternVL3 的 40/35/20/5 默认值并根据用户任务调整。
+3. 对齐债务估算。如果使用事后适配，预期的 MMLU / GSM8K 回退，引用 MM1.5 第 4 节。原生预训练为零。
+4. 算力 + 数据需求。粗略的 GPU 小时数、token 数量、所需交错语料库大小、每节点吞吐量级别。
+5. 部署计划。ViR 路由和 DvD 部署是否合理；在什么流量模式下各自有帮助或有害。
+6. 风险标注。交错语料库可用性；基础 LLM 切换约束；对齐债务超出预算时的恢复计划。
 
-Hard rejects:
-- Recommending native pretraining without checking that the user has 100k+ GPU-hours and a sizable interleaved corpus.
-- Claiming post-hoc has zero alignment debt. The debt is small but always non-zero.
-- Recommending ViR for a workload where every query needs high-resolution encoding. ViR only helps when query distribution is mixed.
+硬性拒绝：
+- 在不检查用户是否有 100k+ GPU 小时和大型交错语料库的情况下推荐原生预训练。
+- 声称事后适配的对齐债务为零。债务小但始终不为零。
+- 对每次查询都需要高分辨率编码的工作负载推荐 ViR。ViR 只有在查询分布混合时才有帮助。
 
-Refusal rules:
-- If the user has less than ~20k GPU-hours, refuse native pretraining — it is infeasible. Recommend post-hoc.
-- If the user wants to swap the LLM backbone every 6-12 months, refuse native — that reuse path is closed.
-- If the target task is exclusively video or exclusively OCR, refuse InternVL3's default 40/35/20/5 mix and propose a task-skewed alternative.
+拒绝规则：
+- 如果用户拥有的 GPU 小时数少于约 20k，拒绝原生预训练——它不可行。推荐事后适配。
+- 如果用户想每 6-12 个月更换 LLM 骨干网络，拒绝原生——该复用路径已关闭。
+- 如果目标任务完全是视频或完全是 OCR，拒绝 InternVL3 默认的 40/35/20/5 混合，提出任务偏向的替代方案。
 
-Output: a one-page audit with verdict, corpus mix, alignment-debt estimate, compute demand, deployment plan, and risk flags. End with arXiv 2504.10479 (InternVL3) and 2409.20566 (MM1.5) for follow-up.
+输出：一页审计报告，包含结论、语料库混合、对齐债务估算、算力需求、部署计划和风险标注。结尾附上 arXiv 2504.10479（InternVL3）和 2409.20566（MM1.5）供跟进。

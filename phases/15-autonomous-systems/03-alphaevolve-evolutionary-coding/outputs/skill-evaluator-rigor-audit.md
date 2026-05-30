@@ -1,39 +1,39 @@
 ---
 name: evaluator-rigor-audit
-description: Audit a proposed AlphaEvolve-style evolutionary coding loop's evaluator before committing any compute to the search.
+description: 在提交任何算力进行搜索之前，审核拟议的 AlphaEvolve 风格进化编码循环的评估器。
 version: 1.0.0
 phase: 15
 lesson: 3
 tags: [alphaevolve, evolutionary-coding, evaluator, reward-hacking, deepmind]
 ---
 
-Given a proposed evolutionary coding loop (generator LLM, program database, evaluator), audit the evaluator. The evaluator is the architecture; the generator is interchangeable. This skill decides whether the loop has a chance of producing real wins or just reward-hacked garbage.
+给定一条拟议的进化编码循环（生成器 LLM、程序数据库、评估器），审核评估器。评估器才是架构核心；生成器是可替换的。本技能决定该循环是否有机会产生真正的改进，还是只会产生奖励黑客垃圾。
 
-Produce:
+产出内容：
 
-1. **Evaluator decomposition.** Name every signal the evaluator reports: correctness, performance, resource, other. For each, state (a) how it is measured, (b) how cheaply it can be gamed, (c) what a held-out inputs rule looks like.
-2. **Confabulation surface.** List the LLM's three most likely confabulations in this domain: claimed complexity classes, claimed correctness on edge cases, claimed performance without measurement. State which evaluator signal catches each.
-3. **Reward-hacking surface.** List three plausible ways the loop could maximize score without doing the intended task (shortcut that passes the test, proxy gaming, memorization of inputs). State the mitigation for each.
-4. **Determinism and reproducibility.** Require evaluator outputs to be deterministic within tolerance. Flag any evaluator whose score moves by more than the population variance run-to-run.
-5. **Deployment check.** If the winning variant would be shipped to production, require a separate pre-deployment review that the evaluator does not check (security, cost, human review). The search did not validate deployment-readiness.
+1. **评估器分解。** 列出评估器报告的每个信号：正确性、性能、资源、其他。对于每个信号，说明：(a) 如何测量，(b) 被博弈的难易程度，(c) 保留输入规则的形式。
+2. **臆造面。** 列出 LLM 在该领域最可能产生的三种臆造：声称的复杂度类别、声称的边缘案例正确性、未经测量的声称性能。说明哪个评估器信号能捕捉每种情况。
+3. **奖励黑客面。** 列出循环可以在不完成预期任务的情况下最大化分数的三种合理方式（通过测试的捷径、代理指标博弈、输入记忆化）。说明每种情况的缓解措施。
+4. **确定性与可重现性。** 要求评估器输出在容忍范围内具有确定性。标记任何在多次运行之间分数变动超过种群方差的评估器。
+5. **部署检查。** 如果获胜变体将被部署到生产环境，要求进行评估器未检查的独立预部署审查（安全性、成本、人工审查）。搜索过程未验证部署就绪性。
 
-Hard rejects:
-- Any loop where the evaluator is an LLM judge without machine-checkable ground truth. LLM judges can be gamed.
-- Any evaluator that reports a single scalar score with no decomposition. Scalar scores amplify reward hacking.
-- Training-set-only evaluators. Held-out inputs are non-negotiable.
+硬性拒绝：
+- 评估器是没有机器可验证真实值的 LLM 裁判的任何循环。LLM 裁判可以被博弈。
+- 评估器只报告单一标量分数、没有分解的任何情况。标量分数会放大奖励黑客行为。
+- 仅使用训练集的评估器。保留输入集是不可谈判的。
 
-Refusal rules:
-- If the user cannot describe the evaluator in two paragraphs, refuse and ask for the evaluator specification first. Loops without a spec'd evaluator are not ready for compute.
-- If the domain is unverified (creative writing, open-ended scientific hypothesis, long-form research), refuse and recommend a hybrid pipeline with human review instead of a closed loop.
-- If the proposed deployment surface is irreversible (production infrastructure changes, algorithm swap in a shipping product), refuse closed-loop deployment. Require staged rollout and human sign-off.
+拒绝规则：
+- 如果用户无法用两段话描述评估器，拒绝并优先要求提供评估器规范。没有规范评估器的循环还未准备好消耗算力。
+- 如果领域无法验证（创意写作、开放式科学假设、长篇研究），拒绝并建议使用混合流水线加入人工审查，而不是闭环。
+- 如果拟议部署面是不可逆的（生产基础设施更改、运输产品中的算法替换），拒绝闭环部署。要求分阶段推出和人工批准。
 
-Output format:
+输出格式：
 
-Return a one-page memo with:
-- **Loop summary** (generator, evaluator, target domain)
-- **Evaluator score** (rigor 1-5 with justification)
-- **Confabulation surface** (top 3, with evaluator coverage)
-- **Reward-hacking surface** (top 3, with mitigations)
-- **Determinism and reproducibility** (score variance vs population variance; seed control; pass/fail)
-- **Deployment readiness** (closed-loop ship allowed y/n; required pre-deployment reviews: security, cost, human)
-- **Recommendation** (proceed / tighten evaluator / choose a different domain)
+返回一页备忘录，包含：
+- **循环摘要**（生成器、评估器、目标领域）
+- **评估器得分**（严格性 1-5 及说明）
+- **臆造面**（前 3 项，含评估器覆盖情况）
+- **奖励黑客面**（前 3 项，含缓解措施）
+- **确定性与可重现性**（分数方差 vs 种群方差；种子控制；通过/失败）
+- **部署就绪性**（是否允许闭环部署；必需的预部署审查：安全性、成本、人工）
+- **建议**（继续 / 收紧评估器 / 选择其他领域）

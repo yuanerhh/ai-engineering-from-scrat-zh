@@ -1,38 +1,38 @@
 ---
 name: coding-scaffold-audit
-description: Audit a proposed coding-agent scaffold (retrieval, verifier loop, sandbox, benchmark fit) before adopting it for production code changes.
+description: 在将编码智能体脚手架用于生产代码变更之前，对其进行审核（检索、验证器循环、沙盒、基准适配性）。
 version: 1.0.0
 phase: 15
 lesson: 9
 tags: [coding-agent, scaffolding, swe-bench, codeact, openhands]
 ---
 
-Given a proposed coding-agent scaffold (SWE-agent, OpenHands, Aider, Cline, Devin, Claude Code, or an in-house build), score it across four axes and flag where benchmark numbers will overstate production quality.
+给定一个拟议的编码智能体脚手架（SWE-agent、OpenHands、Aider、Cline、Devin、Claude Code 或内部构建），在四个轴上对其进行评分，并标记基准数字将在哪些方面高估生产质量。
 
-Produce:
+产出内容：
 
-1. **Retrieval.** Describe how the scaffold selects which files the agent reads before acting. Repo map, embedding search, explicit file list, or agent-driven `grep` calls. Quality of retrieval is the silent dominant reliability factor.
-2. **Verifier loop.** Does the scaffold run tests, read the stack trace, and feed failure back into the next turn? If no verifier loop, flag as missing — this is usually a 10+ point absolute delta on SWE-bench-like tasks.
-3. **Sandbox and blast radius.** Where do actions execute? Local file system, ephemeral container, managed VM. For CodeAct-style scaffolds, confirm the sandbox is hardened (no egress, no host mounts, time limit). For JSON tool-call scaffolds, confirm the tool validators reject every unintended side effect.
-4. **Benchmark fit.** What distribution does the reported number (e.g., "80.9% on SWE-bench Verified") actually cover? Count the fraction of the benchmark made up of 1–2 line tasks; compare the reported score to SWE-bench Pro (10+ line tasks) for the same model. A scaffold whose headline number is driven by the easy tail is not a production signal.
+1. **检索。** 描述脚手架如何选择智能体在行动前读取的文件。仓库地图、嵌入搜索、明确文件列表或智能体驱动的 `grep` 调用。检索质量是无声的主导可靠性因素。
+2. **验证器循环。** 脚手架是否运行测试、读取堆栈跟踪，并将失败反馈到下一轮？如果没有验证器循环，标记为缺失——这通常在类 SWE-bench 任务上是 10+ 个绝对百分点的差距。
+3. **沙盒与爆炸半径。** 操作在哪里执行？本地文件系统、临时容器、托管虚拟机。对于 CodeAct 风格的脚手架，确认沙盒已加固（无出口流量、无主机挂载、有时间限制）。对于 JSON 工具调用脚手架，确认工具验证器拒绝每个非预期副作用。
+4. **基准适配性。** 报告的数字（例如"SWE-bench Verified 80.9%"）实际覆盖哪种分布？统计基准中由 1-2 行任务构成的比例；对同一模型将报告分数与 SWE-bench Pro（10+ 行任务）进行比较。标题数字由简单任务尾部驱动的脚手架不是生产信号。
 
-Hard rejects:
-- Any scaffold without a verifier loop used for tasks above trivial complexity.
-- CodeAct scaffolds without sandbox isolation (no Docker, no rootless container, no VM) pointing at real repositories.
-- Benchmark claims that do not disclose the distribution (easy-tail fraction, Pro-equivalent score).
-- Tool-call scaffolds where a single tool can touch arbitrary paths with no validator (e.g., a raw `shell_exec` tool exposed to the model).
+硬性拒绝：
+- 用于复杂度超过微不足道的任务但没有验证器循环的任何脚手架。
+- 没有沙盒隔离（无 Docker、无无根容器、无虚拟机）、指向真实仓库的 CodeAct 脚手架。
+- 不披露分布（简单任务尾部比例、Pro 等效分数）的基准声明。
+- 单个工具可以通过无验证器触及任意路径的工具调用脚手架（例如向模型暴露原始 `shell_exec` 工具）。
 
-Refusal rules:
-- If the user cannot produce the scaffold's test-suite pass-rate on a representative internal distribution, refuse and require a small-sample measurement first. Public benchmarks predict rank-order, not absolute quality.
-- If the proposed scaffold would run against a production repository without a staging dry-run, refuse and require staging first. Coding agents rewrite files; coding agents with bad retrieval rewrite the wrong files.
-- If the user plans to use benchmark scores alone (without their own evals) to make a go/no-go decision, refuse and require internal eval data.
+拒绝规则：
+- 如果用户无法在代表性内部分布上提供脚手架的测试套件通过率，拒绝并要求先进行小样本测量。公共基准预测排名顺序，而非绝对质量。
+- 如果拟议的脚手架将在没有暂存干跑的情况下针对生产仓库运行，拒绝并要求先进行暂存测试。编码智能体会重写文件；检索糟糕的编码智能体会重写错误的文件。
+- 如果用户计划仅凭基准分数（不含自己的评估）做出通过/不通过决策，拒绝并要求内部评估数据。
 
-Output format:
+输出格式：
 
-Return a scored memo with:
-- **Retrieval score** (0–5 with mechanism described)
-- **Verifier loop score** (0–5 with feedback format)
-- **Sandbox score** (0–5 with isolation mechanism)
-- **Benchmark fit score** (0–5 with internal distribution delta)
-- **Deployment recommendation** (production / staging / research only)
-- **One-line risk summary** (the most likely first production failure)
+返回评分备忘录，包含：
+- **检索得分**（0–5 含机制描述）
+- **验证器循环得分**（0–5 含反馈格式）
+- **沙盒得分**（0–5 含隔离机制）
+- **基准适配性得分**（0–5 含内部分布差距）
+- **部署建议**（生产 / 暂存 / 仅研究）
+- **一句话风险摘要**（最可能的首次生产失败）

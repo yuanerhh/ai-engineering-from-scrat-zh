@@ -1,32 +1,32 @@
 ---
 name: quantization-picker
-description: Pick a 2026 quantization format given hardware, engine, workload, and quality tolerance, and produce a calibration + validation plan.
+description: 根据硬件、引擎、工作负载和质量容忍度选择 2026 年量化格式，并生成校准 + 验证计划。
 version: 1.0.0
 phase: 17
 lesson: 09
 tags: [quantization, awq, gptq, gguf, fp8, nvfp4, calibration]
 ---
 
-Given hardware (CPU / H100 / H200 / B200 / GB200, with count), engine (llama.cpp / vLLM / TRT-LLM / SGLang), model (size + task type — routine chat / reasoning / code / multi-LoRA), and quality tolerance (can absorb N-point drop on HumanEval / MATH / MMLU), pick a quantization format and produce a validation plan.
+给定硬件（CPU / H100 / H200 / B200 / GB200，含数量）、引擎（llama.cpp / vLLM / TRT-LLM / SGLang）、模型（大小 + 任务类型——常规聊天 / 推理 / 代码 / 多 LoRA），以及质量容忍度（可以承受 HumanEval / MATH / MMLU 上的 N 分下降），选择量化格式并生成验证计划。
 
-Produce:
+产出内容：
 
-1. Format recommendation. One of: GGUF Q4_K_M, GGUF Q5_K_M, GPTQ-Int4 + Marlin, AWQ-Int4 + Marlin, FP8, NVFP4 + FP8 KV, or a stacked combo. Justify by the decision tree: CPU → GGUF; reasoning → FP8; multi-LoRA on vLLM → GPTQ; routine GPU chat → AWQ; Blackwell validated → NVFP4.
-2. Memory budget. Report weights + KV cache (at reported concurrency × context) + activations. Confirm it fits on the target GPU or call out multi-GPU requirement.
-3. Calibration plan. Dataset source (domain-matched for AWQ/GPTQ; generic C4/WikiText as a last resort). Sample count (500-2000 for domain). Validation set (10% held out from calibration pool).
-4. Validation plan. Eval set matched to task: HumanEval for code, MATH/MMLU for reasoning, MT-Bench for chat. Baseline BF16 vs quantized. Ship if drop ≤ quality tolerance.
-5. KV cache decision. Separate from weight quantization. Recommend FP8 KV for reasoning; BF16 KV if attention accuracy is marginal; INT8 KV only after validation.
-6. Rollback path. Keep BF16/FP8 weights on disk; flag to switch back if production quality degrades.
+1. **格式推荐。** 以下之一：GGUF Q4_K_M、GGUF Q5_K_M、GPTQ-Int4 + Marlin、AWQ-Int4 + Marlin、FP8、NVFP4 + FP8 KV，或组合栈。通过决策树说明理由：CPU → GGUF；推理 → FP8；vLLM 上的多 LoRA → GPTQ；常规 GPU 聊天 → AWQ；Blackwell 已验证 → NVFP4。
+2. **内存预算。** 报告权重 + KV 缓存（在报告的并发 × 上下文下）+ 激活。确认它适合目标 GPU，否则说明多 GPU 需求。
+3. **校准计划。** 数据集来源（AWQ/GPTQ 使用领域匹配的；通用 C4/WikiText 作为最后手段）。样本数量（领域为 500-2000）。验证集（从校准池中保留 10%）。
+4. **验证计划。** 与任务匹配的评估集：代码用 HumanEval，推理用 MATH/MMLU，聊天用 MT-Bench。基准 BF16 vs 量化版本。如果下降 ≤ 质量容忍度则发布。
+5. **KV 缓存决策。** 与权重量化分开。推理使用 FP8 KV；如果注意力精度边际则使用 BF16 KV；INT8 KV 仅在验证后使用。
+6. **回滚路径。** 在磁盘上保留 BF16/FP8 权重；如果生产质量下降，标记以切换回去。
 
-Hard rejects:
-- Recommending NVFP4 weights on reasoning-heavy workloads without eval-set validation.
-- Calibrating on generic web data for domain models. Always use in-domain.
-- Forgetting the KV cache in HBM budget. Always itemize.
-- Claiming throughput numbers without naming the kernels (Marlin-AWQ vs plain AWQ is 10x).
+硬性拒绝：
+- 在没有评估集验证的情况下推荐推理密集型工作负载使用 NVFP4 权重。
+- 在领域模型上使用通用网络数据进行校准。始终使用领域内数据。
+- 忘记 HBM 预算中的 KV 缓存。始终逐项列出。
+- 不命名内核就声称吞吐量数字（Marlin-AWQ vs 普通 AWQ 差 10 倍）。
 
-Refusal rules:
-- If the workload is inherently quality-marginal (open-ended creative generation, edge-case reasoning), refuse aggressive INT4. Stay FP8 or BF16.
-- If the engine is llama.cpp, refuse any format other than GGUF. Matching format to engine is table stakes.
-- If the user cannot run a 1,000-sample eval, refuse. No blind quantization in production.
+拒绝规则：
+- 如果工作负载本质上质量边际（开放式创意生成、边缘案例推理），拒绝激进的 INT4。保持 FP8 或 BF16。
+- 如果引擎是 llama.cpp，拒绝除 GGUF 以外的任何格式。将格式与引擎匹配是基本要求。
+- 如果用户无法运行 1,000 样本评估，拒绝。生产中不进行盲目量化。
 
-Output: a one-page quantization pick listing chosen format, HBM budget, calibration plan, validation plan, KV cache decision, and rollback path. End with a "what to measure next" paragraph naming one of eval-set delta, KV cache pressure under peak concurrency, or throughput at real batch size depending on the key risk.
+输出：一页量化选择，列出所选格式、HBM 预算、校准计划、验证计划、KV 缓存决策和回滚路径。结尾给出"下一步要测量什么"段落，根据关键风险列出评估集差距、峰值并发下的 KV 缓存压力或真实批量大小下的吞吐量中的一个。

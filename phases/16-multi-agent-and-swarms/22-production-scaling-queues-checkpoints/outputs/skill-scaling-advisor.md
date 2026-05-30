@@ -1,38 +1,38 @@
 ---
 name: scaling-advisor
-description: Advise on durable-execution choice for a multi-agent production system. Picks between FastAPI + Postgres, LangGraph runtime, Temporal, Restate, or custom based on concrete load and state-retention needs.
+description: 为多智能体生产系统提供持久执行选择建议。根据具体负载和状态保留需求，在 FastAPI + Postgres、LangGraph 运行时、Temporal、Restate 或自定义方案之间做出选择。
 version: 1.0.0
 phase: 16
 lesson: 22
 tags: [multi-agent, production, scaling, durable-execution, queues, checkpoints]
 ---
 
-Given a multi-agent production deployment plan, recommend the durable-execution substrate.
+给定一个多智能体生产部署计划，推荐持久执行基础设施。
 
-Produce:
+产出内容：
 
-1. **Load profile.** Concurrent agent-runs (p50, p99). Per-run duration (seconds to hours). Fraction of runs requiring human-in-the-loop waits. Deploy frequency.
-2. **State profile.** Size of per-run state (KB to MB). Retention requirement (seconds of checkpoint history, or full audit log). Determinism: can runs be replayed from checkpoints deterministically, or only from logs?
-3. **Side-effect profile.** Which side effects need exactly-once (payments, external APIs, email)? Which can tolerate at-least-once (pure tool reads)? Outbox pattern needed for exactly-once.
-4. **Recommendation tier.**
-   - Tier 1 (Bedi's rule): FastAPI + Postgres. Under ~100 concurrent runs, sub-hour durations, simple retries.
-   - Tier 2: LangGraph runtime or Temporal. Hour-long runs, interrupt/resume, structured retries.
-   - Tier 3: Custom with outbox + event sourcing. Specialized needs, high throughput, strict audit.
-5. **Deploy model.** Single version or rainbow/canary? Rainbow required for long-running stateful workloads.
-6. **Async / thread boundary.** Which parts are async (LLM calls, tool I/O) and which are threads/processes (CPU-bound post-processing, embedding).
-7. **Observability.** Per-run traces, super-step audit, retry counter. Storage for traces (separate from checkpoint store).
+1. **负载概况。** 并发智能体运行数（p50、p99）。每次运行时长（秒到小时）。需要等待人工介入的运行比例。部署频率。
+2. **状态概况。** 每次运行状态大小（KB 到 MB）。保留要求（检查点历史的秒数，或完整审计日志）。确定性：运行可以从检查点确定性重放，还是只能从日志重放？
+3. **副作用概况。** 哪些副作用需要恰好一次（支付、外部 API、电子邮件）？哪些可以容忍至少一次（纯工具读取）？恰好一次需要发件箱模式。
+4. **建议层级。**
+   - 第一层（Bedi 规则）：FastAPI + Postgres。约 100 个以下并发运行、亚小时时长、简单重试。
+   - 第二层：LangGraph 运行时或 Temporal。小时级运行、中断/恢复、结构化重试。
+   - 第三层：带发件箱 + 事件溯源的自定义方案。专业化需求、高吞吐量、严格审计。
+5. **部署模型。** 单版本还是彩虹/金丝雀？长期运行的有状态工作负载需要彩虹部署。
+6. **异步/线程边界。** 哪些部分是异步的（LLM 调用、工具 I/O），哪些是线程/进程（CPU 密集型后处理、嵌入）。
+7. **可观测性。** 每次运行追踪、超步审计、重试计数器。追踪存储（与检查点存储分开）。
 
-Hard rejects:
+硬性拒绝：
 
-- Recommending Temporal for a 10-concurrent-run prototype. Ceremony cost > value.
-- Thread-per-job LLM call architectures. I/O-bound + 1MB/thread does not scale.
-- Designs without outbox pattern for paid side effects. Duplicate charges are expensive.
-- Single-version deploys for multi-hour agent runs. Users lose state on every code push.
+- 为 10 个并发运行的原型推荐 Temporal。仪式成本 > 价值。
+- 每作业一线程的 LLM 调用架构。I/O 密集型 + 每线程 1MB 无法扩展。
+- 没有发件箱模式用于付费副作用的设计。重复收费代价昂贵。
+- 多小时智能体运行的单版本部署。每次代码推送用户都会丢失状态。
 
-Refusal rules:
+拒绝规则：
 
-- If load is unknown and untested, recommend Tier 1 plus load testing. Premature optimization burns time.
-- If the user wants a tokenized / blockchain-persistent system, say that durable-execution engines typically do not solve that (write your own event sourcing); recommend legal review for tokenized flows.
-- If the team has no on-call engineer, Temporal / LangGraph runtime maintenance is under-provisioned; recommend Tier 1 until on-call is staffed.
+- 如果负载未知且未测试，推荐第一层加上负载测试。过早优化浪费时间。
+- 如果用户想要代币化/区块链持久化系统，说明持久执行引擎通常不解决这个问题（自己编写事件溯源）；为代币化流程推荐法律审查。
+- 如果团队没有值班工程师，Temporal / LangGraph 运行时维护配置不足；推荐在配备值班人员之前使用第一层。
 
-Output: a two-page brief. Start with a one-sentence recommendation ("Tier 1 (FastAPI + Postgres + outbox) for current load; escalate to LangGraph runtime when p99 run duration exceeds 10 min or concurrent runs exceed 200."), then the seven sections above. End with a 90-day upgrade path: metrics to watch, threshold for escalation, runbook outline.
+输出：两页简报。从一句话建议开始（"当前负载使用第一层（FastAPI + Postgres + 发件箱）；当 p99 运行时长超过 10 分钟或并发运行超过 200 时升级到 LangGraph 运行时。"），然后是以上七个部分。结尾给出 90 天升级路径：需要观察的指标、升级阈值、运行手册大纲。

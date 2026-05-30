@@ -1,39 +1,39 @@
 ---
 name: topology-picker
-description: Pick a multi-agent debate topology (star / chain / tree / graph), an N of agents, a heterogeneity profile, and a round bound for a given task.
+description: 为给定任务选择多智能体辩论拓扑（星形/链式/树形/图形）、智能体数量 N、异质性概况和轮次限制。
 version: 1.0.0
 phase: 16
 lesson: 15
 tags: [multi-agent, debate, topology, voting, self-consistency]
 ---
 
-Given a task description, recommend a multi-agent topology and sizing.
+给定一个任务描述，推荐多智能体拓扑和规模。
 
-Produce:
+产出内容：
 
-1. **Task fingerprint.** Research (long-horizon, open-ended), fast-factual (closed-form answer), stepwise-refinement (staged pipeline), or opinion (no ground truth). Pick one; if it spans two, pick the dominant shape.
-2. **Topology.** Star, chain, tree, or graph. Justify from the fingerprint:
-   - research → graph (any-to-any critique)
-   - fast-factual → star (hub aggregates)
-   - stepwise-refinement → chain (or tree if divide-and-conquer)
-   - opinion → none of the above; recommend single agent + human decision
-3. **N of agents.** 3 is the cheapest useful ensemble; 5 is the common sweet spot; 7+ is specialty. Above 5 on graph topology, warn about coordination tax.
-4. **Heterogeneity profile.** At least one agent must come from a different base model family if monoculture matters (research, reasoning). Prefer 3 different base models at N=5.
-5. **Round bound.** 1 round = vote. 2 rounds = one refinement. 3 rounds = maximum before conformity dominates. Never unbounded.
-6. **Aggregation.** Plurality (cheap), confidence-weighted (CP-WBFT from Lesson 14), geometric median (DecentLLMs), or judge-scored. Default to confidence-weighted unless cost constraints dictate plurality.
-7. **Escalation.** Below-threshold consensus → escalate where? Human, another ensemble with different base models, or abstention?
+1. **任务指纹。** 研究型（长期、开放式）、快速事实型（封闭式答案）、逐步细化型（阶段性流水线）或意见型（无真实值）。选择一种；如果跨越两种，选择主导形式。
+2. **拓扑。** 星形、链式、树形或图形。根据指纹说明理由：
+   - 研究型 → 图形（任意到任意的批评）
+   - 快速事实型 → 星形（中心聚合）
+   - 逐步细化型 → 链式（或如果是分而治之则用树形）
+   - 意见型 → 以上均不适用；推荐单智能体 + 人工决策
+3. **智能体数量 N。** 3 是最便宜的有用集成；5 是常见的最优点；7+ 是专业用途。在图形拓扑上超过 5 时，警告协调税。
+4. **异质性概况。** 如果单一文化很重要（研究、推理），至少一个智能体必须来自不同的基础模型系列。在 N=5 时优先选择 3 个不同的基础模型。
+5. **轮次限制。** 1 轮 = 投票。2 轮 = 一次细化。3 轮 = 一致性主导之前的最大值。绝不无限制。
+6. **聚合。** 多数（便宜）、置信度加权（来自第 14 课的 CP-WBFT）、几何中位数（DecentLLMs）或裁判评分。默认置信度加权，除非成本约束要求多数。
+7. **升级。** 低于阈值的共识 → 升级到哪里？人工、具有不同基础模型的另一个集成，还是弃权？
 
-Hard rejects:
+硬性拒绝：
 
-- Any recommendation of 10+ agents on graph topology. Coordination tax dominates; measure first.
-- Star topology for open research questions. Star loses the benefit of any-to-any critique.
-- Any recommendation that runs the same base model N times and calls it multi-agent. That is self-consistency in disguise; label it correctly.
-- Unbounded rounds. Rewards conformity; the longer debate runs, the more agents agree by pressure rather than logic.
+- 在图形拓扑上推荐 10+ 个智能体。协调税占主导；先测量。
+- 开放式研究问题使用星形拓扑。星形丧失了任意到任意批评的好处。
+- 任何将相同基础模型运行 N 次并称其为多智能体的推荐。那只是自一致性的变体；要正确标记。
+- 无限轮次。奖励一致性；辩论运行越长，智能体越多靠压力而非逻辑达成一致。
 
-Refusal rules:
+拒绝规则：
 
-- If the task has no ground truth (opinion, synthesis, creative), state that voting is advisory. Recommend single agent + human decision.
-- If the user lacks access to multiple base models, flag the monoculture ceiling and recommend self-consistency with temperature variation as a fallback.
-- If the task is simple (single factual lookup, < 100 tokens of reasoning), recommend a single agent with self-consistency N=5.
+- 如果任务没有真实值（意见、综合、创意），说明投票是建议性的。推荐单智能体 + 人工决策。
+- 如果用户无法访问多个基础模型，标记单一文化上限，并推荐带温度变化的自一致性作为回退。
+- 如果任务简单（单一事实查询，< 100 令牌的推理），推荐单智能体配 N=5 的自一致性。
 
-Output: a one-page brief. Start with a single-sentence recommendation ("Graph topology, N=5 agents from 3 different base models, 2 rounds, confidence-weighted aggregation, escalate to human on below-threshold."), then the seven sections above. End with a budget estimate: expected tokens per query and expected latency in seconds.
+输出：一页简报。从一句话建议开始（"图形拓扑，来自 3 个不同基础模型的 N=5 智能体，2 轮，置信度加权聚合，低于阈值时升级给人工。"），然后是以上七个部分。结尾给出预算估算：每次查询预期令牌数和预期延迟（秒）。

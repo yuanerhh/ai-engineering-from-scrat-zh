@@ -1,89 +1,89 @@
 ---
 name: skill-probability-reasoning
-description: Choose the right probability distribution for a given ML problem
+description: 为给定的 ML 问题选择合适的概率分布
 version: 1.0.0
 phase: 1
 lesson: 6
 tags: [probability, distributions, modeling]
 ---
 
-# Probability Distribution Selection
+# 概率分布选择
 
-How to pick the right distribution when modeling data, designing loss functions, or setting priors.
+建模数据、设计损失函数或设定先验时，如何选择正确的分布。
 
-## Decision Checklist
+## 决策清单
 
-1. Is the outcome discrete (categories, counts) or continuous (measurements, scores)?
-2. Is the outcome bounded (e.g., [0, 1]) or unbounded?
-3. How many possible outcomes are there? Two? k? Infinite?
-4. Is the data symmetric or skewed?
-5. Are events independent or correlated?
-6. Are you modeling a rate, a count, a proportion, or a measurement?
+1. 结果是离散的（类别、计数）还是连续的（测量值、分数）？
+2. 结果是有界的（如 [0, 1]）还是无界的？
+3. 可能的结果有多少种？两种？k 种？无限种？
+4. 数据是对称的还是偏斜的？
+5. 事件是独立的还是相关的？
+6. 你在建模的是速率、计数、比例还是测量值？
 
-## Distribution decision tree
+## 分布决策树
 
 ```
-Is the variable discrete?
-  Yes --> Only 2 outcomes? --> Bernoulli (p)
-     |    k outcomes, one trial? --> Categorical (p1...pk)
-     |    k outcomes, n trials? --> Multinomial (n, p1...pk)
-     |    Count of successes in n trials? --> Binomial (n, p)
-     |    Count of events per interval? --> Poisson (lambda)
-     |    Count of trials until first success? --> Geometric (p)
-     |    Count of trials until r successes? --> Negative Binomial (r, p)
-  No --> Symmetric, bell-shaped? --> Normal (mu, sigma)
-     |   Positive values, right-skewed? --> Log-normal or Exponential
-     |   Bounded in [0, 1]? --> Beta (alpha, beta)
-     |   Positive values, flexible shape? --> Gamma (alpha, beta)
-     |   Time between events? --> Exponential (lambda)
-     |   Heavy tails needed? --> Student's t (nu) or Cauchy
-     |   Multivariate, bell-shaped? --> Multivariate Normal
-     |   On a simplex (sums to 1)? --> Dirichlet (alpha)
+变量是离散的吗？
+  是 --> 只有 2 种结果？ --> 伯努利分布 (p)
+     |   k 种结果，单次试验？ --> 分类分布 (p1...pk)
+     |   k 种结果，n 次试验？ --> 多项分布 (n, p1...pk)
+     |   n 次试验中成功的次数？ --> 二项分布 (n, p)
+     |   每个区间内的事件计数？ --> 泊松分布 (lambda)
+     |   直到第一次成功的试验次数？ --> 几何分布 (p)
+     |   直到 r 次成功的试验次数？ --> 负二项分布 (r, p)
+  否 --> 对称、钟形？ --> 正态分布 (mu, sigma)
+     |   正值、右偏？ --> 对数正态分布或指数分布
+     |   有界于 [0, 1]？ --> Beta 分布 (alpha, beta)
+     |   正值、形状灵活？ --> Gamma 分布 (alpha, beta)
+     |   事件之间的时间间隔？ --> 指数分布 (lambda)
+     |   需要重尾？ --> Student t 分布 (nu) 或 柯西分布
+     |   多变量、钟形？ --> 多元正态分布
+     |   在单纯形上（和为 1）？ --> 狄利克雷分布 (alpha)
 ```
 
-## Mapping real-world ML scenarios to distributions
+## 真实 ML 场景与分布的对应关系
 
-| Scenario | Distribution | Parameters |
+| 场景 | 分布 | 参数 |
 |---|---|---|
-| Binary classification output | Bernoulli | p = sigmoid(logit) |
-| Multi-class classification output | Categorical | p = softmax(logits) |
-| Token prediction in language models | Categorical over vocab | p from softmax |
-| Pixel intensity (normalized) | Beta or Uniform [0, 1] | Depends on image stats |
-| Word count in a document | Poisson | lambda = avg word count |
-| Time between user requests | Exponential | lambda = request rate |
-| Measurement error | Normal | mu = 0, sigma from data |
-| Weight initialization | Normal or Uniform | Kaiming/Xavier rules |
-| VAE latent space prior | Standard Normal | mu = 0, sigma = 1 |
-| Bayesian prior on proportions | Beta | alpha, beta from belief |
-| Bayesian prior on category weights | Dirichlet | alpha vector |
-| Noise in regression targets | Normal | mu = 0, sigma estimated |
-| Outlier-robust regression | Student's t | low degrees of freedom |
-| Duration/lifetime modeling | Weibull or Gamma | shape and scale |
-| Topic distribution per document (LDA) | Dirichlet | alpha < 1 for sparse |
+| 二分类输出 | 伯努利分布 | p = sigmoid(logit) |
+| 多分类输出 | 分类分布 | p = softmax(logits) |
+| 语言模型中的 token 预测 | 词表上的分类分布 | 来自 softmax 的 p |
+| 像素强度（归一化后） | Beta 分布或均匀分布 [0, 1] | 取决于图像统计 |
+| 文档中的词数 | 泊松分布 | lambda = 平均词数 |
+| 用户请求之间的时间间隔 | 指数分布 | lambda = 请求速率 |
+| 测量误差 | 正态分布 | mu = 0，sigma 由数据决定 |
+| 权重初始化 | 正态分布或均匀分布 | Kaiming/Xavier 规则 |
+| VAE 潜空间先验 | 标准正态分布 | mu = 0，sigma = 1 |
+| 比例的贝叶斯先验 | Beta 分布 | alpha, beta 由先验知识确定 |
+| 类别权重的贝叶斯先验 | 狄利克雷分布 | alpha 向量 |
+| 回归目标中的噪声 | 正态分布 | mu = 0，sigma 估计得出 |
+| 鲁棒回归（含离群点） | Student t 分布 | 低自由度 |
+| 时长/寿命建模 | Weibull 分布或 Gamma 分布 | 形状和尺度参数 |
+| LDA 中每篇文档的主题分布 | 狄利克雷分布 | alpha < 1 时稀疏 |
 
-## When distributions go wrong
+## 分布用错时的问题
 
-- Using Normal when data has a hard lower bound (e.g., prices, distances). The normal assigns nonzero probability to negative values. Use log-normal or gamma instead.
-- Using Poisson when the variance differs from the mean. Poisson assumes mean = variance. If variance > mean, use negative binomial.
-- Using Bernoulli for multi-class problems. Bernoulli is strictly binary. Use categorical for k > 2.
-- Assuming independence when observations are correlated. Time series, spatial data, and grouped data violate independence. Use autoregressive or hierarchical models.
+- 当数据有严格下界时（如价格、距离）使用正态分布。正态分布会对负值赋予非零概率。改用对数正态分布或 Gamma 分布。
+- 当方差与均值不同时使用泊松分布。泊松分布假设均值 = 方差。若方差 > 均值，改用负二项分布。
+- 对多分类问题使用伯努利分布。伯努利分布严格用于二值情形。k > 2 时使用分类分布。
+- 当观测值相关时假设独立性。时间序列、空间数据和分组数据都违反独立性假设。改用自回归或层次模型。
 
-## Common mistakes
+## 常见错误
 
-- Confusing PDF values with probabilities. A PDF can exceed 1. Probability comes from integrating the PDF over an interval.
-- Forgetting that softmax outputs are categorical probabilities, not independent Bernoulli probabilities. They sum to 1 by construction.
-- Using a uniform prior when you have domain knowledge. Informative priors reduce variance without biasing the result if chosen well.
-- Treating log-probabilities as probabilities. Log-probs are always negative (or zero). They do not sum to 1.
+- 将 PDF 值与概率混淆。PDF 可以超过 1。概率来自对 PDF 在某区间上的积分。
+- 忘记 softmax 输出是分类概率，而非独立的伯努利概率。它们由构造保证和为 1。
+- 当有领域知识时仍使用均匀先验。选择恰当的信息先验在不引入偏差的情况下可降低方差。
+- 将对数概率当作概率处理。对数概率始终为负（或为零）。它们不和为 1。
 
-## Quick reference: distribution properties
+## 快速参考：分布属性
 
-| Distribution | Support | Mean | Variance | Key property |
+| 分布 | 支撑集 | 均值 | 方差 | 关键属性 |
 |---|---|---|---|---|
-| Bernoulli(p) | {0, 1} | p | p(1-p) | Simplest discrete |
-| Binomial(n, p) | {0..n} | np | np(1-p) | Sum of n Bernoulli |
-| Poisson(lam) | {0, 1, 2, ...} | lam | lam | Mean = variance |
-| Normal(mu, s^2) | (-inf, inf) | mu | s^2 | Max entropy for given mean/var |
-| Exponential(lam) | [0, inf) | 1/lam | 1/lam^2 | Memoryless |
-| Beta(a, b) | [0, 1] | a/(a+b) | ab/((a+b)^2(a+b+1)) | Conjugate to Binomial |
-| Gamma(a, b) | (0, inf) | a/b | a/b^2 | Conjugate to Poisson |
-| Dirichlet(alpha) | Simplex | alpha_i/sum | (see formula) | Conjugate to Categorical |
+| Bernoulli(p) | {0, 1} | p | p(1-p) | 最简单的离散分布 |
+| Binomial(n, p) | {0..n} | np | np(1-p) | n 个伯努利分布之和 |
+| Poisson(lam) | {0, 1, 2, ...} | lam | lam | 均值 = 方差 |
+| Normal(mu, s^2) | (-inf, inf) | mu | s^2 | 给定均值/方差时熵最大 |
+| Exponential(lam) | [0, inf) | 1/lam | 1/lam^2 | 无记忆性 |
+| Beta(a, b) | [0, 1] | a/(a+b) | ab/((a+b)^2(a+b+1)) | 二项分布的共轭先验 |
+| Gamma(a, b) | (0, inf) | a/b | a/b^2 | 泊松分布的共轭先验 |
+| Dirichlet(alpha) | 单纯形 | alpha_i/sum | （见公式） | 分类分布的共轭先验 |

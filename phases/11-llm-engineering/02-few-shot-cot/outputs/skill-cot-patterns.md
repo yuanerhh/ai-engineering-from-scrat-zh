@@ -1,120 +1,120 @@
 ---
 name: skill-cot-patterns
-description: Decision framework for choosing the right reasoning technique based on task complexity, accuracy requirements, and cost constraints
+description: 根据任务复杂度、准确性要求和成本约束选择正确推理技术的决策框架
 version: 1.0.0
 phase: 11
 lesson: 02
 tags: [chain-of-thought, few-shot, self-consistency, tree-of-thought, react, reasoning, prompting]
 ---
 
-# Reasoning Technique Selection Guide
+# 推理技术选择指南
 
-When you need an LLM to reason through a problem, choose the technique before writing the prompt. The technique determines the reasoning architecture. The prompt fills it in.
+当你需要 LLM 对某个问题进行推理时，在编写提示词之前先选择技术。技术决定推理架构，提示词负责填充内容。
 
-## Quick Decision Tree
+## 快速决策树
 
-1. Is the task a simple factual lookup or single-step classification?
-   - Yes: use **zero-shot**. CoT adds cost with no accuracy gain.
-   - No: continue.
+1. 这个任务是简单的事实查询或单步分类吗？
+   - 是：使用**零样本**。CoT 增加成本而不提升准确率。
+   - 否：继续。
 
-2. Does the task require multi-step reasoning (math, logic, planning)?
-   - Yes: use **Chain-of-Thought**. Continue to step 3.
-   - No: use **few-shot** if format matters, zero-shot if it does not.
+2. 任务是否需要多步推理（数学、逻辑、规划）？
+   - 是：使用**思维链**。继续到步骤 3。
+   - 否：如果格式重要则使用**少样本**，否则使用零样本。
 
-3. Is a single reasoning error acceptable?
-   - Yes: use **few-shot CoT** (single sample, temperature 0.0).
-   - No: use **self-consistency** (N=5, temperature 0.7). Continue to step 4.
+3. 单次推理错误是否可以接受？
+   - 是：使用**少样本 CoT**（单次采样，temperature 0.0）。
+   - 否：使用**自洽性**（N=5，temperature 0.7）。继续到步骤 4。
 
-4. Is the problem a search/planning problem with many possible paths?
-   - Yes: use **Tree-of-Thought**.
-   - No: self-consistency is sufficient.
+4. 问题是一个有许多可能路径的搜索/规划问题吗？
+   - 是：使用**思维树**。
+   - 否：自洽性已经足够。
 
-5. Does the task require external information or computation?
-   - Yes: use **ReAct** (reasoning + tool calls).
-   - No: pure reasoning techniques are sufficient.
+5. 任务是否需要外部信息或计算？
+   - 是：使用 **ReAct**（推理 + 工具调用）。
+   - 否：纯推理技术已经足够。
 
-## Technique Matrix
+## 技术矩阵
 
-| Technique | Accuracy Lift | Cost Multiplier | Latency | Best For |
-|-----------|--------------|-----------------|---------|----------|
-| Zero-shot | Baseline | 1x | ~1s | Simple tasks, factual Q&A |
-| Few-shot | +5-15% | 1.2x | ~1s | Format matching, classification |
-| Zero-shot CoT | +10-20% | 1.3x | ~1.5s | Quick reasoning boost |
-| Few-shot CoT | +15-25% | 1.5x | ~2s | Math, logic, multi-step |
-| Self-Consistency (N=5) | +2-5% over CoT | 5x | ~5s | High-stakes reasoning |
-| Self-Consistency (N=10) | +1-2% over N=5 | 10x | ~10s | Critical decisions only |
-| Tree-of-Thought | Task-dependent | 10-40x | ~30s+ | Search, planning, puzzles |
-| ReAct | Task-dependent | 3-10x | ~5-15s | Knowledge-grounded tasks |
-| Prompt Chaining | +5-10% over single | 2-5x | ~5-10s | Complex multi-part tasks |
+| 技术 | 准确率提升 | 成本倍数 | 延迟 | 最适用场景 |
+|------|-----------|---------|------|-----------|
+| 零样本 | 基准 | 1x | ~1s | 简单任务、事实问答 |
+| 少样本 | +5-15% | 1.2x | ~1s | 格式匹配、分类 |
+| 零样本 CoT | +10-20% | 1.3x | ~1.5s | 快速推理提升 |
+| 少样本 CoT | +15-25% | 1.5x | ~2s | 数学、逻辑、多步骤 |
+| 自洽性 (N=5) | CoT 基础上 +2-5% | 5x | ~5s | 高风险推理 |
+| 自洽性 (N=10) | N=5 基础上 +1-2% | 10x | ~10s | 仅限关键决策 |
+| 思维树 | 依任务而定 | 10-40x | ~30s+ | 搜索、规划、谜题 |
+| ReAct | 依任务而定 | 3-10x | ~5-15s | 需要知识支撑的任务 |
+| 提示词链 | 单次基础上 +5-10% | 2-5x | ~5-10s | 复杂多部分任务 |
 
-## Model-Specific Guidance
+## 模型特定指南
 
 ### GPT-4o / GPT-4.1
-- Strong baseline reasoning. Zero-shot CoT often sufficient.
-- Few-shot CoT with 3 examples hits 95% on GSM8K.
-- Self-consistency gives marginal gains (95% to 97%) -- only worth it for critical tasks.
-- Supports structured outputs natively for answer extraction.
+- 基础推理能力强，零样本 CoT 通常已足够。
+- 3 个示例的少样本 CoT 在 GSM8K 上可达 95%。
+- 自洽性提升有限（95% 到 97%）——只有在关键任务时才值得使用。
+- 原生支持结构化输出以便提取答案。
 
 ### Claude 3.5 Sonnet / Claude 3.7 Sonnet
-- Excellent at following structured prompt formats (XML tags).
-- Few-shot CoT with XML-delimited examples works best.
-- Extended thinking (Claude 3.7) is native CoT -- no need to prompt for it.
-- Self-consistency is effective because Claude's reasoning varies well at temperature 0.7.
+- 擅长遵循结构化提示词格式（XML 标签）。
+- 使用 XML 分隔示例的少样本 CoT 效果最好。
+- 扩展思考（Claude 3.7）是原生 CoT——无需在提示词中要求。
+- 自洽性效果好，因为 Claude 在 temperature 0.7 时推理变化丰富。
 
 ### Llama 3.1/3.3 70B
-- Benefits most from few-shot CoT (larger accuracy gap vs zero-shot).
-- Self-consistency with N=5 recommended for reasoning tasks.
-- Needs more explicit format instructions than commercial models.
-- ToT is expensive on local inference -- consider only for batch processing.
+- 少样本 CoT 受益最大（与零样本相比准确率差距更大）。
+- 推理任务建议使用 N=5 的自洽性。
+- 比商业模型需要更明确的格式指令。
+- 在本地推理上 ToT 代价高昂——仅考虑用于批处理。
 
 ### Gemini 2.5 Pro
-- Strong at multi-step reasoning out of the box.
-- Thinking mode provides built-in CoT without prompt engineering.
-- Few-shot examples help with format consistency more than accuracy.
-- Large context window (1M) makes example-heavy few-shot practical.
+- 开箱即用的多步推理能力强。
+- 思考模式提供内置 CoT，无需提示词工程。
+- 少样本示例对格式一致性的帮助大于对准确率的帮助。
+- 大上下文窗口（1M）使大量少样本示例在实践中可行。
 
-## Anti-Patterns
+## 反模式
 
-**CoT for simple tasks**: asking "What is 2+2? Let's think step by step" wastes tokens. The model gets simple arithmetic right without reasoning traces. CoT helps when there are 3+ steps.
+**对简单任务使用 CoT**：问「2+2 等于多少？让我们一步步思考」浪费 token。模型不需要推理轨迹就能正确计算简单的算术。当有 3 个以上步骤时，CoT 才有帮助。
 
-**Self-consistency at temperature 0.0**: all N samples will be identical. You must use temperature > 0 (0.5-0.8 recommended) for diverse reasoning paths.
+**在 temperature 0.0 下使用自洽性**：所有 N 个样本将完全相同。必须使用 temperature > 0（建议 0.5-0.8）才能获得多样化的推理路径。
 
-**ToT for everything**: ToT requires O(b^d) LLM calls where b=branching factor and d=depth. A tree with b=3, d=3 needs up to 39 calls. Reserve for problems where cheaper techniques fail.
+**对所有问题使用 ToT**：ToT 需要 O(b^d) 次 LLM 调用，其中 b 是分支因子，d 是深度。b=3、d=3 的树需要多达 39 次调用。留给较便宜技术无法解决的问题时再使用。
 
-**Few-shot with bad examples**: examples with reasoning errors teach the model to make those errors. Every example must be verified. One wrong example can reduce accuracy more than zero examples.
+**使用错误示例进行少样本**：含有推理错误的示例会教会模型犯同样的错误。每个示例都必须经过验证。一个错误示例对准确率的损害可能超过零示例。
 
-**Extracting answers without a consistent format**: self-consistency requires comparing answers across samples. If the answer format varies ("$18", "18 dollars", "eighteen"), voting fails. Always enforce: "The answer is [number]."
+**不使用一致格式提取答案**：自洽性需要跨样本比较答案。如果答案格式变化（「$18」、「18 美元」、「十八」），投票就会失败。始终强制：「答案是 [数字]。」
 
-## Cost Optimization
+## 成本优化
 
-For a production system handling 10,000 queries/day at GPT-4o pricing ($2.50/1M input, $10/1M output):
+对于使用 GPT-4o 定价（输入 $2.50/1M，输出 $10/1M）每天处理 10,000 次查询的生产系统：
 
-| Technique | Avg Tokens/Query | Daily Cost | Accuracy |
-|-----------|-----------------|------------|----------|
-| Zero-shot | ~200 | ~$5 | 78% |
-| Few-shot CoT | ~600 | ~$15 | 95% |
-| Self-Consistency (N=5) | ~3,000 | ~$75 | 97% |
-| ToT (b=3, d=2) | ~6,000 | ~$150 | Task-dependent |
+| 技术 | 平均 token/查询 | 每日成本 | 准确率 |
+|------|----------------|---------|------|
+| 零样本 | ~200 | ~$5 | 78% |
+| 少样本 CoT | ~600 | ~$15 | 95% |
+| 自洽性 (N=5) | ~3,000 | ~$75 | 97% |
+| ToT (b=3, d=2) | ~6,000 | ~$150 | 依任务而定 |
 
-The cost-optimal strategy for most applications: start with few-shot CoT. Add self-consistency only for queries where confidence is low (the escalation pattern from the Build It section).
+大多数应用的最优成本策略：从少样本 CoT 开始。只对置信度低的查询添加自洽性（来自 Build It 部分的升级模式）。
 
-## Integration with Prompt Chaining
+## 与提示词链的结合
 
-Reasoning techniques compose with prompt chaining:
+推理技术可与提示词链组合使用：
 
-**Chain Step 1** (Extract): zero-shot, temperature 0.0
-**Chain Step 2** (Reason): few-shot CoT, temperature 0.0
-**Chain Step 3** (Verify): self-consistency with N=3, temperature 0.7
+**链步骤 1**（提取）：零样本，temperature 0.0
+**链步骤 2**（推理）：少样本 CoT，temperature 0.0
+**链步骤 3**（验证）：N=3 的自洽性，temperature 0.7
 
-This three-step chain costs ~3x a single CoT call but catches extraction errors, reasoning errors, and provides a confidence score from the verification step.
+这个三步链的成本约为单次 CoT 调用的 3 倍，但能捕获提取错误、推理错误，并从验证步骤中提供置信度分数。
 
-## When to Move Beyond Prompting
+## 何时超越提示词工程
 
-If you are spending more time engineering prompts than writing application code, consider:
+如果你花在提示词工程上的时间多于编写应用代码的时间，请考虑：
 
-1. **Fine-tuning**: if you have 500+ labeled examples and the task is narrow
-2. **DSPy compilation**: if you want automated prompt optimization
-3. **Agent frameworks**: if the task requires multi-turn tool use (Phase 14)
-4. **RAG**: if the model needs access to private/current knowledge (Lessons 06-07)
+1. **微调**：如果你有 500 个以上的标注示例且任务范围窄
+2. **DSPy 编译**：如果你想要自动化提示词优化
+3. **智能体框架**：如果任务需要多轮工具使用（第 14 阶段）
+4. **RAG**：如果模型需要访问私有/当前知识（第 06-07 课）
 
-Prompting techniques are the foundation. They work with any model, any provider, and require no training data. But they have limits. Knowing when to graduate to the next level is as important as mastering the techniques themselves.
+提示词技术是基础。它们适用于任何模型、任何提供商，不需要训练数据。但它们有其局限性。知道何时升级到下一个级别与掌握这些技术本身同样重要。

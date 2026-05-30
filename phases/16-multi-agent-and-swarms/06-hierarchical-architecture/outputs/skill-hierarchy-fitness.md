@@ -1,33 +1,33 @@
 ---
 name: hierarchy-fitness
-description: Decide whether a multi-agent task fits hierarchical, flat supervisor, or sequential. Surface the failure modes that matter.
+description: 决定多智能体任务适合层级式、扁平主管式还是顺序式。呈现重要的失败模式。
 version: 1.0.0
 phase: 16
 lesson: 06
 tags: [multi-agent, hierarchy, crewai, langgraph, decomposition-drift]
 ---
 
-Given a task description and an optional org structure, recommend the coordination pattern (flat supervisor, hierarchical, sequential) and list the specific failure modes to guard against.
+给定一个任务描述和可选的组织结构，推荐协调模式（扁平主管、层级式、顺序式），并列出需要防范的具体失败模式。
 
-Produce:
+产出内容：
 
-1. **Task shape analysis.** Is the task one linear flow, fan-out with independent branches, or nested teams with their own sub-teams? Justify.
-2. **Pattern verdict.** Sequential, flat supervisor, or hierarchical. If hierarchical, specify the depth (2 levels strongly preferred; 3 only with strong audit need).
-3. **Decomposition plan.** The exact split the top manager should make. For each branch, name the sub-manager and the bounded scope.
-4. **Reconciliation budget.** Number of rounds allowed before the top manager must commit. Default 2.
-5. **Guardrails.** Three minimum guardrails: canary worker per level, provenance chain on every synthesis, alert on decomposition drift.
-6. **Failure-mode checklist.** Which of {task-assignment error, output misinterpretation, consensus loop} is most likely given the task shape? Describe one concrete symptom and one mitigation per mode.
+1. **任务形态分析。** 任务是一个线性流程、独立分支的扇出，还是有自己子团队的嵌套团队？说明理由。
+2. **模式结论。** 顺序式、扁平主管式还是层级式。如果是层级式，指定深度（强烈建议 2 层；只有在有强烈审计需求时才用 3 层）。
+3. **分解计划。** 顶层管理者应该进行的精确拆分。对于每个分支，列出子管理者及其有界范围。
+4. **协调预算。** 顶层管理者必须提交前允许的轮次数。默认 2 轮。
+5. **护栏。** 三个最少护栏：每层一个金丝雀工作者、每次综合的溯源链、分解漂移时发出警报。
+6. **失败模式检查清单。** 鉴于任务形态，{任务分配错误、输出误解、共识循环} 中哪种最可能发生？每种模式描述一个具体症状和一个缓解措施。
 
-Hard rejects:
+硬性拒绝：
 
-- Any recommendation that proposes depth > 2 without naming a concrete audit or org requirement that demands it.
-- Hierarchical for single-linear-flow tasks. Those should be sequential pipelines.
-- Designs without an explicit reconciliation budget.
+- 任何建议深度 > 2 但未列出具体审计或组织要求的推荐。
+- 对单一线性流程任务使用层级式。这类任务应该是顺序流水线。
+- 没有明确协调预算的设计。
 
-Refusal rules:
+拒绝规则：
 
-- If the task is simple enough to fit one agent (under ~10 tool calls), refuse hierarchy and recommend single-agent.
-- If the task has no natural team boundaries (every sub-step depends on every other), refuse and recommend a group chat pattern instead.
-- If the user wants hierarchical for "realism" (because the human org is deep), flag that human hierarchy does not map to LLM hierarchy and recommend flatter.
+- 如果任务简单到适合一个智能体（不到约 10 次工具调用），拒绝层级式并推荐单智能体。
+- 如果任务没有自然的团队边界（每个子步骤都依赖其他所有子步骤），拒绝并推荐群组聊天模式。
+- 如果用户因为"现实性"而想要层级式（因为人类组织层级很深），说明人类层级不能映射到 LLM 层级，并推荐更扁平的结构。
 
-Output: one-page brief. Open with the pattern verdict, close with the three biggest risks and their guardrails.
+输出：一页简报。以模式结论开头，以三大风险及其护栏结尾。

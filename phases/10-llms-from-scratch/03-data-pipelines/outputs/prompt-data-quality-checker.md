@@ -1,75 +1,75 @@
 ---
 name: prompt-data-quality-checker
-description: Validate and debug data quality in LLM pre-training pipelines
+description: 验证和调试 LLM 预训练流水线中的数据质量
 version: 1.0.0
 phase: 10
 lesson: 3
 tags: [data-pipeline, deduplication, quality-filter, pre-training, llm, data-cleaning]
 ---
 
-# Data Quality Checker for LLM Pre-Training
+# LLM 预训练数据质量检查器
 
-When building or auditing a data pipeline for LLM pre-training, use this framework to catch problems before they reach the model.
+在构建或审计 LLM 预训练的数据流水线时，使用此框架在数据到达模型之前发现问题。
 
-## Red Flags in Pipeline Output
+## 流水线输出中的红色警报
 
-**Deduplication removed less than 20% of web data.** Common Crawl typically contains 30-40% duplicates. If your dedup step removes less than 20%, your MinHash parameters are too conservative or your threshold is too high. Check: shingle size k, number of hash functions, number of LSH bands, Jaccard threshold.
+**去重删除的 Web 数据少于 20%。** Common Crawl 通常包含 30-40% 的重复内容。如果你的去重步骤删除量少于 20%，说明 MinHash 参数过于保守或阈值太高。检查：分片大小 k、哈希函数数量、LSH 带数、Jaccard 阈值。
 
-**Compression ratio below 2.0 chars/token.** This means your tokenizer is splitting too aggressively. Either retrain with more merges, increase vocabulary size, or check that pre-tokenization is not fragmenting text unnecessarily.
+**压缩率低于 2.0 字符/token。** 这意味着你的分词器切割过于激进。要么用更多合并重新训练、增加词汇量，要么检查预分词是否不必要地切碎了文本。
 
-**Compression ratio above 6.0 chars/token.** Your tokenizer has learned very domain-specific merges that may not generalize. This is fine for a domain-specific model but a warning sign for general-purpose models.
+**压缩率高于 6.0 字符/token。** 你的分词器学习了非常特定领域的合并，泛化能力可能不足。对于领域特定模型来说这没问题，但对于通用模型是一个警告信号。
 
-**Sequence utilization below 90%.** Too much padding. Either your documents are very short (filter them or increase minimum document length) or your sequence packing is inefficient (switch from naive padding to multi-document packing).
+**序列利用率低于 90%。** 填充过多。要么你的文档很短（过滤掉或增加最小文档长度），要么你的序列打包效率低下（从简单填充切换到多文档打包）。
 
-**Vocab utilization below 50%.** More than half your vocabulary is unused on this corpus. Either the vocabulary is too large for your domain or the tokenizer was trained on very different data.
+**词汇利用率低于 50%。** 超过一半的词汇在该语料库上未被使用。要么词汇量对你的领域来说太大，要么分词器在非常不同的数据上训练。
 
-## Quality Filter Calibration
+## 质量过滤器校准
 
-Run these checks on a random sample of 1,000 documents at each pipeline stage:
+在每个流水线阶段对 1000 个随机文档样本运行以下检查：
 
-1. **Read 20 random documents after cleaning.** Do they contain residual HTML, JavaScript, navigation text, or boilerplate? If yes, your HTML stripping is incomplete.
+1. **随机读取 20 个清洗后的文档。** 它们是否包含残留的 HTML、JavaScript、导航文本或模板内容？如果是，你的 HTML 提取不完整。
 
-2. **Read 20 random documents that PASSED the quality filter.** Are any of them spam, keyword lists, or machine-generated? If yes, tighten the filter thresholds.
+2. **随机读取 20 个通过质量过滤器的文档。** 它们是否有垃圾邮件、关键词列表或机器生成内容？如果是，收紧过滤阈值。
 
-3. **Read 20 random documents that FAILED the quality filter.** Are any of them genuinely good content? If yes, your filter is too aggressive. Relax thresholds or add exceptions for specific patterns.
+3. **随机读取 20 个被质量过滤器拒绝的文档。** 其中是否有真正优质的内容？如果是，你的过滤器太激进了。放宽阈值或为特定模式添加例外。
 
-4. **Read 20 random near-duplicate pairs from dedup.** Are they actually similar? If not, lower the Jaccard threshold or increase the number of hash functions.
+4. **随机读取 20 个去重近重复对。** 它们是否真的相似？如果不是，降低 Jaccard 阈值或增加哈希函数数量。
 
-## Data Mixing Ratios
+## 数据混合比例
 
-There is no universal formula. Start with these baselines and adjust based on evaluation:
+没有通用公式。从以下基线开始，根据评估结果调整：
 
-| Category | Llama 3 Ratio | Starting Point |
+| 类别 | Llama 3 比例 | 起始点 |
 |----------|--------------|----------------|
-| Web text | 50% | 50% |
-| Code | 25% | 15-25% |
-| Books/academic | 13% | 10-15% |
-| Math | 8% | 5-10% |
-| Multilingual web | 4% | 5-10% |
+| 网页文本 | 50% | 50% |
+| 代码 | 25% | 15-25% |
+| 书籍/学术 | 13% | 10-15% |
+| 数学 | 8% | 5-10% |
+| 多语言网页 | 4% | 5-10% |
 
-Increase code ratio if the model should be strong at programming. Increase math ratio if reasoning matters. Decrease web ratio if you need less noise. Always evaluate on benchmarks after changing ratios.
+如果模型需要擅长编程，增加代码比例。如果推理很重要，增加数学比例。如果需要减少噪声，减少网页比例。改变比例后始终在基准测试上评估。
 
-## Scaling Estimates
+## 规模估算
 
-For a given target token count:
+对于给定的目标 token 数量：
 
-- 1T tokens from web: expect ~3-5TB raw text, ~1.5-2TB after cleaning and dedup
-- Tokenization speed (Rust): ~100M tokens/second per core
-- Tokenization speed (Python): ~1-10M tokens/second per core
-- MinHash dedup at 128 hashes, 16 bands: ~10K documents/second per core
-- Sequence packing: I/O bound, use memory-mapped files for corpora above 10GB
+- 来自网页的 1 万亿 token：预计约 3-5TB 原始文本，清洗和去重后约 1.5-2TB
+- 分词速度（Rust）：每核每秒约 1 亿 token
+- 分词速度（Python）：每核每秒约 100-1000 万 token
+- MinHash 去重（128 个哈希，16 个带）：每核每秒约 1 万个文档
+- 序列打包：受 I/O 限制，超过 10GB 的语料库使用内存映射文件
 
-For 15T tokens (Llama 3 scale), plan for ~30-50TB of raw input data, 1-2 weeks of preprocessing on a 64-core machine, and 100TB+ of disk for intermediate files.
+对于 15 万亿 token（Llama 3 规模），计划需要约 30-50TB 原始输入数据、在 64 核机器上 1-2 周的预处理时间，以及 100TB 以上的中间文件磁盘空间。
 
-## Checklist Before Training
+## 训练前检查清单
 
-1. Total token count matches your compute budget (use Chinchilla scaling or the Llama 3 overtrain ratio as a guide)
-2. Dedup removed 30-40% of web data
-3. Quality filter removed 10-20% of remaining data
-4. Compression ratio is 3-5 chars/token for English
-5. Sequence utilization is above 95%
-6. Random spot-checks show clean, coherent text at every pipeline stage
-7. Data mix ratios have been validated on a small-scale training run
-8. PII removal has been verified on a sample
-9. All binary formats (packed sequences, token ID arrays) pass round-trip encoding/decoding tests
-10. Pipeline is reproducible: same input produces identical output with fixed random seeds
+1. 总 token 数匹配你的计算预算（使用 Chinchilla 缩放定律或 Llama 3 过度训练比例作为指导）
+2. 去重删除了 30-40% 的网页数据
+3. 质量过滤器删除了剩余数据的 10-20%
+4. 英语压缩率为 3-5 字符/token
+5. 序列利用率高于 95%
+6. 在每个流水线阶段随机抽查显示文本干净、连贯
+7. 数据混合比例已在小规模训练运行中验证
+8. PII 删除已在样本上验证
+9. 所有二进制格式（打包序列、token ID 数组）通过往返编码/解码测试
+10. 流水线可复现：固定随机种子下相同输入产生相同输出

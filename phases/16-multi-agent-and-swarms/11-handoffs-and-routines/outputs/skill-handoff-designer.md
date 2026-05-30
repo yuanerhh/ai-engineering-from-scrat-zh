@@ -1,34 +1,34 @@
 ---
 name: handoff-designer
-description: Design a handoff topology for a Swarm/Agents-SDK-style system: which agents exist, which handoffs they can call, what context transfers.
+description: 为 Swarm/Agents-SDK 风格系统设计交接拓扑：存在哪些智能体、它们可以调用哪些交接、传输什么上下文。
 version: 1.0.0
 phase: 16
 lesson: 11
 tags: [multi-agent, swarm, handoff, openai-agents-sdk]
 ---
 
-Given a user-facing task (often triage or skill-based routing), produce a handoff topology ready to map onto OpenAI Swarm or the OpenAI Agents SDK.
+给定一个面向用户的任务（通常是分类或基于技能的路由），生成可映射到 OpenAI Swarm 或 OpenAI Agents SDK 的交接拓扑。
 
-Produce:
+产出内容：
 
-1. **Agent roster.** Each agent: name, one-sentence purpose, tools, and which other agents it can hand off to.
-2. **Handoff functions.** The tool signatures per agent. Each handoff function returns a target Agent.
-3. **Context transfer policy.** On each handoff edge: full history, last N messages, or summarized snapshot. Justify.
-4. **Guardrails.** Input validation per agent (what prompts are allowed to trigger handoffs to sensitive specialists), authentication on handoff where needed.
-5. **Loop detection.** Rule to detect ping-pong (e.g., "A handed off to B; B handed off back to A" occurring more than once in a row).
-6. **Fallback behavior.** If a handoff target is missing (removed agent, auth failure), which agent handles the session.
-7. **Session / memory plan.** Whether to use Agents SDK sessions, caller-managed memory, or no memory at all.
+1. **智能体名册。** 每个智能体：名称、一句话目的、工具，以及它可以交接给哪些其他智能体。
+2. **交接函数。** 每个智能体的工具签名。每个交接函数返回一个目标 Agent。
+3. **上下文传输策略。** 在每条交接边上：完整历史、最后 N 条消息还是摘要快照。说明理由。
+4. **护栏。** 每个智能体的输入验证（哪些提示可以触发向敏感专家的交接）、必要时的交接认证。
+5. **循环检测。** 检测乒乓球的规则（例如，"A 交接给 B；B 交接回 A"连续发生超过一次）。
+6. **回退行为。** 如果交接目标缺失（已移除的智能体、认证失败），哪个智能体处理会话。
+7. **会话/内存计划。** 是否使用 Agents SDK 会话、调用者管理的内存，还是完全不使用内存。
 
-Hard rejects:
+硬性拒绝：
 
-- Any handoff design without loop detection.
-- Handoff functions that pass full history to specialists with different tool permissions (security risk).
-- Designs that assume Swarm's stateless behavior but then require multi-turn memory — use Agents SDK sessions instead.
+- 任何没有循环检测的交接设计。
+- 将完整历史传递给具有不同工具权限的专家的交接函数（安全风险）。
+- 假设 Swarm 的无状态行为但又需要多轮内存的设计——改用 Agents SDK 会话。
 
-Refusal rules:
+拒绝规则：
 
-- If the task needs parallel execution, refuse Swarm and recommend supervisor (Lesson 05) instead.
-- If the task needs deterministic audit/replay, refuse and recommend LangGraph static graph.
-- If the task is a simple DAG of stages (research → code → review), recommend CrewAI Sequential instead.
+- 如果任务需要并行执行，拒绝 Swarm 并推荐主管模式（第 5 课）。
+- 如果任务需要确定性审计/重放，拒绝并推荐 LangGraph 静态图。
+- 如果任务是简单的阶段 DAG（研究 → 编码 → 审查），推荐改用 CrewAI 顺序模式。
 
-Output: a one-page handoff brief. Close with a security note on how prompt injection could trigger unwanted handoffs and what guardrails block it.
+输出：一页交接简报。结尾附上关于提示注入如何触发意外交接以及哪些护栏阻止它的安全说明。

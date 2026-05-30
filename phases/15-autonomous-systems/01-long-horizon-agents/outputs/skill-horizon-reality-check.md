@@ -1,38 +1,38 @@
 ---
 name: horizon-reality-check
-description: Given a task you want to hand to an agent, decide whether the current frontier's horizon covers it with enough margin.
+description: 针对你想交给智能体的任务，判断当前前沿模型的时间跨度是否能以足够的余量覆盖该任务。
 version: 1.0.0
 phase: 15
 lesson: 1
 tags: [autonomous-agents, metr, time-horizon, reliability, deployment]
 ---
 
-Given a proposed autonomous task (what the agent should do, how long a human expert would take, what the failure cost is), produce a reality check on whether the current frontier model's horizon actually covers it.
+给定一项拟议的自主任务（智能体需要完成的内容、人类专家所需时间、失败成本），生成一份现实核查报告，评估当前前沿模型的时间跨度能否实际覆盖该任务。
 
-Produce:
+产出内容：
 
-1. **Expert-time estimate.** Ask the user for the median expert completion time in minutes or hours. If they cannot estimate it, refuse and redirect them to measure a small sample first.
-2. **Headroom ratio.** Divide the chosen model's 50% METR horizon by the expert-time estimate. Flag any ratio under 4x — at 50% success probability, you want a generous margin. At ratio 2x or below, refuse the deployment unless HITL is in the loop on every significant action.
-3. **Reliability budget.** Estimate trajectory length in tool calls, then compute end-to-end success at per-step reliability 0.95, 0.99, 0.995. If the task length exceeds the 50%-success threshold at your assumed per-step reliability, require checkpoints or split the task.
-4. **Eval-vs-deploy adjustment.** Apply a 20-40% gap between benchmark horizon and deploy-context horizon. Cite the Anthropic 2024 alignment-faking study or the 2026 International AI Safety Report when justifying to stakeholders.
-5. **Required controls.** Based on headroom, list the minimum set of controls: budget cap, iteration cap, kill switch, HITL checkpoint points, canary tokens, and trajectory audit schedule.
+1. **专家耗时估算。** 向用户询问中位数专家完成时间（分钟或小时）。如果无法估算，拒绝继续并引导他们先测量小样本。
+2. **余量比率。** 将所选模型的 50% METR 时间跨度除以专家耗时估算。标记任何低于 4x 的比率——在 50% 成功概率下，需要留有充裕余量。比率在 2x 或以下时，拒绝部署，除非每个重要操作都有人工介入（HITL）。
+3. **可靠性预算。** 估算工具调用的轨迹长度，然后在每步可靠性 0.95、0.99、0.995 下计算端到端成功率。如果任务长度超过假设每步可靠性下 50% 成功阈值，要求设置检查点或拆分任务。
+4. **评估-部署调整。** 在基准时间跨度与部署环境时间跨度之间应用 20-40% 的差距。向利益相关者说明时引用 Anthropic 2024 对齐伪装研究或 2026 年国际 AI 安全报告。
+5. **必需控制措施。** 根据余量，列出最少控制措施集：预算上限、迭代上限、紧急停止开关、人工介入检查点、金丝雀令牌，以及轨迹审计计划。
 
-Hard rejects:
-- Any deployment at horizon ratio below 2x without HITL on every consequential action.
-- Any claim that a model "can do" a task based on the METR horizon alone. The horizon is the 50% mark on a logistic curve; tail failures are guaranteed.
-- Treating METR horizons as a floor rather than a ceiling.
+硬性拒绝：
+- 在没有每个重要操作 HITL 的情况下，时间跨度比率低于 2x 的任何部署。
+- 仅凭 METR 时间跨度就声称模型"能够完成"某任务。时间跨度是 logistic 曲线上的 50% 标记；尾部失败是必然的。
+- 将 METR 时间跨度视为下限而非上限。
 
-Refusal rules:
-- If the user cannot estimate expert-time for the task, refuse and ask them to measure a small sample first. Anything else is guesswork.
-- If the proposed task would cost more than the user's worst-case budget at full model pricing, refuse and recommend budget controls from Lesson 13 before proceeding.
-- If the user describes a task that touches irreversible actions (financial transactions, production database writes, emails to customers) without any HITL layer, refuse. The horizon argument does not clear irreversible deployment.
+拒绝规则：
+- 如果用户无法估算任务的专家耗时，拒绝并要求他们先测量小样本。任何其他做法都是猜测。
+- 如果以完整模型定价计算，拟议任务的成本将超过用户的最坏情况预算，拒绝并建议先实施第 13 课的预算控制。
+- 如果用户描述的任务涉及不可逆操作（金融交易、生产数据库写入、向客户发送邮件），且没有任何 HITL 层，拒绝。时间跨度论据不能为不可逆部署背书。
 
-Output format:
+输出格式：
 
-Return a short memo with:
-- **Task summary** (one sentence)
-- **Expert-time estimate** (with units)
-- **Headroom ratio** (with explicit number)
-- **End-to-end reliability estimate** (table at three per-step rates)
-- **Minimum controls** (bulleted)
-- **Go / hold / no-go** (explicit verdict plus one-sentence justification)
+返回一份简短备忘录，包含：
+- **任务摘要**（一句话）
+- **专家耗时估算**（含单位）
+- **余量比率**（含明确数字）
+- **端到端可靠性估算**（三种每步速率的表格）
+- **最少控制措施**（项目列表）
+- **通过 / 暂停 / 不通过**（明确结论加一句话说明）

@@ -1,129 +1,129 @@
 ---
 name: prompt-reward-model-designer
-description: Design reward model training pipelines for RLHF alignment
+description: 为 RLHF 对齐设计奖励模型训练流水线
 version: 1.0.0
 phase: 10
 lesson: 7
 tags: [rlhf, reward-model, ppo, alignment, human-feedback, preference-learning]
 ---
 
-# Reward Model Designer
+# 奖励模型设计器
 
-When building an RLHF pipeline to align a language model toward a target behavior (helpfulness, coding ability, safety, honesty), use this framework to design the data collection protocol, train the reward model, and configure PPO.
+在构建 RLHF 流水线以将语言模型对齐到目标行为（有用性、编程能力、安全性、诚实性）时，使用此框架设计数据收集协议、训练奖励模型和配置 PPO。
 
-## Input Requirements
+## 输入要求
 
-Provide:
-- **Target behavior** (e.g., "helpful and harmless assistant", "expert Python coder", "medical Q&A with safety")
-- **Base model** (e.g., Llama 3 8B after SFT, Mistral 7B Chat)
-- **Reward model size** (typically same size or larger than the policy model)
-- **Annotation budget** (human hours or comparison pairs available)
-- **Compute budget** (GPU hours for reward model training + PPO)
+提供：
+- **目标行为**（例如"有用且无害的助手"、"专业 Python 程序员"、"含安全保障的医学问答"）
+- **基础模型**（例如 SFT 后的 Llama 3 8B、Mistral 7B Chat）
+- **奖励模型大小**（通常与策略模型相同大小或更大）
+- **标注预算**（可用的人工工时或比较对数量）
+- **计算预算**（奖励模型训练 + PPO 的 GPU 小时数）
 
-## Step 1: Preference Data Collection
+## 第一步：偏好数据收集
 
-### Annotation Protocol
+### 标注协议
 
-1. **Prompt selection**: Sample from the SFT training distribution plus out-of-distribution prompts (10-20% novel)
-2. **Response generation**: Generate 2-4 responses per prompt using the SFT model with different temperatures (0.3, 0.7, 1.0)
-3. **Comparison format**: Show annotators exactly 2 responses and ask "Which response is better?"
-4. **Criteria rubric**: Define what "better" means for your use case
+1. **提示词选择**：从 SFT 训练分布以及分布外提示词（10-20% 新颖）中采样
+2. **回复生成**：使用不同温度（0.3、0.7、1.0）用 SFT 模型为每个提示词生成 2-4 个回复
+3. **比较格式**：给标注者展示恰好 2 个回复，询问"哪个回复更好？"
+4. **评判标准**：定义"更好"对你的使用场景意味着什么
 
-### Rubric Template
+### 评判标准模板
 
-| Criterion | Weight | Description |
+| 标准 | 权重 | 描述 |
 |-----------|--------|-------------|
-| Helpfulness | 40% | Does it answer the question completely and correctly? |
-| Harmlessness | 25% | Does it avoid harmful, biased, or misleading content? |
-| Honesty | 20% | Does it acknowledge uncertainty rather than hallucinate? |
-| Conciseness | 15% | Is the response an appropriate length for the question? |
+| 有用性 | 40% | 是否完整正确地回答了问题？ |
+| 无害性 | 25% | 是否避免了有害、偏见或误导性内容？ |
+| 诚实性 | 20% | 是否在不确定时承认不确定而非产生幻觉？ |
+| 简洁性 | 15% | 回复长度是否与问题相称？ |
 
-Adjust weights for your use case. A coding assistant might weight correctness at 60% and conciseness at 20%.
+根据你的使用场景调整权重。编程助手可能将正确性权重提高到 60%，简洁性 20%。
 
-### Data Size Guidelines
+### 数据规模指南
 
-| Scale | Comparison Pairs | Annotator Hours | Expected RM Accuracy |
+| 规模 | 比较对数 | 标注工时 | 预期奖励模型准确率 |
 |-------|-----------------|-----------------|---------------------|
-| Minimum viable | 5,000-10,000 | 400-800 | 60-65% |
-| Production v1 | 20,000-50,000 | 1,600-4,000 | 65-72% |
-| Production v2 | 100,000-500,000 | 8,000-40,000 | 72-78% |
+| 最小可行 | 5,000-10,000 | 400-800 | 60-65% |
+| 生产 v1 | 20,000-50,000 | 1,600-4,000 | 65-72% |
+| 生产 v2 | 100,000-500,000 | 8,000-40,000 | 72-78% |
 
-InstructGPT used 33,000 comparisons from 40 contractors. Anthropic's initial paper used 22,000 from 20 annotators. Inter-annotator agreement is typically 70-75% -- the reward model cannot exceed human agreement levels.
+InstructGPT 使用了来自 40 名外包人员的 3.3 万比较对。Anthropic 初始论文使用了来自 20 名标注者的 2.2 万比较对。标注者间一致性通常为 70-75%——奖励模型的准确率无法超过人类一致性水平。
 
-### Quality Control
+### 质量控制
 
-- **Agreement filtering**: Discard pairs where fewer than 70% of annotators agree
-- **Annotator calibration**: Run calibration rounds with known-good pairs before real annotation
-- **Bias detection**: Monitor if annotators consistently prefer longer responses, formal language, or specific patterns
-- **Adversarial examples**: Include 5-10% examples designed to catch annotators who are not reading carefully
+- **一致性过滤**：丢弃少于 70% 标注者同意的对
+- **标注者校准**：在正式标注前用已知优质对进行校准轮次
+- **偏差检测**：监控标注者是否系统性地偏好更长回复、正式语言或特定模式
+- **对抗样本**：包含 5-10% 专门设计来检测不认真阅读的标注者的样本
 
-## Step 2: Reward Model Architecture
+## 第二步：奖励模型架构
 
-### Architecture Decisions
+### 架构决策
 
-| Decision | Recommendation | Rationale |
+| 决策 | 建议 | 理由 |
 |----------|---------------|-----------|
-| Base architecture | Same transformer as the policy | Weight initialization from SFT checkpoint gives strong starting features |
-| Output head | Single linear projection from last hidden state | Scalar reward from the most complete position representation |
-| Model size | >= policy model size | Smaller RM produces unreliable signals that destabilize PPO |
-| Initialization | SFT checkpoint with new output head | Pre-trained features capture language quality already |
+| 基础架构 | 与策略模型相同的 Transformer | 从 SFT 检查点初始化权重，具有强大的起始特征 |
+| 输出头 | 从最后隐藏状态的单一线性投影 | 从最完整位置表示中获得标量奖励 |
+| 模型大小 | >= 策略模型大小 | 较小的奖励模型产生不可靠的信号，会使 PPO 不稳定 |
+| 初始化 | 带新输出头的 SFT 检查点 | 预训练特征已经捕捉语言质量 |
 
-### Training Configuration
+### 训练配置
 
-| Parameter | Range | Notes |
+| 参数 | 范围 | 备注 |
 |-----------|-------|-------|
-| Learning rate | 1e-5 to 5e-5 | Lower than SFT because the task is simpler |
-| Epochs | 1-3 | Overfitting is a major risk with limited comparison data |
-| Batch size | 64-256 | Each "example" is a pair, so effective data is 2x |
-| Loss function | Bradley-Terry: -log(sigmoid(r_preferred - r_rejected)) | Standard for pairwise comparisons |
-| Validation split | 10-20% | Monitor accuracy on held-out pairs |
+| 学习率 | 1e-5 到 5e-5 | 比 SFT 更低，因为任务更简单 |
+| 训练轮数 | 1-3 | 有限比较数据的过拟合是主要风险 |
+| 批次大小 | 64-256 | 每个"样本"是一对，所以有效数据量翻倍 |
+| 损失函数 | Bradley-Terry：-log(sigmoid(r_preferred - r_rejected)) | 成对比较的标准 |
+| 验证集比例 | 10-20% | 监控保留对上的准确率 |
 
-### Evaluation Metrics
+### 评估指标
 
-1. **Pairwise accuracy**: What fraction of held-out preference pairs does the RM rank correctly? Target: > 65%
-2. **Margin distribution**: Plot the distribution of (r_preferred - r_rejected). Should be centered above 0 with few negatives.
-3. **Calibration**: Is sigmoid(r_preferred - r_rejected) close to the actual human preference probability?
-4. **OOD generalization**: Test on prompts from a different distribution than training. Accuracy should drop < 10%.
+1. **成对准确率**：奖励模型在保留偏好对上正确排名的比例？目标：> 65%
+2. **差距分布**：绘制 (r_preferred - r_rejected) 的分布。应以 0 以上为中心，负值很少。
+3. **校准性**：sigmoid(r_preferred - r_rejected) 是否接近实际人类偏好概率？
+4. **分布外泛化**：在与训练不同分布的提示词上测试。准确率下降应 < 10%。
 
-## Step 3: PPO Configuration
+## 第三步：PPO 配置
 
-### Hyperparameters
+### 超参数
 
-| Parameter | Typical Value | Effect of Being Too High | Effect of Being Too Low |
+| 参数 | 典型值 | 过高的影响 | 过低的影响 |
 |-----------|--------------|-------------------------|------------------------|
-| KL coefficient (beta) | 0.01-0.05 | Model barely learns, stays too close to SFT | Reward hacking, degenerate outputs |
-| Learning rate | 5e-6 to 3e-5 | Training instability, divergence | Slow convergence, wasted compute |
-| Clip ratio (epsilon) | 0.1-0.3 | Large, potentially destabilizing updates | Very conservative updates, slow learning |
-| PPO epochs per batch | 1-4 | Overfitting to current batch | Underutilizing each batch |
-| Generation batch size | 128-512 | Memory issues | Noisy gradient estimates |
-| Max response length | 256-1024 | Slow generation, memory issues | Truncates useful responses |
+| KL 系数（beta）| 0.01-0.05 | 模型几乎不学习，距离 SFT 太近 | 奖励黑客、退化输出 |
+| 学习率 | 5e-6 到 3e-5 | 训练不稳定、发散 | 收敛缓慢、浪费计算 |
+| 裁剪比例（epsilon）| 0.1-0.3 | 大且可能不稳定的更新 | 非常保守的更新，学习缓慢 |
+| 每批次 PPO 轮数 | 1-4 | 对当前批次过拟合 | 没有充分利用每个批次 |
+| 生成批次大小 | 128-512 | 内存问题 | 梯度估计噪声大 |
+| 最大回复长度 | 256-1024 | 生成缓慢、内存问题 | 截断有用回复 |
 
-### Monitoring Dashboard
+### 监控仪表板
 
-Track these metrics during PPO training:
+在 PPO 训练期间跟踪以下指标：
 
-1. **Mean reward**: Should increase over training. Plateau is fine; decrease means instability.
-2. **KL divergence**: Should stay below 10-20 nats. Spike = reward hacking.
-3. **Response length**: Should stay stable. Monotonic increase = verbosity reward hacking.
-4. **Entropy**: Token distribution entropy should decrease slowly. Rapid decrease = mode collapse.
-5. **Reward model agreement**: Score PPO responses with the reward model; agreement should improve.
+1. **平均奖励**：训练期间应上升。平稳没问题；下降意味着不稳定。
+2. **KL 散度**：应保持在 10-20 nat 以下。飙升 = 奖励黑客。
+3. **回复长度**：应保持稳定。单调增加 = 冗长奖励黑客。
+4. **熵**：Token 分布熵应缓慢下降。快速下降 = 模式崩溃。
+5. **奖励模型一致性**：对 PPO 回复用奖励模型评分；一致性应提升。
 
-### Red Flags During PPO
+### PPO 期间的红色警报
 
-| Symptom | Likely Cause | Fix |
+| 症状 | 可能原因 | 修复方法 |
 |---------|-------------|-----|
-| Reward increases but outputs degrade | Reward hacking | Increase KL coefficient, retrain RM on adversarial examples |
-| KL divergence explodes | Learning rate too high or KL coefficient too low | Reduce lr, increase beta |
-| Response length grows monotonically | RM rewards verbosity | Add length penalty to reward, retrain RM with length-controlled pairs |
-| All responses become identical | Mode collapse | Increase generation temperature, reduce PPO epochs |
-| Reward oscillates wildly | PPO instability | Reduce learning rate, increase clip ratio |
+| 奖励上升但输出退化 | 奖励黑客 | 增加 KL 系数，在对抗样本上重新训练奖励模型 |
+| KL 散度爆炸 | 学习率过高或 KL 系数过低 | 降低学习率，增大 beta |
+| 回复长度单调增长 | 奖励模型奖励冗长 | 添加长度惩罚，用长度控制的对重新训练奖励模型 |
+| 所有回复变得相同 | 模式崩溃 | 增大生成温度，减少 PPO 轮数 |
+| 奖励剧烈振荡 | PPO 不稳定 | 降低学习率，增大裁剪比例 |
 
-## Step 4: End-to-End Validation
+## 第四步：端到端验证
 
-Before deploying an RLHF-trained model:
+在部署 RLHF 训练的模型前：
 
-1. **A/B test vs SFT**: Run the SFT and RLHF models on 200+ test prompts. Have 3+ evaluators compare responses. The RLHF model should win > 60% of the time.
-2. **Safety evaluation**: Test on known adversarial prompts (jailbreaks, harmful requests). The RLHF model should refuse appropriately.
-3. **Regression check**: Run standard benchmarks (MMLU, HumanEval, MT-Bench) to confirm the RLHF model hasn't lost core capabilities.
-4. **Forgetting check**: Measure perplexity on a general text corpus. Increase should be < 10% vs the SFT model.
-5. **Length analysis**: Compare average response length between SFT and RLHF models. If RLHF is > 50% longer, the reward model likely has a verbosity bias.
+1. **A/B 测试对比 SFT**：在 200+ 测试提示词上运行 SFT 和 RLHF 模型。让 3+ 名评估者比较回复。RLHF 模型应在 > 60% 的情况下获胜。
+2. **安全评估**：在已知对抗性提示词（越狱攻击、有害请求）上测试。RLHF 模型应适当拒绝。
+3. **回归检查**：运行标准基准（MMLU、HumanEval、MT-Bench）确认 RLHF 模型没有丢失核心能力。
+4. **遗忘检查**：测量通用文本语料库上的困惑度。与 SFT 模型相比增加应 < 10%。
+5. **长度分析**：比较 SFT 和 RLHF 模型的平均回复长度。如果 RLHF 长 > 50%，奖励模型可能有冗长偏差。

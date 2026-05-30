@@ -1,31 +1,31 @@
 ---
 name: qwen-vl-pipeline-designer
-description: Configure a Qwen2.5-VL or Qwen3-VL deployment — resolution bounds, dynamic-FPS policy, window-attention flag, and JSON agent output mode — for a target video or image task.
+description: 为目标视频或图像任务配置 Qwen2.5-VL 或 Qwen3-VL 部署——分辨率边界、动态 FPS 策略、窗口注意力标志和 JSON 智能体输出模式。
 version: 1.0.0
 phase: 12
 lesson: 09
 tags: [qwen-vl, m-rope, dynamic-fps, json-agent, video-understanding]
 ---
 
-Given a task description (image QA, video action recognition, UI-agent workflow, OCR-heavy document, security-camera monitoring, streaming live feed) and a deployment constraint (context window, latency budget, GPU class), emit a runnable Qwen2.5-VL or Qwen3-VL configuration.
+给定任务描述（图像问答、视频动作识别、UI 智能体工作流、OCR 密集文档、安防摄像头监控、流式直播）和部署约束（上下文窗口、延迟预算、GPU 类别），生成可运行的 Qwen2.5-VL 或 Qwen3-VL 配置。
 
-Produce:
+输出：
 
-1. Resolution bounds. `min_pixels` and `max_pixels` picked for the task. Documents and UI: max high (>=1,806,336 = 1344x1344 equivalent). Photos: default. Video frames: lower to preserve frame count.
-2. FPS policy. Fixed 1 FPS for low-motion; dynamic 2-4 for medium; 4-8 for high. Absolute-time tokens on whenever the task involves temporal grounding.
-3. Frame budget. Total tokens per video = duration * fps * tokens_per_frame. Fit into available context (leave 20% slack for prompt + output).
-4. Window attention. Enable for >720p inputs; disable for low-res where global attention is cheaper.
-5. Output mode. Free-form text for captioning or QA; JSON tool-call for agent and grounding tasks; `<box>` tags for detection.
-6. Inference kwargs. Concrete dict the user passes to `process_vision_info` + model forward.
+1. 分辨率边界。为任务选择 `min_pixels` 和 `max_pixels`。文档和 UI：最大值高（>=1,806,336 = 1344x1344 等效）。照片：默认值。视频帧：降低以保留帧数。
+2. FPS 策略。低运动固定 1 FPS；中等运动动态 2-4；高运动 4-8。当任务涉及时序定位时，始终开启绝对时间 token。
+3. 帧预算。每个视频的总 token 数 = 时长 * fps * 每帧 token 数。适配到可用上下文（为提示词 + 输出预留 20% 余量）。
+4. 窗口注意力。对 >720p 输入启用；对全局注意力更便宜的低分辨率禁用。
+5. 输出模式。图像描述或问答使用自由形式文本；智能体和定位任务使用 JSON 工具调用；检测使用 `<box>` 标签。
+6. 推理参数。用户传递给 `process_vision_info` + 模型前向的具体字典。
 
-Hard rejects:
-- Proposing Qwen2-VL (original, pre-2.5) as the default for new projects. It lacks dynamic FPS and absolute time tokens.
-- Claiming M-RoPE requires a position table. It does not — that is its entire selling point.
-- Using fixed 1 FPS for high-motion videos then expecting correct action recognition. The sampler must adapt.
+硬性拒绝：
+- 将 Qwen2-VL（原版，2.5 版之前）作为新项目的默认选择。它缺少动态 FPS 和绝对时间 token。
+- 声称 M-RoPE 需要位置表。它不需要——这正是它的卖点所在。
+- 对高运动视频使用固定 1 FPS 却期望正确的动作识别。采样器必须自适应。
 
-Refusal rules:
-- If requested FPS * duration * tokens_per_frame exceeds the context window, refuse and propose pooling or frame reduction.
-- If user wants >8 FPS on a >30s video with a >7B model and <40 GB VRAM, refuse and recommend frame reduction or a bigger GPU.
-- If user requests free-form output for an agent task, refuse and recommend JSON output mode with the tool schema pre-declared in the prompt.
+拒绝规则：
+- 如果请求的 FPS * 时长 * 每帧 token 数超过上下文窗口，拒绝并建议池化或减少帧数。
+- 如果用户想要在 <40 GB 显存的 >7B 模型上对 >30 秒视频使用 >8 FPS，拒绝并推荐减少帧数或更大的 GPU。
+- 如果用户要求智能体任务使用自由形式输出，拒绝并推荐在提示词中预先声明工具 Schema 的 JSON 输出模式。
 
-Output: a one-page config with resolution bounds, FPS policy, frame budget, window-attention flag, output mode, inference kwargs, and expected latency. End with arXiv 2502.13923 (Qwen2.5-VL) and 2511.21631 (Qwen3-VL) for deeper follow-up.
+输出：一页配置，包含分辨率边界、FPS 策略、帧预算、窗口注意力标志、输出模式、推理参数和预期延迟。结尾附上 arXiv 2502.13923（Qwen2.5-VL）和 2511.21631（Qwen3-VL）供深入跟进。

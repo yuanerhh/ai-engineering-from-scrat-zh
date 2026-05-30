@@ -1,30 +1,30 @@
 ---
 name: inference-platform-picker
-description: Pick an inference platform (Fireworks, Together, Baseten, Modal, Replicate, Anyscale, or custom silicon) given workload, SLA, budget, and operational constraints. Normalize per-token, per-minute, and per-prediction pricing.
+description: 根据工作负载、SLA、预算和运营约束，选择推理平台（Fireworks、Together、Baseten、Modal、Replicate、Anyscale 或自定义硅）。标准化每令牌、每分钟和每次预测的定价。
 version: 1.0.0
 phase: 17
 lesson: 02
 tags: [inference, fireworks, together, baseten, modal, replicate, anyscale, economics]
 ---
 
-Given a workload profile (model, tokens/day, sustained utilization, TTFT SLA, burst factor, compliance, Python vs mixed stack), produce a platform recommendation.
+给定一个工作负载概况（模型、每日令牌数、持续利用率、TTFT SLA、突发因子、合规、Python vs 混合栈），生成平台推荐。
 
-Produce:
+产出内容：
 
-1. Primary platform. Name the platform and the specific pricing tier (serverless vs dedicated vs batch). Justify with the workload characteristics that match — e.g., "Fireworks serverless because TTFT < 500 ms is the SLA and the traffic is bursty."
-2. Effective cost. Normalize the chosen pricing model to $/M output tokens. Compare to at least two alternatives. Call out when per-minute beats per-token (above ~30% sustained utilization) or vice versa.
-3. Cold-start plan. For serverless picks (Fireworks, Modal, Replicate), state expected cold-start latency and a mitigation (pre-warming, min_workers=1, live-migration). For dedicated picks (Baseten, Anyscale), skip this section but note the trade-off.
-4. Runner-up. Name the second platform and the explicit condition under which you would switch (e.g., "move to Baseten if we close an enterprise deal requiring HIPAA + dedicated GPUs").
-5. Gateway layer. Recommend whether to front the platform with an AI gateway (LiteLLM, Portkey, Kong AI Gateway) to isolate the product from provider churn. Default: yes, unless scale is below 500 RPS.
+1. **主要平台。** 列出平台名称和具体定价层（无服务器 vs 专用 vs 批量）。用匹配工作负载特征的理由说明——例如，"Fireworks 无服务器，因为 TTFT < 500ms 是 SLA 且流量是突发性的。"
+2. **有效成本。** 将所选定价模型标准化为 $/百万输出令牌。与至少两个替代方案比较。说明何时每分钟优于每令牌（持续利用率超过约 30%），反之亦然。
+3. **冷启动计划。** 对于无服务器选择（Fireworks、Modal、Replicate），说明预期的冷启动延迟和缓解措施（预热、min_workers=1、实时迁移）。对于专用选择（Baseten、Anyscale），跳过此部分但注意权衡。
+4. **备选方案。** 列出第二平台以及切换的明确条件（例如，"如果我们完成需要 HIPAA + 专用 GPU 的企业交易，则迁移到 Baseten"）。
+5. **网关层。** 推荐是否在平台前面放置 AI 网关（LiteLLM、Portkey、Kong AI Gateway）以将产品与提供商更替隔离。默认：是，除非规模低于 500 RPS。
 
-Hard rejects:
-- Comparing per-token against per-minute without normalizing. Refuse and insist on effective $/M tokens.
-- Picking Fireworks because it's "fastest" without validating TTFT SLA against the published benchmarks.
-- Recommending custom silicon (Groq, Cerebras, SambaNova) for any workload not latency-bound. They are priced at a premium and only justify themselves on interactive SLAs.
+硬性拒绝：
+- 不标准化就比较每令牌和每分钟。拒绝并坚持有效 $/百万令牌。
+- 以"最快"为由选择 Fireworks 而不根据已发布的基准验证 TTFT SLA。
+- 为任何非延迟绑定的工作负载推荐自定义硅（Groq、Cerebras、SambaNova）。它们定价有溢价，只在交互式 SLA 上才合理。
 
-Refusal rules:
-- If the workload requires a regulated framework (SOC 2 Type II, HIPAA) and the customer picked Modal or Replicate, refuse — neither has the same enterprise footprint as Baseten or Anyscale. Suggest Baseten.
-- If the expected traffic is below 100k tokens/day, refuse to recommend per-minute (Baseten, Modal, Anyscale). The economics do not work — default to a marketplace (OpenRouter, DeepInfra) or a managed hyperscaler.
-- If the customer wants "the cheapest," refuse — name the multi-dimensional cost function (token rate + cold start + attribution + gateway + DX).
+拒绝规则：
+- 如果工作负载需要受监管框架（SOC 2 Type II、HIPAA）且客户选择了 Modal 或 Replicate，拒绝——两者都没有 Baseten 或 Anyscale 相同的企业足迹。建议 Baseten。
+- 如果预期流量低于每日 100k 令牌，拒绝推荐每分钟计费（Baseten、Modal、Anyscale）。经济上不合算——默认使用市场（OpenRouter、DeepInfra）或托管超大规模云。
+- 如果客户想要"最便宜的"，拒绝——列出多维成本函数（令牌速率 + 冷启动 + 归因 + 网关 + 开发体验）。
 
-Output: a one-page recommendation naming primary platform, effective cost, cold-start plan, runner-up, gateway posture. End with the single metric that will reveal a mis-pick (cold-start P99, per-token rate, or utilization drift).
+输出：一页推荐，列出主要平台、有效成本、冷启动计划、备选方案、网关姿态。结尾给出将揭示错误选择的单一指标（冷启动 P99、每令牌速率或利用率漂移）。

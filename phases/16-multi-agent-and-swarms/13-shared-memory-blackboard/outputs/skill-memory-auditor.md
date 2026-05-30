@@ -1,33 +1,33 @@
 ---
 name: memory-auditor
-description: Audit a multi-agent system's shared-memory design for provenance, versioning, verifier separation, and projection schema. Flag memory-poisoning exposure before production.
+description: 审核多智能体系统的共享内存设计，检查溯源、版本控制、验证器分离和投影模式。在生产前标记内存中毒暴露。
 version: 1.0.0
 phase: 16
 lesson: 13
 tags: [multi-agent, shared-state, blackboard, memory-poisoning, provenance]
 ---
 
-Given a multi-agent codebase or architecture doc, audit the shared-memory design and flag exposure to memory poisoning.
+给定一个多智能体代码库或架构文档，审核共享内存设计并标记内存中毒风险。
 
-Produce:
+产出内容：
 
-1. **Topology.** Full message pool, topic-partitioned blackboard, projected per-agent view, or hybrid? Name the data structure (list, dict, pandas frame, vector store, SQL table). Count rough upper bound of writers and readers at steady state.
-2. **Provenance fields.** On every write, does the entry record: writer id, timestamp, prompt hash or prompt text, tool-call trace, source URI or tool name? List the fields present and the fields missing.
-3. **Update model.** Is the log append-only, or do writers mutate in place? If mutation, what is the concurrency-control mechanism (lock, optimistic versioning, none)? Corrections should be supersession entries, not in-place edits — flag any design that does not do this.
-4. **Verifier separation.** Is there a read-only agent with independent source access? Can it write to the main pool (it should not)? Where does its output go?
-5. **Projection schema.** If the design uses projections (LangGraph reducers, blackboard topics, role-scoped views), is the schema documented? How do new agents declare the projection they consume?
-6. **Poisoning risk score.** Score 1-5 on each axis: [provenance completeness], [supersession over mutation], [verifier independence], [projection schema clarity]. A system that scores below 3 on any axis is flagged.
+1. **拓扑。** 完整消息池、按主题分区的黑板、每智能体投影视图还是混合？列出数据结构（列表、字典、pandas 帧、向量存储、SQL 表）。估算稳定状态下写入者和读取者的大致上限。
+2. **溯源字段。** 在每次写入时，条目是否记录：写入者 ID、时间戳、提示哈希或提示文本、工具调用追踪、来源 URI 或工具名称？列出已有字段和缺失字段。
+3. **更新模型。** 日志是仅追加的，还是写入者就地变更？如果是变更，并发控制机制是什么（锁、乐观版本控制、无）？更正应该是取代条目，而非就地编辑——标记任何不这样做的设计。
+4. **验证器分离。** 是否有具有独立来源访问权限的只读智能体？它能否写入主池（不应该）？它的输出去哪里？
+5. **投影模式。** 如果设计使用投影（LangGraph reducers、黑板主题、角色范围视图），模式是否有文档记录？新智能体如何声明它们消费的投影？
+6. **中毒风险评分。** 对每个轴评 1-5 分：[溯源完整性]、[取代而非变更]、[验证器独立性]、[投影模式清晰度]。任何轴低于 3 分的系统都被标记。
 
-Hard rejects:
+硬性拒绝：
 
-- Any audit that does not flag a missing verifier. An unwritable verifier with independent source access is the load-bearing mitigation; every other mitigation is decorative without it.
-- Audits that recommend "add more tests." Tests do not catch memory poisoning because poisoning produces plausible outputs that pass tests.
-- Audits that recommend hashing the content as the sole provenance. A hash tells you *what* was written, not *who* or *from where*.
+- 任何不标记缺失验证器的审核。具有独立来源访问权限的不可写验证器是关键缓解措施；没有它，其他所有缓解措施都是装饰性的。
+- 建议"添加更多测试"的审核。测试无法捕捉内存中毒，因为中毒会产生通过测试的合理输出。
+- 将内容哈希化作为唯一溯源的审核建议。哈希告诉你*写了什么*，而不是*谁*或*从哪里*写的。
 
-Refusal rules:
+拒绝规则：
 
-- If the codebase hides shared state in an external service (Redis, Postgres, vector DB) with no inspection tools, state that the audit cannot complete without production read access.
-- If the system has fewer than three agents, note that memory poisoning risk is low but provenance is still cheap insurance.
-- If the system uses a framework with built-in state management (LangGraph checkpointer, AutoGen pool), audit the framework's guarantees rather than re-deriving them.
+- 如果代码库将共享状态隐藏在没有检查工具的外部服务（Redis、Postgres、向量数据库）中，说明在没有生产读取访问权限的情况下无法完成审核。
+- 如果系统的智能体少于三个，说明内存中毒风险较低，但溯源仍是廉价的保险。
+- 如果系统使用具有内置状态管理的框架（LangGraph 检查点、AutoGen 池），审核框架的保证，而不是重新推导它们。
 
-Output: a two-page report. Start with a one-sentence summary ("Shared state is a full message pool with no provenance and no verifier — high poisoning risk."), then the six sections above. End with a prioritized action list: three changes, each labeled [critical] [should] or [nice-to-have], with estimated time-to-implement.
+输出：两页报告。从一句话摘要开始（"共享状态是没有溯源且没有验证器的完整消息池——高中毒风险。"），然后是以上六个部分。结尾给出优先行动列表：三项更改，每项标记为 [关键] [应该] 或 [锦上添花]，并附估计实施时间。

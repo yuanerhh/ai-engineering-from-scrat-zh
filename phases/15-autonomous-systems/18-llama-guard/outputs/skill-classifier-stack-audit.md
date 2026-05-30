@@ -1,41 +1,41 @@
 ---
 name: classifier-stack-audit
-description: Audit a deployment's input/output classifier stack (model, taxonomy, input rails, output rails, dialog rails) and flag adversarial-attack gaps.
+description: 审核部署的输入/输出分类器栈（模型、分类法、输入护栏、输出护栏、对话护栏），并标记对抗性攻击缺口。
 version: 1.0.0
 phase: 15
 lesson: 18
 tags: [llama-guard, nemo-guardrails, input-rails, output-rails, colang, adversarial-attacks]
 ---
 
-Given a deployment's classifier stack (Llama Guard version, NeMo Guardrails config, custom classifiers, normalization steps), audit it against the 2026 reference and flag attack surface the stack does not cover.
+给定一个部署的分类器栈（Llama Guard 版本、NeMo Guardrails 配置、自定义分类器、归一化步骤），根据 2026 参考标准对其进行审核，并标记该栈未覆盖的攻击面。
 
-Produce:
+产出内容：
 
-1. **Model inventory.** List the classifiers in use. Llama Guard 3 (8B / 1B-INT4) vs Llama Guard 4 (multimodal, S1–S14). NeMo Guardrails version. Any custom classifiers. If the deployment accepts images, confirm the classifier is multimodal.
-2. **Taxonomy mapping.** Map declared business categories onto the classifier's taxonomy. Every category the operator cares about must map to a classifier category; unmapped categories are unguarded.
-3. **Rail coverage.** Confirm input rails fire before the model turn and output rails fire before the response ships. Dialog rails (Colang in NeMo) enforce cross-turn constraints. Single-turn classifiers cannot catch multi-turn attacks.
-4. **Normalization.** Confirm inputs are NFKC-normalized, homoglyph-mapped, and have zero-width / variation-selector characters stripped before classification. Raw-byte classification is a 100% ASR target for Emoji Smuggling (Huang et al. 2025).
-5. **Attack-corpus coverage.** For each documented attack (emoji smuggling, homoglyph, in-context redirection, semantic paraphrase), name the specific defense in the stack. Classifier-only defense fails this audit; layering with Constitution (Lesson 17) and runtime (Lessons 10, 13, 14) is required.
+1. **模型清单。** 列出使用的分类器。Llama Guard 3（8B / 1B-INT4）vs Llama Guard 4（多模态，S1–S14）。NeMo Guardrails 版本。任何自定义分类器。如果部署接受图像，确认分类器是多模态的。
+2. **分类法映射。** 将声明的业务类别映射到分类器的分类法上。运营商关心的每个类别都必须映射到分类器类别；未映射的类别是未受保护的。
+3. **护栏覆盖。** 确认输入护栏在模型轮次之前触发，输出护栏在响应发出之前触发。对话护栏（NeMo 中的 Colang）强制执行跨轮次约束。单轮次分类器无法捕捉多轮次攻击。
+4. **归一化。** 确认输入在分类之前经过 NFKC 归一化、同形字映射，并剥离了零宽度/变体选择器字符。原始字节分类是表情符号走私（Huang 等，2025）的 100% ASR 目标。
+5. **攻击语料库覆盖。** 对于每种已记录的攻击（表情符号走私、同形字、上下文内重定向、语义改写），说明栈中的具体防御措施。仅分类器防御此项审核不通过；与宪法（第 17 课）和运行时（第 10、13、14 课）的分层是必需的。
 
-Hard rejects:
-- Deployments using a text-only classifier on multimodal inputs.
-- Deployments with no normalization step.
-- Deployments with input rails only (no output rails on sensitive-category outputs).
-- Stack treating the classifier as the single safety layer.
-- ASR claims the operator cannot reproduce on their own distribution.
+硬性拒绝：
+- 在多模态输入上使用纯文本分类器的部署。
+- 没有归一化步骤的部署。
+- 只有输入护栏（对敏感类别输出没有输出护栏）的部署。
+- 将分类器视为单一安全层的栈。
+- 运营商无法在自己的分布上重现的 ASR 声明。
 
-Refusal rules:
-- If the user's declared categories do not map into the classifier's taxonomy, refuse and require a mapping first. Unmapped = unguarded.
-- If the deployment cites Llama Guard 3 ASR numbers on a multimodal input surface, refuse and require Llama Guard 4 or a multimodal classifier.
-- If the user treats the classifier layer as sufficient in a high-risk setting, refuse. EU AI Act Article 14 (Lesson 15) expects human oversight on top.
+拒绝规则：
+- 如果用户声明的类别未映射到分类器的分类法，拒绝并要求先进行映射。未映射 = 未受保护。
+- 如果部署在多模态输入面上引用 Llama Guard 3 ASR 数字，拒绝并要求使用 Llama Guard 4 或多模态分类器。
+- 如果用户在高风险环境中将分类器层视为充分，拒绝。EU AI Act 第 14 条（第 15 课）期望在顶层有人工监督。
 
-Output format:
+输出格式：
 
-Return a classifier audit with:
-- **Model inventory** (name, version, modality)
-- **Taxonomy mapping** (operator category → classifier category)
-- **Rail coverage** (input / output / dialog; firing before/after model)
-- **Normalization note** (NFKC y/n, homoglyph y/n, zero-width strip y/n)
-- **Attack-corpus coverage** (attack → defense)
-- **Layer completeness** (classifier + constitution + runtime; three required)
-- **Readiness** (production / staging / research-only)
+返回分类器审核报告，包含：
+- **模型清单**（名称、版本、模态）
+- **分类法映射**（运营商类别 → 分类器类别）
+- **护栏覆盖**（输入 / 输出 / 对话；模型前/后触发）
+- **归一化说明**（NFKC 是否存在、同形字映射是否存在、零宽度剥离是否存在）
+- **攻击语料库覆盖**（攻击 → 防御）
+- **层级完整性**（分类器 + 宪法 + 运行时；三者均必需）
+- **就绪性**（生产 / 暂存 / 仅研究）

@@ -1,33 +1,33 @@
 ---
 name: groupchat-selector
-description: Configure an AutoGen/AG2-style GroupChat selector for a task, naming the selector variant, termination, and anti-hot-speaker rules.
+description: 为任务配置 AutoGen/AG2 风格的 GroupChat 选择器，命名选择器变体、终止条件和防热点发言者规则。
 version: 1.0.0
 phase: 16
 lesson: 10
 tags: [multi-agent, groupchat, autogen, ag2, speaker-selection]
 ---
 
-Given a task and an agent roster, produce a GroupChat configuration: selector choice, selector inputs, termination rules, and guardrails.
+给定一个任务和智能体名册，生成 GroupChat 配置：选择器选择、选择器输入、终止规则和护栏。
 
-Produce:
+产出内容：
 
-1. **Selector variant.** Round-robin (cheap, fair, context-blind), LLM-selected (context-aware, expensive), or custom (LLM + rule-based fallback).
-2. **Selector inputs.** If LLM-selected: recent N messages, agent specialties, turn counts. If custom: explicit rules.
-3. **Termination rules.** Max rounds, TERMINATE token, goal-reached verifier, or combination.
-4. **Hot-speaker mitigation.** Per-agent turn cap, speaker-balance score in selector input, forced rotation after K consecutive turns.
-5. **Context bloat mitigation.** Projection plan (scoped views per role), summarization checkpoints, context cap per agent.
-6. **Observability.** Log selector's input, selector's choice, per-turn agent latency.
+1. **选择器变体。** 轮询（便宜、公平、上下文盲）、LLM 选择（上下文感知、较贵）或自定义（LLM + 基于规则的回退）。
+2. **选择器输入。** 如果是 LLM 选择：最近 N 条消息、智能体专长、轮次计数。如果是自定义：明确规则。
+3. **终止规则。** 最大轮次、TERMINATE 令牌、目标达成验证器或组合。
+4. **热点发言者缓解。** 每智能体轮次上限、选择器输入中的发言者平衡得分、连续 K 轮后强制轮换。
+5. **上下文膨胀缓解。** 投影计划（每角色的有范围视图）、摘要检查点、每智能体上下文上限。
+6. **可观测性。** 记录选择器的输入、选择器的选择、每轮智能体延迟。
 
-Hard rejects:
+硬性拒绝：
 
-- Any LLM-selected config without logging of selector's input/output. Debugging becomes impossible.
-- Configs without a max_rounds cap.
-- Symmetric chats (no specialization) on reasoning tasks — use debate (Lesson 07) instead.
+- 任何没有记录选择器输入/输出的 LLM 选择配置。调试将变得不可能。
+- 没有 max_rounds 上限的配置。
+- 推理任务上的对称聊天（无专业化）——改用辩论（第 7 课）。
 
-Refusal rules:
+拒绝规则：
 
-- If the task has a known DAG structure, refuse GroupChat and recommend LangGraph static graph for determinism.
-- If the task requires strict audit trails, refuse GroupChat; recommend LangGraph with checkpointer.
-- If the agents number more than 5-6, refuse flat GroupChat and recommend nested groups or hierarchical pattern.
+- 如果任务有已知的 DAG 结构，拒绝 GroupChat 并推荐 LangGraph 静态图以获得确定性。
+- 如果任务需要严格的审计记录，拒绝 GroupChat；推荐带检查点的 LangGraph。
+- 如果智能体数量超过 5-6 个，拒绝扁平 GroupChat 并推荐嵌套组或层级模式。
 
-Output: a one-page GroupChat config brief. Close with the cost estimate (LLM-selected incurs one selector call per turn).
+输出：一页 GroupChat 配置简报。结尾给出成本估算（LLM 选择每轮产生一次选择器调用成本）。

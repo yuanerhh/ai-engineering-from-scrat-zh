@@ -1,41 +1,41 @@
 ---
 name: durable-execution-review
-description: Review a proposed long-running agent deployment for correct durable-execution shape (activities, determinism, checkpoint backend, human-input state, HITL-on-resume).
+description: 审查拟议的长期运行智能体部署，检查其是否符合持久执行模式（活动、确定性、检查点后端、人工输入状态、恢复时 HITL）。
 version: 1.0.0
 phase: 15
 lesson: 12
 tags: [durable-execution, workflows, checkpointing, temporal, langgraph, agents-sdk]
 ---
 
-Given a proposed long-running agent deployment (Temporal + OpenAI Agents SDK, LangGraph with PostgreSQL checkpointer, Microsoft Agent Framework, Claude Code Routines, Cloudflare Durable Objects, or an in-house equivalent), audit the design against the durable-execution pattern.
+给定一个拟议的长期运行智能体部署（Temporal + OpenAI Agents SDK、带 PostgreSQL 检查点的 LangGraph、Microsoft Agent Framework、Claude Code Routines、Cloudflare Durable Objects 或内部等效系统），根据持久执行模式审计其设计。
 
-Produce:
+产出内容：
 
-1. **Activity inventory.** List every activity (LLM call, tool call, HTTP request, file write). For each, confirm it is wrapped as an activity with retry policy, timeout, and idempotency key. Raw LLM calls outside the activity envelope are a reliability hole.
-2. **Workflow determinism.** Identify every non-deterministic read inside the workflow code (wall clock, random, external state). Each must be registered as a side-effect activity so replay returns the same value. Hidden non-determinism is the most common cause of replay drift.
-3. **Checkpoint backend.** Name the backend (PostgreSQL, SQLite, Redis, Durable Objects). Confirm it survives deploys. SQLite is dev-only. Redis requires AOF or snapshot config. Cloudflare Durable Objects are transparent but require a unique key discipline.
-4. **Human-input state.** Confirm pauses for HITL are a first-class workflow state, not a polling loop. The workflow should block on an external signal (approval queue, webhook, `interrupt()` primitive) that resumes exactly when the approval arrives.
-5. **HITL-on-resume policy.** For any resume after a crash, state whether fresh HITL is required before executing the next activity. Without this, durable execution plus an approval granted before the crash may re-fire an approved action when the context has changed. Critical for long horizons.
+1. **活动清单。** 列出每个活动（LLM 调用、工具调用、HTTP 请求、文件写入）。对于每个，确认其已作为带有重试策略、超时和幂等键的活动进行封装。活动封装之外的原始 LLM 调用是可靠性漏洞。
+2. **工作流确定性。** 识别工作流代码中的每个非确定性读取（墙上时钟、随机、外部状态）。每个都必须注册为副作用活动，以便回放返回相同的值。隐藏的非确定性是回放漂移最常见的原因。
+3. **检查点后端。** 列出后端名称（PostgreSQL、SQLite、Redis、Durable Objects）。确认其在部署后仍然存在。SQLite 仅适用于开发环境。Redis 需要 AOF 或快照配置。Cloudflare Durable Objects 是透明的，但需要唯一键规范。
+4. **人工输入状态。** 确认 HITL 暂停是工作流的一等状态，而非轮询循环。工作流应阻塞在外部信号上（审批队列、webhook、`interrupt()` 原语），在审批到达时精确恢复。
+5. **恢复时 HITL 策略。** 对于崩溃后的任何恢复，说明在执行下一个活动之前是否需要新的 HITL。没有这一点，持久执行加上崩溃前已授予的审批可能在上下文已改变时重新触发已批准的操作。对于长时间跨度尤为关键。
 
-Hard rejects:
-- Agent SDK usage where LLM calls are not wrapped as activities.
-- Checkpoint backends that do not survive a deploy.
-- Workflows that embed wall clock or random without activity wrapping.
-- Human-input modeled as a polling loop rather than a signal.
-- Long-horizon runs (above one hour) with no HITL-on-resume policy.
-- Runs with no budget kill switch (Lesson 13) layered on top of durability.
+硬性拒绝：
+- LLM 调用未作为活动封装的 Agent SDK 使用。
+- 在部署后无法存活的检查点后端。
+- 在活动封装之外嵌入墙上时钟或随机的工作流。
+- 以轮询循环而非信号建模的人工输入。
+- 超过一小时的长期运行，没有恢复时 HITL 策略。
+- 没有在持久性之上叠加预算紧急停止开关的运行（第 13 课）。
 
-Refusal rules:
-- If the user proposes a durable workflow with no explicit idempotency on side-effect activities, refuse and require idempotency keys first. Retries will double-execute otherwise.
-- If the user cannot show a replay test (run workflow, crash mid-run, replay, assert no double side effects), refuse and require that test before production.
-- If the user proposes a 24-hour unattended run with no HITL checkpoint, refuse. The 35-minute degradation (Lesson 12 notes) makes this a reliability problem even if durability is correct.
+拒绝规则：
+- 如果用户建议持久工作流在副作用活动上没有明确幂等性，拒绝并要求先添加幂等键。否则重试将导致双重执行。
+- 如果用户无法展示回放测试（运行工作流、中途崩溃、回放、断言无双重副作用），拒绝并要求在生产前完成该测试。
+- 如果用户建议在没有 HITL 检查点的情况下进行 24 小时无人值守运行，拒绝。35 分钟降级（第 12 课注释）使这成为可靠性问题，即使持久性是正确的。
 
-Output format:
+输出格式：
 
-Return a design-review memo with:
-- **Activity table** (activity, retry policy, timeout, idempotency key)
-- **Determinism audit** (non-deterministic reads and how each is handled)
-- **Checkpoint backend** (name, survives-deploy y/n, replay-test status)
-- **HITL state shape** (first-class state / polling / missing)
-- **HITL-on-resume policy** (explicit, with rationale)
-- **Readiness** (production / staging / research-only)
+返回设计审查备忘录，包含：
+- **活动表格**（活动、重试策略、超时、幂等键）
+- **确定性审计**（非确定性读取及每种的处理方式）
+- **检查点后端**（名称、部署后是否存活、回放测试状态）
+- **HITL 状态形式**（一等状态 / 轮询 / 缺失）
+- **恢复时 HITL 策略**（明确，含说明）
+- **就绪性**（生产 / 暂存 / 仅研究）

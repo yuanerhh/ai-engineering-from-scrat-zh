@@ -1,31 +1,31 @@
 ---
 name: long-video-strategy-planner
-description: Pick brute-context, ring-attention, token-compression, or agentic-retrieval for a long-video understanding task and compute latency + recall expectations.
+description: 为长视频理解任务在暴力上下文、环形注意力、token 压缩或智能体检索之间进行选择，并计算延迟和召回预期。
 version: 1.0.0
 phase: 12
 lesson: 18
 tags: [long-video, gemini, ring-attention, videoagent, retrieval]
 ---
 
-Given a video duration, query complexity (single event vs holistic summary), and open vs closed constraints, pick a long-video strategy and emit a config.
+给定视频时长、查询复杂度（单事件 vs 整体摘要）以及开源 vs 闭源约束，选择长视频策略并生成配置。
 
-Produce:
+输出：
 
-1. Strategy pick. Brute-context, ring-attention (LongVILA), token-compression (Video-XL), or agentic-retrieval (VideoAgent).
-2. Token budget. Duration * FPS * per-frame-tokens. Warn if > LLM context.
-3. Expected recall. Needle-in-a-haystack recall at video-length percentiles. Cite Gemini 1.5 reports when relevant.
-4. Latency. Prefill time for brute-context; retrieval + VLM for agentic.
-5. Engineering path. Code snippet scaffold for the chosen strategy.
-6. Fallback plan. Hybrid: brute-context global summary + agentic local detail.
+1. 策略选择。暴力上下文、环形注意力（LongVILA）、token 压缩（Video-XL）或智能体检索（VideoAgent）。
+2. Token 预算。时长 * FPS * 每帧 token 数。如果 > LLM 上下文则发出警告。
+3. 预期召回率。在视频时长百分位数上的大海捞针召回率。在相关时引用 Gemini 1.5 报告。
+4. 延迟。暴力上下文的预填充时间；智能体方案的检索 + VLM 时间。
+5. 工程路径。所选策略的代码片段脚手架。
+6. 降级计划。混合方案：暴力上下文全局摘要 + 智能体局部细节。
 
-Hard rejects:
-- Proposing brute-context for a 2-hour video on an open 72B model. Context does not fit.
-- Claiming agentic retrieval always wins. For holistic-summary questions it loses to brute context.
-- Recommending token compression without flagging the recall tax.
+硬性拒绝：
+- 对开源 72B 模型处理 2 小时视频提出暴力上下文。上下文装不下。
+- 声称智能体检索总是获胜。对整体摘要问题，它不如暴力上下文。
+- 推荐 token 压缩而不标注召回损失。
 
-Refusal rules:
-- If target is a 90-minute video at frontier recall (>95%), refuse open-only options and recommend Gemini 2.5 Pro.
-- If user cannot afford tool-calling loops, refuse agentic-retrieval and propose compressed brute-context.
-- If user needs real-time (stream-as-it-plays), refuse retrieval (too slow) and recommend streaming Qwen2.5-VL.
+拒绝规则：
+- 如果目标是在前沿召回率（>95%）下处理 90 分钟视频，拒绝纯开源方案并推荐 Gemini 2.5 Pro。
+- 如果用户无法承担工具调用循环，拒绝智能体检索并提出压缩的暴力上下文。
+- 如果用户需要实时处理（边播边处理），拒绝检索（太慢）并推荐流式 Qwen2.5-VL。
 
-Output: one-page plan with strategy, budget, recall, latency, engineering path, and fallback. End with arXiv 2403.05530 (Gemini 1.5) and 2403.10517 (VideoAgent) for comparison.
+输出：一页计划，包含策略、预算、召回率、延迟、工程路径和降级方案。结尾附上 arXiv 2403.05530（Gemini 1.5）和 2403.10517（VideoAgent）供比较。

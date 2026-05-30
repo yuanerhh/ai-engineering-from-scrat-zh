@@ -1,20 +1,20 @@
 ---
 name: fm-tuner
-description: Convert a diffusion training plan into a flow-matching / rectified-flow config.
+description: 将扩散训练方案转换为流匹配 / 矫正流配置。
 version: 1.0.0
 phase: 8
 lesson: 13
 tags: [flow-matching, rectified-flow, diffusion]
 ---
 
-Given a diffusion-style training plan (data, compute, schedule, target step count, quality bar), output a flow-matching equivalent:
+给定扩散式训练方案（数据、计算、调度、目标步骤数、质量要求），输出等效的流匹配配置：
 
-1. Schedule + interpolant. Linear (rectified flow), optimal transport (Lipman OT-CFM), variance-preserving, or cosine. One-sentence reason.
-2. Time sampling. Uniform, logit-normal (SD3), or mode-weighted. Warn when uniform sampling at 1000 Hz wastes capacity at endpoints.
-3. Target. Velocity v = x_1 - x_0 (rectified flow) or alpha'(t)x_1 + sigma'(t)x_0 (CFM). State which.
-4. Optimizer + lr warmup. Include AdamW with beta2 = 0.95 for stability at transformer scale.
-5. Reflow plan. Whether to run 0, 1, or 2 reflow iterations; budget per iteration ~ full re-inference over a curated subset.
-6. Step counts. Training step count target, expected inference steps (20, 4, 2, 1), guidance scale range.
-7. Eval. FID / CLIP-score against the diffusion baseline, plot quality vs step count.
+1. 调度 + 插值器。线性（矫正流）、最优传输（Lipman OT-CFM）、方差保持或余弦。一句话说明理由。
+2. 时间采样。均匀、logit-正态（SD3）或模式加权。当以 1000 Hz 均匀采样在端点附近浪费容量时发出警告。
+3. 预测目标。速度 v = x_1 - x_0（矫正流）或 alpha'(t)x_1 + sigma'(t)x_0（CFM）。说明选择哪种。
+4. 优化器 + 学习率预热。在 Transformer 规模下使用 beta2 = 0.95 的 AdamW 以保证稳定性。
+5. 矫正计划。是否运行 0、1 或 2 轮矫正；每轮预算 ≈ 在精选子集上的一次完整重新推理。
+6. 步骤数。训练步骤目标、预期推理步骤（20、4、2、1）、引导缩放范围。
+7. 评估。对照扩散基线的 FID / CLIP 分数，绘制质量 vs 步骤数图。
 
-Refuse to do reflow before v_1 has converged (reflow on a bad model just bakes in the bad direction). Refuse to recommend 1-step inference without consistency distillation on top. Flag any flow-matching model that targets &gt; 20 step inference - if you need that many steps, you wasted the reformulation.
+拒绝在 v_1 收敛之前进行矫正（在差模型上矫正只会把错误方向固化）。拒绝在没有一致性蒸馏的情况下推荐 1 步推理。标记任何需要超过 20 步推理的流匹配模型——如果需要那么多步骤，说明你浪费了这次重构的价值。

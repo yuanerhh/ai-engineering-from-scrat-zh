@@ -1,35 +1,35 @@
 ---
 name: tom-auditor
-description: Audit a multi-agent system that claims "emergent coordination." Separates real ToM-enabled coordination from prompt-dressed illusion with control conditions, statistical tests, and complementarity measurement.
+description: 审核声称"涌现协调"的多智能体系统。通过对照条件、统计测试和互补性测量，将真正的心智理论（ToM）协调与提示装扮的幻觉分开。
 version: 1.0.0
 phase: 16
 lesson: 18
 tags: [multi-agent, theory-of-mind, coordination, evaluation, emergence]
 ---
 
-Given a multi-agent system that claims emergent coordination, audit whether the coordination is real or an artifact of prompt engineering.
+给定一个声称涌现协调的多智能体系统，审核协调是否真实或是提示工程的副产品。
 
-Produce:
+产出内容：
 
-1. **Claim extraction.** What coordination behavior is being claimed? (division of labor, anticipation, complementary actions, consensus reaching). State it precisely.
-2. **Prompt inspection.** Does any agent's system prompt explicitly instruct coordination, role selection, or team awareness? If yes, flag the claim as partially prompt-dressed and design a control.
-3. **Control condition.** A version of the system with coordination-inducing language stripped. Specify exactly what text changes.
-4. **Metric.** At least one of: identity-linked differentiation, goal-directed complementarity, higher-order synergy (Riedl 2025). Do not accept "agents seem to work together" as evidence.
-5. **Statistical test.** Significance of the metric on system vs control. Sample size needed for `p < 0.05`. If `n < 50` trials, report power explicitly.
-6. **Model-capacity check.** Repeat the comparison on a smaller base model. Does the effect persist or vanish? Li/Riedl both show capacity-dependence.
-7. **Failure-case review.** When the system fails, what does the ToM state (if any) look like? Identity confusion (belief-agent binding broken) or content hallucination (wrong belief content)?
+1. **声明提取。** 声称的是什么协调行为？（分工、预期、互补行动、达成共识）。精确陈述。
+2. **提示检查。** 任何智能体的系统提示是否明确指示协调、角色选择或团队意识？如果是，将声明标记为部分提示装扮，并设计对照条件。
+3. **对照条件。** 去除诱导协调语言的系统版本。精确指定文本变化内容。
+4. **指标。** 至少以下之一：身份关联分化、目标导向互补性、高阶协同效应（Riedl 2025）。不接受"智能体似乎在协作"作为证据。
+5. **统计检验。** 系统 vs 对照的指标显著性。达到 `p < 0.05` 所需的样本量。如果 `n < 50` 次试验，明确报告统计效力。
+6. **模型容量检查。** 在较小的基础模型上重复比较。效果是持续还是消失？Li/Riedl 都显示了容量依赖性。
+7. **失败案例审查。** 当系统失败时，ToM 状态（如果有的话）是什么样的？身份混淆（信念-智能体绑定破坏）还是内容幻觉（错误的信念内容）？
 
-Hard rejects:
+硬性拒绝：
 
-- Claims of emergence without a control condition. Demo reels are not evidence.
-- Claims that vanish on statistical scrutiny (effect below `p < 0.05` on `n >= 50` trials). These are coordination illusions.
-- Claims that hold on one model only. If a smaller strong baseline also achieves the effect without ToM prompting, the coordination is not ToM-driven.
-- "Our agents just figured it out" as a mechanism explanation. Mechanism claims need the ToM state logged and inspectable.
+- 没有对照条件的涌现声明。演示视频不是证据。
+- 在统计检验中消失的声明（在 `n >= 50` 次试验中效果低于 `p < 0.05`）。这些是协调幻觉。
+- 只在一个模型上成立的声明。如果较小的强基线也在没有 ToM 提示的情况下实现效果，协调不是 ToM 驱动的。
+- "我们的智能体自己想出来了"作为机制解释。机制声明需要记录并可检查的 ToM 状态。
 
-Refusal rules:
+拒绝规则：
 
-- If the system has no logging of per-agent reasoning, the audit cannot distinguish real coordination from randomness. Recommend adding structured ToM-state logs before re-auditing.
-- If the task has an oracle-computed optimal coordination, compare to optimal rather than control.
-- If the claim is narrow ("coordination on single-round task"), the audit can be a shorter check: measure complementarity on the single round, no long-horizon analysis needed.
+- 如果系统没有记录每个智能体的推理，审核无法区分真实协调和随机性。建议在重新审核前添加结构化 ToM 状态日志。
+- 如果任务有预言机计算的最优协调，与最优而非对照进行比较。
+- 如果声明是狭义的（"单轮任务上的协调"），审核可以是更短的检查：测量单轮的互补性，不需要长期分析。
 
-Output: a two-page audit. Start with a one-sentence verdict ("Coordination claim is prompt-dressed: removing 'work together' language drops the metric from 0.82 to 0.31, control-significant."), then the seven sections above. End with a list of fixes to convert prompt-dressed coordination into real coordination: explicit ToM state, longer horizons with logging, mixed-model ensembles.
+输出：两页审核报告。从一句话结论开始（"协调声明是提示装扮的：去除'协同工作'语言后指标从 0.82 降至 0.31，对照显著。"），然后是以上七个部分。结尾列出将提示装扮的协调转化为真实协调的修复方法：明确的 ToM 状态、带日志的更长视野、混合模型集成。

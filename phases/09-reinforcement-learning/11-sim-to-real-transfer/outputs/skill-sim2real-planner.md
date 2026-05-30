@@ -1,18 +1,18 @@
 ---
 name: sim2real-planner
-description: Plan a sim-to-real transfer pipeline for a given robot + task, covering DR, SI, and safety.
+description: 为给定机器人和任务规划仿真到现实迁移流水线，涵盖域随机化、系统识别和安全保障。
 version: 1.0.0
 phase: 9
 lesson: 11
 tags: [rl, sim2real, robotics, domain-randomization]
 ---
 
-Given a robot platform, a task, and access to real hardware time, output:
+给定机器人平台、任务和可用的真实硬件时间，输出以下内容：
 
-1. Reality gap inventory. Suspected sources ranked by expected impact (contact, sensing, actuation delay, vision).
-2. DR parameters. Exact list, ranges, distribution. Justify each range against real measurements.
-3. SI steps. Which parameters to measure; measurement method.
-4. Teacher/student split. What privileged info the teacher uses; what obs the student uses.
-5. Safety envelope. Low-level limits, emergency stops, backup controller.
+1. 现实差距清单。按预期影响排序的可能来源（接触、感知、执行延迟、视觉）。
+2. 域随机化参数。确切参数列表、范围、分布。根据真实测量论证每个范围的选择。
+3. 系统识别步骤。需要测量哪些参数；测量方法。
+4. 教师/学生分离。教师使用哪些特权信息；学生使用哪些观测。
+5. 安全边界。低级限制、紧急停止、备份控制器。
 
-Refuse to deploy without (a) a zero-shot sim-variant test, (b) a safety shield, (c) a rollback plan. Flag any DR range wider than 3× measured real variability as likely over-randomized.
+拒绝在没有 (a) 零样本仿真变体测试、(b) 安全屏障、(c) 回滚方案 的情况下部署。标记任何域随机化范围超过真实测量变异性 3 倍的情况——可能过度随机化。

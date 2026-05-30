@@ -1,30 +1,30 @@
 ---
 name: clip-zero-shot
-description: Run zero-shot image classification with a CLIP / SigLIP checkpoint, producing ranked predictions with similarity scores.
+description: 使用 CLIP / SigLIP 检查点进行零样本图像分类，生成带相似度分数的排名预测。
 version: 1.0.0
 phase: 12
 lesson: 02
 tags: [clip, siglip, zero-shot, vision-language]
 ---
 
-Given a list of images (file paths or URLs) and a list of candidate class names, produce a ranked zero-shot classification using a declared CLIP or SigLIP checkpoint. The skill is pure-prediction; it does not train or finetune.
+给定一组图像（文件路径或 URL）和候选类别名称列表，使用声明的 CLIP 或 SigLIP 检查点生成排名的零样本分类结果。该技能仅用于预测，不进行训练或微调。
 
-Produce:
+输出：
 
-1. Prompt construction. For each class, form N text templates (default: `a photo of a {class}`, `a picture of a {class}`, `an image of a {class}`). Embed each prompt with the text encoder and average to form the class prototype.
-2. Image embedding. Embed each input image with the stated vision encoder. Normalize both sides to unit length.
-3. Ranked predictions. Compute cosine similarity between each image embedding and each class prototype. Return top-1 and top-5 with scores.
-4. Checkpoint metadata. Name the exact Hugging Face checkpoint used (e.g., `openai/clip-vit-large-patch14` or `google/siglip2-so400m-patch14-384`) and the resolution it expects.
-5. Honesty notice. State that zero-shot on classes outside the pretraining distribution is unreliable; surface top-1 score as a confidence proxy and warn when it is below 0.2.
+1. 提示词构建。对每个类别，构建 N 个文本模板（默认：`a photo of a {class}`、`a picture of a {class}`、`an image of a {class}`）。用文本编码器嵌入每个提示词并取平均值形成类别原型。
+2. 图像嵌入。用声明的视觉编码器嵌入每张输入图像。将两侧归一化为单位长度。
+3. 排名预测。计算每张图像嵌入与每个类别原型之间的余弦相似度。返回 top-1 和 top-5 及其分数。
+4. 检查点元数据。命名使用的确切 Hugging Face 检查点（例如 `openai/clip-vit-large-patch14` 或 `google/siglip2-so400m-patch14-384`）及其期望的分辨率。
+5. 诚实说明。说明对预训练分布之外的类别进行零样本分类是不可靠的；将 top-1 分数作为置信度代理，并在低于 0.2 时发出警告。
 
-Hard rejects:
-- Any use that frames the output as a definitive label for classes not in the caller's provided list.
-- Claims about scores across different checkpoints being comparable; SigLIP and CLIP score on different scales.
-- Running on images known to contain people without a downstream consent policy.
+硬性拒绝：
+- 任何将输出作为调用者提供列表之外类别的确定性标签的使用。
+- 声称不同检查点的分数可以比较；SigLIP 和 CLIP 使用不同的评分尺度。
+- 在没有下游知情同意政策的情况下对已知包含人物的图像运行。
 
-Refusal rules:
-- If the caller asks to classify into medical, legal, or safety-critical categories (diagnosis, identity, protected attributes), refuse and redirect to supervised models with audit trails.
-- If the caller provides a single class name (one-way classification with no alternatives), refuse — zero-shot needs at least two candidates to be meaningful.
-- If the checkpoint is unspecified, refuse and ask which of (CLIP, OpenCLIP, SigLIP, SigLIP 2) plus which scale.
+拒绝规则：
+- 如果调用者要求分类到医疗、法律或安全关键类别（诊断、身份、受保护属性），拒绝并重定向到带有审计追踪的监督模型。
+- 如果调用者只提供一个类别名称（没有替代方案的单向分类），拒绝——零样本需要至少两个候选才有意义。
+- 如果检查点未指定，拒绝并询问（CLIP、OpenCLIP、SigLIP、SigLIP 2）中的哪个以及哪个规模。
 
-Output: a ranked list of top-5 predictions per image with cosine similarity scores, checkpoint name, prompt templates used, and a confidence flag. End with a "what to read next" paragraph pointing to Lesson 12.06 for NaFlex (handling variable aspect ratios) or the SigLIP 2 paper for a deeper dive.
+输出：每张图像的 top-5 预测排名列表（带余弦相似度分数）、检查点名称、使用的提示词模板和置信度标志。结尾附上「下一步阅读」段落，指向第 12.06 课了解 NaFlex（处理可变宽高比），或 SigLIP 2 论文进行深入研究。

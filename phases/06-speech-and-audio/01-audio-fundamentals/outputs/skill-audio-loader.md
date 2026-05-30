@@ -1,18 +1,18 @@
 ---
 name: audio-loader
-description: Validate a raw audio file against a target model's expectations and resample it safely.
+description: 根据目标模型的要求验证原始音频文件并安全地重采样。
 version: 1.0.0
 phase: 6
 lesson: 01
 tags: [audio, speech, preprocessing]
 ---
 
-Given an audio file (path, channels, sample rate, bit depth, codec) and a target model (ASR / TTS / classifier with a required sample rate and channel count), output:
+给定一个音频文件（路径、声道数、采样率、位深度、编解码器）和目标模型（ASR / TTS / 分类器，需要特定采样率和声道数），输出以下内容：
 
-1. Mismatches. List every dimension where the file does not match the target (sr, channels, duration floor, clipping check).
-2. Resample plan. Source sr, target sr, resampling library (`torchaudio.transforms.Resample` or `librosa.resample`), anti-aliasing filter type.
-3. Channel plan. Mono fold strategy (mean vs left-only), or multichannel pass-through when the model supports it.
-4. Normalization. Peak vs RMS normalization, dBFS target, clipping guard.
-5. Validation snippet. Python that loads the file, runs the transforms, and asserts the final array matches `(target_sr, dtype, channel_count, range)`.
+1. 不匹配项。列出文件与目标在每个维度上不匹配的地方（采样率、声道数、最小时长、削波检查）。
+2. 重采样方案。源采样率、目标采样率、重采样库（`torchaudio.transforms.Resample` 或 `librosa.resample`）、抗混叠滤波器类型。
+3. 声道方案。单声道混合策略（均值 vs 仅左声道），或当模型支持时的多声道直通。
+4. 归一化。峰值 vs 均方根归一化、dBFS 目标值、削波保护。
+5. 验证代码片段。Python 代码，加载文件、执行变换，并断言最终数组匹配 `(目标采样率, 数据类型, 声道数, 范围)`。
 
-Refuse to downsample without an anti-aliasing filter. Refuse to upsample beyond 2x without a reconstruction filter. Flag any input file with clipping peaks over ±0.999 or a DC offset above ±0.01.
+拒绝在没有抗混叠滤波器的情况下进行降采样。拒绝在没有重建滤波器的情况下将上采样超过 2 倍。标记任何削波峰值超过 ±0.999 或直流偏移超过 ±0.01 的输入文件。

@@ -1,18 +1,18 @@
 ---
 name: training-budget-estimator
-description: Estimate (N, D, hours, GPU count) for a new transformer training run given compute budget and deployment constraints.
+description: 根据计算预算和部署约束估算新 Transformer 训练任务的（N, D, 小时数, GPU 数量）。
 version: 1.0.0
 phase: 7
 lesson: 13
 tags: [scaling-laws, training, chinchilla]
 ---
 
-Given a training objective (target loss / target MMLU / target downstream metric), compute budget (dollars or FLOPs), inference volume (tokens/month), and constraints (target device, memory, latency), output:
+给定训练目标（目标损失 / 目标 MMLU / 目标下游指标）、计算预算（美元或 FLOP）、推理量（每月 token 数）和约束条件（目标设备、内存、延迟），输出以下内容：
 
-1. Compute regime. Chinchilla-optimal, over-trained (inference-optimized), under-trained (prototype). One-sentence reason tied to inference volume.
-2. N and D. Concrete values. Print the `D/N` ratio. If over-trained, note the loss penalty vs Chinchilla-optimal.
-3. Training wall-clock. Hours × GPU-count given assumed training throughput (MFU ≈ 40% for dense, ~30% for MoE). Budget the precision (bf16 / fp8) and optimizer (AdamW / Muon).
-4. Data sources. Named corpora or synthetic budget. Flag if the required `D` exceeds available high-quality tokens.
-5. Risk note. One specific failure mode: data contamination, optimizer instability at scale, context-length tokenizer mismatch, evaluation suite saturation.
+1. 计算制度。Chinchilla 最优、过度训练（推理优化）、欠训练（原型）。一句话说明理由，与推理量挂钩。
+2. N 和 D。具体数值。打印 `D/N` 比值。如果是过度训练，说明与 Chinchilla 最优相比的损失惩罚。
+3. 训练墙时。在假定训练吞吐量下（密集 MFU ≈ 40%，MoE ≈ 30%），小时数 × GPU 数量。预算精度（bf16 / fp8）和优化器（AdamW / Muon）。
+4. 数据来源。具名语料库或合成预算。标记所需 `D` 是否超过可用高质量 token 数量。
+5. 风险说明。一个具体失败模式：数据污染、大规模优化器不稳定、上下文长度分词器不匹配、评估套件饱和。
 
-Refuse to train a dense model >8B under Chinchilla-optimal if it will serve high inference volume — the inference cost compounds. Refuse to set target loss without a held-out evaluation suite defined. Flag any plan spending >1% of budget on architecture search rather than data curation — returns are known to be small. Require a 1% of-budget run at scale to validate assumptions before committing the full budget.
+拒绝在高推理量场景下训练超过 80 亿参数的密集模型而不达到 Chinchilla 最优——推理成本会累积。拒绝在没有定义保留评估套件的情况下设定目标损失。标记将超过 1% 预算用于架构搜索而非数据整理的方案——收益已知很小。在提交完整预算前，要求先用 1% 预算进行规模验证运行。

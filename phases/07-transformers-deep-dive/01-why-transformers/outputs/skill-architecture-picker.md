@@ -1,18 +1,18 @@
 ---
 name: sequence-architecture-picker
-description: Pick sequence architecture (RNN, transformer, SSM, hybrid) given length, throughput, and training budget.
+description: 根据序列长度、吞吐量和训练预算选择序列架构（RNN、Transformer、SSM、混合架构）。
 version: 1.0.0
 phase: 7
 lesson: 1
 tags: [transformers, architecture, rnn, ssm]
 ---
 
-Given a sequence problem (max length, batch shape, training tokens budgeted, inference latency target, device class), output:
+给定一个序列问题（最大长度、批次形状、训练 token 预算、推理延迟目标、设备类型），输出以下内容：
 
-1. Primary architecture. One of: transformer, state-space model (Mamba/RWKV), hybrid SSM+attention, RNN. One-sentence reason tied to the dominant constraint.
-2. Context length strategy. If transformer: full attention cutoff, sliding window size, RoPE scaling factor. If SSM: scan chunk size. If RNN: hidden width.
-3. Training FLOP profile. Approximate FLOPs per token from architecture + context; note whether the spec fits the compute budget.
-4. Inference memory profile. KV cache for transformers, state size for SSMs, per-token memory for RNNs. Flag if the target device can hold a single batch of 1.
-5. Risk note. One specific failure mode that this choice is known to have at the scale of the spec (e.g. transformer OOM at 64K context on a 24GB GPU without Flash Attention).
+1. 主要架构。以下之一：Transformer、状态空间模型（Mamba/RWKV）、混合 SSM+注意力、RNN。一句话说明理由，与主要约束挂钩。
+2. 上下文长度策略。如果是 Transformer：全注意力截止长度、滑动窗口大小、RoPE 缩放因子。如果是 SSM：扫描块大小。如果是 RNN：隐藏层宽度。
+3. 训练 FLOP 分析。架构 + 上下文对应的每 token 近似 FLOP 量；说明该规格是否符合计算预算。
+4. 推理内存分析。Transformer 的 KV 缓存、SSM 的状态大小、RNN 的每 token 内存。标记目标设备是否能容纳单批次大小为 1 的推理。
+5. 风险说明。该选择在给定规格下的一个已知失败模式（例如：在没有 Flash Attention 的 24GB GPU 上，64K 上下文的 Transformer 会 OOM）。
 
-Refuse to recommend a pure RNN for any training run above 1B tokens without explicitly stating the gradient-flow and parallelism penalties. Refuse to recommend a full-attention transformer for >64K context without stating the `O(N^2)` memory cost. Refuse to recommend a brand-new architecture (published <12 months ago) for production without a named fallback.
+拒绝为超过 10 亿 token 的训练任务推荐纯 RNN，除非明确说明梯度流和并行性惩罚。拒绝为超过 64K 上下文的任务推荐全注意力 Transformer，除非说明 `O(N^2)` 内存成本。拒绝为生产环境推荐发布不足 12 个月的全新架构，除非有具体的备选方案。

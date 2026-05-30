@@ -1,31 +1,31 @@
 ---
 name: unified-gen-model-picker
-description: Pick between Show-o / Transfusion / Emu3 / Janus-Pro families for a product that needs both multimodal understanding and generation with open weights.
+description: 为需要多模态理解和生成的产品在 Show-o / Transfusion / Emu3 / Janus-Pro 系列之间进行选择（开源权重约束）。
 version: 1.0.0
 phase: 12
 lesson: 14
 tags: [show-o, masked-diffusion, unified, t2i, inpainting]
 ---
 
-Given a product that needs unified understanding + generation (VQA, captioning, T2I, optionally inpainting) with an open-weights constraint and a latency budget, pick a model family and emit a reference configuration.
+给定一个需要统一理解 + 生成（VQA、描述、T2I，可选图像修复）且有开源权重约束和延迟预算的产品，选择模型系列并生成参考配置。
 
-Produce:
+输出：
 
-1. Family verdict. Show-o (masked discrete diffusion), Transfusion / MMDiT (continuous diffusion), Emu3 / Chameleon (autoregressive discrete), or Janus-Pro (decoupled encoders).
-2. Inference-step budget. 16 steps for Show-o, 20 for Transfusion, 1024+ for Emu3. Justify the pick with user's latency budget.
-3. Inpainting support. Show-o is free; Transfusion adds a mask channel; Emu3 needs a separate fine-tune. Flag this for the user.
-4. Tokenizer pick. For discrete families, recommend IBQ / MAGVIT-v2 / SBER; for continuous, recommend SD3's VAE.
-5. Training stability. Two-loss (Transfusion) needs weight tuning; Show-o's single loss is cleaner.
-6. Migration path if user grows. From Show-o to Transfusion when quality becomes the limit.
+1. 系列结论。Show-o（掩码离散扩散）、Transfusion / MMDiT（连续扩散）、Emu3 / Chameleon（自回归离散）或 Janus-Pro（解耦编码器）。
+2. 推理步数预算。Show-o 16 步，Transfusion 20 步，Emu3 1024+ 步。用用户的延迟预算说明选择理由。
+3. 图像修复支持。Show-o 免费支持；Transfusion 添加掩码通道；Emu3 需要单独微调。为用户标注此信息。
+4. 分词器选择。对于离散系列，推荐 IBQ / MAGVIT-v2 / SBER；对于连续系列，推荐 SD3 的 VAE。
+5. 训练稳定性。双损失（Transfusion）需要权重调优；Show-o 的单损失更简洁。
+6. 用户规模增长时的迁移路径。从 Show-o 迁移到 Transfusion，当质量成为瓶颈时。
 
-Hard rejects:
-- Proposing Emu3 / Chameleon when inference latency is <10s per image. Autoregressive over ~1024 tokens is too slow.
-- Claiming Show-o matches Transfusion on frontier image quality. It does not. The tokenizer is the ceiling.
-- Recommending Stable Diffusion for a product that needs VQA. SD cannot reason about images.
+硬性拒绝：
+- 在推理延迟 <10 秒/图像时提出 Emu3 / Chameleon。在约 1024 个 token 上自回归太慢。
+- 声称 Show-o 在前沿图像质量上与 Transfusion 持平。它不是。分词器是上限。
+- 为需要 VQA 的产品推荐 Stable Diffusion。SD 无法推理图像。
 
-Refusal rules:
-- If the user wants <2s per image generation, refuse Show-o and recommend Stable Diffusion + a separate VLM for understanding. Accept the multi-model complexity.
-- If user wants "best-in-class quality" with open weights, refuse Show-o / Emu3 and recommend Transfusion-family (MMDiT) or JanusFlow.
-- If user cannot commit to a tokenizer (fears licensing, quality ceiling), refuse discrete-only families and recommend Transfusion.
+拒绝规则：
+- 如果用户想要每张图像生成 <2 秒，拒绝 Show-o 并推荐 Stable Diffusion + 独立的 VLM 用于理解。接受多模型复杂性。
+- 如果用户想要开源权重的「最佳质量」，拒绝 Show-o / Emu3 并推荐 Transfusion 系列（MMDiT）或 JanusFlow。
+- 如果用户无法承诺分词器（担心许可证、质量上限），拒绝纯离散系列并推荐 Transfusion。
 
-Output: one-page pick with family verdict, step budget, inpainting support, tokenizer recommendation, stability plan, and migration path. End with arXiv 2408.12528 (Show-o), 2408.11039 (Transfusion), 2501.17811 (Janus-Pro).
+输出：一页选择，包含系列结论、步数预算、图像修复支持、分词器推荐、稳定性计划和迁移路径。结尾附上 arXiv 2408.12528（Show-o）、2408.11039（Transfusion）、2501.17811（Janus-Pro）。

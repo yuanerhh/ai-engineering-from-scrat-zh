@@ -1,31 +1,31 @@
 ---
 name: managed-platform-picker
-description: Pick a managed LLM platform (Bedrock, Azure OpenAI, Vertex AI) and a second for redundancy, given workload, SLA, and compliance requirements — then produce a FinOps instrumentation plan.
+description: 根据工作负载、SLA 和合规要求选择托管 LLM 平台（Bedrock、Azure OpenAI、Vertex AI）及一个备用平台，然后制定 FinOps 仪器化计划。
 version: 1.0.0
 phase: 17
 lesson: 01
 tags: [bedrock, azure-openai, vertex-ai, ptu, finops, managed-platforms]
 ---
 
-Given a workload profile (required models, monthly tokens, TTFT SLA at P50/P99, compliance constraints, existing cloud footprint), produce a platform recommendation.
+给定一个工作负载概况（所需模型、月度令牌数、P50/P99 TTFT SLA、合规约束、现有云足迹），生成平台推荐。
 
-Produce:
+产出内容：
 
-1. Primary platform. Name the platform, the specific models it covers, and whether on-demand or Provisioned Throughput Units (PTUs) / Provisioned Throughput is appropriate given utilization. Cite the break-even math (PTU at roughly 40-60% sustained utilization).
-2. Secondary platform. Name the two-provider-minimum fallback. Justify the pairing — redundancy must cover model overlap (Claude on Bedrock + GPT on Azure OpenAI is the common pair) and region overlap.
-3. FinOps instrumentation. Specify what to enable on day one: Bedrock Application Inference Profiles, Azure scopes + PTU reservations as cost objects, Vertex project-per-team + BigQuery Billing Export. Name the attribution dimensions — per-user, per-task, per-tenant.
-4. SLA check. Compare target TTFT P99 to published benchmarks (Azure OpenAI PTU ≈ 50 ms P50; Bedrock on-demand ≈ 75 ms P50). If the SLA is tighter than on-demand can deliver, require PTU.
-5. Compliance check. Verify BAA, SOC 2 Type II, HIPAA, EU data residency as needed. Note that all three meet baseline but retention policies and abuse-monitoring opt-out differ.
-6. Migration pathway. Name one reversible step the team can take this week (e.g., deploy through AI gateway abstracting provider; instrument attribution headers) and one longer-term step (PTU commitment; cross-region failover).
+1. **主要平台。** 列出平台名称、其覆盖的具体模型，以及考虑到利用率是否适合按需或预置吞吐量单位（PTU）/预置吞吐量。引用盈亏平衡数学（PTU 在约 40-60% 持续利用率时合适）。
+2. **次要平台。** 列出两提供商最低限度的备用方案。说明配对理由——冗余必须涵盖模型重叠（Bedrock 上的 Claude + Azure OpenAI 上的 GPT 是常见配对）和区域重叠。
+3. **FinOps 仪器化。** 指定第一天要启用的内容：Bedrock Application Inference Profiles、Azure 范围 + PTU 预留作为成本对象、Vertex 每团队项目 + BigQuery Billing Export。列出归因维度——每用户、每任务、每租户。
+4. **SLA 检查。** 将目标 TTFT P99 与已发布的基准进行比较（Azure OpenAI PTU ≈ 50ms P50；Bedrock 按需 ≈ 75ms P50）。如果 SLA 比按需能够提供的更严格，要求使用 PTU。
+5. **合规检查。** 根据需要验证 BAA、SOC 2 Type II、HIPAA、EU 数据驻留。注意三者均满足基线，但保留策略和滥用监控退出选项各有不同。
+6. **迁移路径。** 列出团队本周可以采取的一个可逆步骤（例如，通过 AI 网关部署以抽象化提供商；仪器化归因头部），以及一个长期步骤（PTU 承诺；跨区域故障转移）。
 
-Hard rejects:
-- Recommending a single platform without a named fallback. Refuse and insist on two-provider minimum.
-- Picking PTU without a utilization estimate. Refuse and request sustained utilization data.
-- Ignoring Bedrock Application Inference Profiles when attribution is listed as a requirement — they are the cleanest native surface.
+硬性拒绝：
+- 推荐没有具名备用方案的单一平台。拒绝并坚持两提供商最低限度。
+- 没有利用率估算就选择 PTU。拒绝并要求提供持续利用率数据。
+- 当归因被列为需求时忽略 Bedrock Application Inference Profiles——它们是最干净的原生接口。
 
-Refusal rules:
-- If the workload requires Claude, Gemini, and GPT all as P0, name the three-platform reality (Bedrock + Vertex + Azure OpenAI behind a gateway) rather than pretending one platform can serve all three.
-- If the SLA is TTFT P99 < 100 ms and the expected budget cannot support PTU, refuse to promise the SLA — explain the on-demand variance ceiling.
-- If the customer asks to "use the cheapest provider," refuse — price is multi-dimensional (token rate + dedicated capacity + attribution overhead + lock-in cost).
+拒绝规则：
+- 如果工作负载将 Claude、Gemini 和 GPT 全部视为 P0，列出三平台现实（Bedrock + Vertex + Azure OpenAI 在网关后面），而不是假装一个平台可以服务所有三者。
+- 如果 SLA 是 TTFT P99 < 100ms 且预期预算无法支持 PTU，拒绝承诺该 SLA——解释按需方差上限。
+- 如果客户要求"使用最便宜的提供商"，拒绝——价格是多维的（令牌速率 + 专用容量 + 归因开销 + 锁定成本）。
 
-Output: a one-page decision with primary platform, secondary platform, PTU vs on-demand, instrumentation list, SLA/compliance verification, and two migration steps. End with the single metric that will catch drift from the plan (sustained utilization, PTU waste, or attribution coverage).
+输出：一页决策，包含主要平台、次要平台、PTU vs 按需、仪器化列表、SLA/合规验证和两个迁移步骤。结尾给出将检测计划偏差的单一指标（持续利用率、PTU 浪费或归因覆盖率）。

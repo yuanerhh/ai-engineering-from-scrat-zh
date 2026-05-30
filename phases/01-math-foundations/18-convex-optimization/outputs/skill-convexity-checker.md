@@ -1,100 +1,100 @@
 ---
 name: skill-convexity-checker
-description: Determine if an optimization problem is convex and choose the right solver
+description: 判断优化问题是否为凸问题并选择合适的求解器
 version: 1.0.0
 phase: 1
 lesson: 18
 tags: [optimization, convexity, solvers]
 ---
 
-# Convexity Checker
+# 凸性检验器
 
-How to verify whether an optimization problem is convex, and what to do with the answer.
+如何验证优化问题是否为凸问题，以及如何利用这一结论。
 
-## Decision Checklist
+## 决策清单
 
-1. Is the objective function convex? (Check Hessian positive semi-definiteness or use composition rules.)
-2. Are all inequality constraints of the form g_i(x) <= 0 where each g_i is convex?
-3. Are all equality constraints affine (linear)?
-4. If all three are yes, the problem is convex. Use a convex solver with convergence guarantees.
-5. If any are no, the problem is non-convex. Use SGD/Adam and accept local optima.
+1. 目标函数是否为凸函数？（检查 Hessian 矩阵是否半正定，或使用复合规则。）
+2. 所有不等式约束是否具有 g_i(x) <= 0 的形式，其中每个 g_i 是凸函数？
+3. 所有等式约束是否为仿射的（线性）？
+4. 如果三者都是，问题是凸的。使用有收敛保证的凸求解器。
+5. 如果任何一个为否，问题是非凸的。使用 SGD/Adam 并接受局部最优。
 
-## How to test convexity of a function
+## 如何检验函数的凸性
 
-| Test | Applies to | Method |
-|---|---|---|
-| Second derivative >= 0 | Scalar functions f(x) | Compute f''(x). If f''(x) >= 0 for all x, convex. |
-| Hessian is PSD | Multivariate functions f(x) | Compute H(x). If all eigenvalues >= 0 everywhere, convex. |
-| Definition test | Any function | Check f(tx + (1-t)y) <= t*f(x) + (1-t)*f(y) for sampled x, y, t. |
-| Composition rules | Composed functions | See composition table below. |
-| Restriction to a line | Multivariate f | f is convex iff g(t) = f(x + tv) is convex in t for all x, v. |
+| 检验方法 | 适用对象 | 方法 |
+|---------|---------|------|
+| 二阶导数 >= 0 | 标量函数 f(x) | 计算 f''(x)。若对所有 x 都有 f''(x) >= 0，则为凸函数。 |
+| Hessian 矩阵半正定 | 多元函数 f(x) | 计算 H(x)。若处处特征值均 >= 0，则为凸函数。 |
+| 定义检验 | 任意函数 | 对采样的 x, y, t 检验 f(tx + (1-t)y) <= t*f(x) + (1-t)*f(y)。 |
+| 复合规则 | 复合函数 | 见下方复合表。 |
+| 限制到直线 | 多元函数 f | 对所有 x, v，若 g(t) = f(x + tv) 关于 t 为凸函数，则 f 为凸函数。 |
 
-## Composition rules (preserving convexity)
+## 保持凸性的复合规则
 
-| Operation | Result |
-|---|---|
-| f + g (both convex) | Convex |
-| c * f (c > 0, f convex) | Convex |
-| max(f, g) (both convex) | Convex |
-| f(Ax + b) where f is convex | Convex |
-| g(f(x)) where g is convex non-decreasing and f is convex | Convex |
-| g(f(x)) where g is convex non-increasing and f is concave | Convex |
-| sum of convex functions | Convex |
-| pointwise supremum of convex functions | Convex |
+| 运算 | 结果 |
+|------|------|
+| f + g（两者均为凸） | 凸 |
+| c * f（c > 0，f 为凸） | 凸 |
+| max(f, g)（两者均为凸） | 凸 |
+| f(Ax + b)（f 为凸） | 凸 |
+| g(f(x))（g 为凸非递减，f 为凸） | 凸 |
+| g(f(x))（g 为凸非递增，f 为凹） | 凸 |
+| 凸函数之和 | 凸 |
+| 凸函数的逐点上确界 | 凸 |
 
-## Common ML objectives: convex or not?
+## 常见 ML 目标函数：凸还是非凸？
 
-| Objective | Convex? | Reason |
-|---|---|---|
-| MSE: (1/n) sum(y - Xw)^2 | Yes | Quadratic in w, Hessian = (2/n) X^T X is PSD |
-| Logistic loss: sum(log(1 + exp(-y_i * w^T x_i))) | Yes | Sum of convex functions (log-sum-exp family) |
-| Hinge loss: sum(max(0, 1 - y_i * w^T x_i)) | Yes | Max of convex (linear) functions |
-| L2 regularization: lambda * \|\|w\|\|^2 | Yes | Quadratic, Hessian = 2*lambda*I |
-| L1 regularization: lambda * \|\|w\|\|_1 | Yes | Sum of absolute values (convex but not differentiable) |
-| Ridge regression: MSE + L2 | Yes | Sum of two convex functions |
-| LASSO: MSE + L1 | Yes | Sum of two convex functions |
-| Elastic net: MSE + L1 + L2 | Yes | Sum of convex functions |
-| SVM (primal): hinge + L2 | Yes | Sum of convex functions |
-| Cross-entropy with softmax | Yes (in logits) | Log-sum-exp is convex |
-| Neural network (any loss) | No | Nonlinear activations create non-convex composition |
-| k-means objective | No | Discrete assignment step |
-| Matrix factorization: \|\|X - UV^T\|\|^2 | No | Bilinear in U and V |
-| GAN loss | No | Minimax, non-convex in generator |
-| Contrastive loss (InfoNCE) | No | Log of ratio of exponentials with negative samples |
+| 目标函数 | 凸？ | 原因 |
+|---------|-----|------|
+| MSE：(1/n) sum(y - Xw)^2 | 是 | 关于 w 为二次，Hessian = (2/n) X^T X 为半正定 |
+| Logistic 损失：sum(log(1 + exp(-y_i * w^T x_i))) | 是 | 凸函数之和（log-sum-exp 族） |
+| Hinge 损失：sum(max(0, 1 - y_i * w^T x_i)) | 是 | 凸（线性）函数的最大值 |
+| L2 正则化：lambda * \|\|w\|\|^2 | 是 | 二次，Hessian = 2*lambda*I |
+| L1 正则化：lambda * \|\|w\|\|_1 | 是 | 绝对值之和（凸但不可微） |
+| 岭回归：MSE + L2 | 是 | 两个凸函数之和 |
+| LASSO：MSE + L1 | 是 | 两个凸函数之和 |
+| 弹性网：MSE + L1 + L2 | 是 | 凸函数之和 |
+| SVM（原始形式）：Hinge + L2 | 是 | 凸函数之和 |
+| 带 softmax 的交叉熵 | 是（关于 logits） | Log-sum-exp 是凸的 |
+| 神经网络（任意损失） | 否 | 非线性激活函数形成非凸复合 |
+| k-means 目标函数 | 否 | 离散赋值步骤 |
+| 矩阵分解：\|\|X - UV^T\|\|^2 | 否 | 关于 U 和 V 是双线性的 |
+| GAN 损失 | 否 | 极大极小，生成器为非凸 |
+| 对比损失（InfoNCE） | 否 | 带负样本的指数之比的对数 |
 
-## Solver selection based on convexity
+## 基于凸性的求解器选择
 
-| Problem type | Solver | Convergence guarantee |
-|---|---|---|
-| Convex, smooth, unconstrained | Gradient descent | O(1/k) to global minimum |
-| Convex, smooth, unconstrained | L-BFGS | Superlinear to global minimum |
-| Convex, smooth, unconstrained | Newton's method | Quadratic near minimum (if Hessian tractable) |
-| Convex, smooth, constrained | Interior point method | Polynomial time |
-| Convex, non-smooth (L1) | Proximal gradient / ISTA | O(1/k) to global minimum |
-| Convex, non-smooth (L1) | ADMM | Flexible, handles constraints |
-| Convex, quadratic | Conjugate gradient | Exact in n steps |
-| Non-convex, smooth | SGD / Adam | Converges to local minimum |
-| Non-convex, smooth | SGD + restarts | Better local minimum on average |
-| Non-convex, smooth | Overparameterize + SGD | Flat minima, good generalization |
+| 问题类型 | 求解器 | 收敛保证 |
+|---------|--------|---------|
+| 凸，光滑，无约束 | 梯度下降 | O(1/k) 到全局最小 |
+| 凸，光滑，无约束 | L-BFGS | 超线性收敛到全局最小 |
+| 凸，光滑，无约束 | 牛顿法 | 最小值附近二次收敛（如 Hessian 可处理） |
+| 凸，光滑，有约束 | 内点法 | 多项式时间 |
+| 凸，非光滑（L1） | 近端梯度 / ISTA | O(1/k) 到全局最小 |
+| 凸，非光滑（L1） | ADMM | 灵活，处理约束 |
+| 凸，二次 | 共轭梯度 | n 步内精确收敛 |
+| 非凸，光滑 | SGD / Adam | 收敛到局部最小 |
+| 非凸，光滑 | SGD + 重启 | 平均意义上更好的局部最小 |
+| 非凸，光滑 | 过参数化 + SGD | 平坦极值，良好泛化 |
 
-## Common mistakes
+## 常见错误
 
-- Assuming a problem is convex because the loss function is convex. The loss must be convex in the parameters you are optimizing. Cross-entropy is convex in the logits, but the full neural network mapping from inputs to logits is non-convex.
-- Using Newton's method on a non-convex problem. The Hessian may have negative eigenvalues, causing Newton to move toward saddle points or maxima instead of minima.
-- Forgetting that L1 regularization makes the objective non-differentiable at zero. Standard gradient descent does not work well. Use proximal gradient descent or subgradient methods.
-- Squaring the condition number by forming A^T A. If you need to solve a least-squares problem and A is ill-conditioned, use QR or SVD instead of the normal equations.
-- Declaring a problem non-convex without checking. Many ML problems (linear models, SVMs, logistic regression) are convex and benefit from stronger solvers.
+- 因为损失函数是凸的就假设问题是凸的。损失函数必须关于正在优化的参数是凸的。交叉熵关于 logits 是凸的，但从输入到 logits 的完整神经网络映射是非凸的。
+- 对非凸问题使用牛顿法。Hessian 矩阵可能有负特征值，导致牛顿法朝鞍点或极大值移动而非极小值。
+- 忘记 L1 正则化使目标函数在零点处不可微。标准梯度下降效果不好。使用近端梯度下降或次梯度方法。
+- 通过形成 A^T A 使条件数平方。如果需要求解最小二乘问题且 A 病态，使用 QR 或 SVD 而非正规方程。
+- 不经检验就宣称问题为非凸。很多 ML 问题（线性模型、SVM、逻辑回归）是凸的，可以使用更强的求解器。
 
-## Quick test: is my problem convex?
+## 快速检验：我的问题是凸的吗？
 
 ```
-1. Write out the objective: minimize f(w) subject to constraints
-2. For each term in f(w):
-   - Is it quadratic with PSD matrix? -> Convex
-   - Is it a norm? -> Convex
-   - Is it log-sum-exp? -> Convex
-   - Does it involve w nonlinearly (sigmoid(w), w1*w2)? -> Likely non-convex
-3. Are all constraints linear or convex inequalities?
-4. If ALL terms are convex and constraints are convex/linear -> problem is convex
-5. If ANY term is non-convex -> problem is non-convex
+1. 写出目标函数：最小化 f(w)，满足约束条件
+2. 对 f(w) 中的每一项：
+   - 是带半正定矩阵的二次型？ -> 凸
+   - 是某种范数？ -> 凸
+   - 是 log-sum-exp？ -> 凸
+   - 涉及 w 的非线性（sigmoid(w)、w1*w2）？ -> 可能非凸
+3. 所有约束是线性的或凸不等式吗？
+4. 如果所有项是凸的且约束是凸/线性的 -> 问题是凸的
+5. 如果任何一项是非凸的 -> 问题是非凸的
 ```

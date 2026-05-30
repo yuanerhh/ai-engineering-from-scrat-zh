@@ -1,27 +1,27 @@
 ---
 name: codec-picker
-description: Pick a neural audio codec (EnCodec / DAC / SNAC / Mimi) for a given generative or compression task.
+description: 为给定的生成或压缩任务选择神经音频编解码器（EnCodec / DAC / SNAC / Mimi）。
 version: 1.0.0
 phase: 6
 lesson: 13
 tags: [codec, encodec, dac, snac, mimi, rvq, semantic-tokens]
 ---
 
-Given the task (generative LM, compression, full-duplex dialogue, music editing, fidelity target), output:
+给定任务（生成语言模型、压缩、全双工对话、音乐编辑、保真度目标），输出以下内容：
 
-1. Codec. EnCodec-24k · EnCodec-48k · DAC-44.1k · SNAC-24k · Mimi · (fallback: Opus for non-neural compression). One-sentence reason.
-2. Frame rate + codebooks. Bitrate budget, codebook count (usually 4-12), sequence length for target clip duration.
-3. Tokenization scheme. Flat vs hierarchical (SNAC) vs semantic+acoustic (Mimi). How the LM consumes tokens.
-4. Decoder. In-codec decoder · external vocoder (HiFi-GAN) · LM-only (no vocoder, predict codec tokens directly). Explain why.
-5. Training implications. Need to train encoder/decoder? Fine-tune on domain audio (speech-only → domain-specific music)? Frozen off-the-shelf?
+1. 编解码器。EnCodec-24k · EnCodec-48k · DAC-44.1k · SNAC-24k · Mimi · （非神经压缩备选：Opus）。一句话说明理由。
+2. 帧率 + 码书。码率预算、码书数量（通常 4-12）、目标片段时长对应的序列长度。
+3. 分词方案。扁平式 vs 分层式（SNAC）vs 语义+声学（Mimi）。语言模型如何消费这些 token。
+4. 解码器。编解码器内置解码器 · 外部声码器（HiFi-GAN）· 仅语言模型（无声码器，直接预测编解码器 token）。解释原因。
+5. 训练影响。是否需要训练编/解码器？是否在领域音频上微调（仅语音 → 特定领域音乐）？还是直接使用冻结的现成模型？
 
-Refuse DAC for AR-LM workloads on tight latency budgets — 86 Hz frame rate × 8 codebooks = 5,504 tokens per 10 s, too long for fast generation. Refuse Mimi for music — it's speech-tuned. Refuse EnCodec for semantic-conditional generation — no semantic codebook, blurry speech from text.
+拒绝在延迟预算紧张的 AR-LM 工作负载中使用 DAC——86 Hz 帧率 × 8 码书 = 每 10 秒 5504 个 token，对快速生成来说序列太长。拒绝将 Mimi 用于音乐——它针对语音调优。拒绝将 EnCodec 用于语义条件生成——没有语义码书，文本生成的语音会很模糊。
 
-Example input: "Build an AR LM for text-to-speech TTS. Target TTFA 200 ms. English only."
+示例输入："构建用于文本转语音 TTS 的 AR 语言模型。目标 TTFA 200 ms。仅英语。"
 
-Example output:
-- Codec: Mimi. Semantic+acoustic split enables text → codebook 0 → codebooks 1-7 factorization, which is both fast and supports voice cloning.
-- Frame rate + codebooks: 12.5 Hz · 8 codebooks · 4.4 kbps. 10 s = 1,000 tokens.
-- Tokenization: predict codebook 0 first from text + speaker reference; then predict codebooks 1-7 given codebook 0 + speaker reference (depth-transformer pattern).
-- Decoder: Mimi's built-in decoder, no external vocoder needed.
-- Training: train the text-to-codec LM; freeze Mimi.
+示例输出：
+- 编解码器：Mimi。语义+声学分离支持文本 → 码书 0 → 码书 1-7 的因式分解，速度快且支持声音克隆。
+- 帧率 + 码书：12.5 Hz · 8 个码书 · 4.4 kbps。10 秒 = 1000 个 token。
+- 分词：先从文本 + 说话人参考预测码书 0；然后基于码书 0 + 说话人参考预测码书 1-7（深度 Transformer 模式）。
+- 解码器：Mimi 内置解码器，无需外部声码器。
+- 训练：训练文本到编解码器的语言模型；冻结 Mimi。

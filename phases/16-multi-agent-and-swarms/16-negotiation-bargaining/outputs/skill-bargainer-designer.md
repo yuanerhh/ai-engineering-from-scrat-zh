@@ -1,36 +1,36 @@
 ---
 name: bargainer-designer
-description: Design a negotiation protocol: which agent narrates, which component generates offers, how private scratchpads separate from public messages, what the round bound is, and how deal rate is monitored.
+description: 设计谈判协议：哪个智能体负责叙述、哪个组件生成报价、私人草稿如何与公开消息分离、轮次限制是什么，以及如何监控成交率。
 version: 1.0.0
 phase: 16
 lesson: 16
 tags: [multi-agent, negotiation, bargaining, contract-net, OG-Narrator]
 ---
 
-Given a negotiation or task-market scenario (two-party bargain, N-party auction, contract-net task allocation), design the protocol.
+给定一个谈判或任务市场场景（双方讨价还价、N 方拍卖、合同网任务分配），设计协议。
 
-Produce:
+产出内容：
 
-1. **Mechanism.** Two-party bargain, N-bidder auction, contract-net broadcast, or multi-party coalition. Name the game.
-2. **Offer generator.** Deterministic (Zeuthen-style concession, Rubinstein equilibrium, simple linear schedule) or LLM-prompted. Default: deterministic unless the offer must be a qualitative structure (proposal, role assignment).
-3. **Narration layer.** What the LLM contributes: the human-friendly framing, persuasion tactics, persona. State explicitly what the LLM does NOT decide.
-4. **Private vs public channels.** How reasoning traces are kept off the counterpart's context. "Private scratchpad" + "public message" as two fields. This is non-negotiable per arXiv:2503.06416.
-5. **Round bound.** 3-5 rounds maximum for two-party. Unbounded is not an option; it rewards conformity and encourages emotional offers.
-6. **Reservation and BATNA discipline.** Both parties must know their reservation price. If the other side probes, the LLM narrator must not reveal it. Validate every outgoing message against this rule.
-7. **Deal-rate monitoring.** Baseline deal rate expected for this protocol (cite a number from the negotiation benchmarks: 27%-89% range depending on LLM role). Alert threshold for regressions.
-8. **Escalation.** Below-threshold rounds, ZOPA violations, or counterpart-side rule-breaking route to a mediator agent or human.
+1. **机制。** 双方谈判、N 投标人拍卖、合同网广播还是多方联盟。命名博弈。
+2. **报价生成器。** 确定性（Zeuthen 式让步、Rubinstein 均衡、简单线性计划）还是 LLM 提示。默认：确定性，除非报价必须是定性结构（提议、角色分配）。
+3. **叙述层。** LLM 贡献的内容：人性化框架、说服策略、角色。明确说明 LLM 不决定什么。
+4. **私人 vs 公开渠道。** 如何将推理追踪排除在对方的上下文之外。"私人草稿"+ "公开消息"作为两个字段。根据 arXiv:2503.06416，这是不可谈判的。
+5. **轮次限制。** 双方谈判最多 3-5 轮。无限制不是选项；它奖励一致性并鼓励情绪化报价。
+6. **保留价格和 BATNA 纪律。** 双方必须知道自己的保留价格。如果对方探测，LLM 叙述者不得透露。对每条外发消息根据此规则进行验证。
+7. **成交率监控。** 此协议的预期基准成交率（引用谈判基准中的数字：根据 LLM 角色，范围在 27%-89% 之间）。回退时的警报阈值。
+8. **升级。** 低于阈值的轮次、ZOPA 违规或对方违规路由到调解者智能体或人工。
 
-Hard rejects:
+硬性拒绝：
 
-- Any design where the LLM computes the numerical offer without a deterministic fallback. arXiv:2402.15813 shows this produces ~27% deal rates.
-- Any design without separate private and public channels. Counterparts will read your reasoning.
-- Any design with unbounded rounds. Guarantees conformity-driven outcomes.
-- Designs that let a single agent hold both buyer and seller state (roleplay bargaining). The private-information property is the mechanism; merging roles removes it.
+- 任何 LLM 在没有确定性回退的情况下计算数值报价的设计。arXiv:2402.15813 显示这会产生约 27% 的成交率。
+- 任何没有独立私人和公开渠道的设计。对方会读取你的推理。
+- 任何有无限轮次的设计。保证一致性驱动的结果。
+- 让单个智能体同时持有买方和卖方状态（角色扮演谈判）的设计。私人信息属性是机制；合并角色会移除它。
 
-Refusal rules:
+拒绝规则：
 
-- If the task has no numerical payoff (qualitative negotiation, contract terms), the OG-Narrator decomposition may not apply. Recommend structured proposal + schema validation instead.
-- If the user cannot implement a separate scratchpad (single-LLM-call architecture), flag the leak risk explicitly and recommend a two-call architecture.
-- If the negotiation is adversarial with a party that may lie, recommend a mediator agent plus logged offers for audit.
+- 如果任务没有数值支付（定性谈判、合同条款），OG-Narrator 分解可能不适用。推荐结构化提议 + 模式验证。
+- 如果用户无法实现独立的草稿（单次 LLM 调用架构），明确标记泄露风险并推荐双调用架构。
+- 如果谈判是与可能撒谎的一方进行的对抗性谈判，推荐调解者智能体加已记录报价用于审计。
 
-Output: a one-page brief. Start with a single-sentence summary ("Two-party bargain: Zeuthen offer generator + LLM narrator, 5-round bound, separate scratchpad, deal-rate alert below 85%."), then the eight sections above. End with a sample message: what the counterpart sees vs what the private scratchpad holds.
+输出：一页简报。从一句话摘要开始（"双方谈判：Zeuthen 报价生成器 + LLM 叙述者，5 轮限制，独立草稿，成交率低于 85% 时发出警报。"），然后是以上八个部分。结尾提供一条示例消息：对方看到的内容 vs 私人草稿中的内容。

@@ -1,34 +1,34 @@
 ---
 name: supervisor-designer
-description: Design a supervisor/orchestrator-worker system for a given research-style query, specifying lead prompt, worker roles, decomposition rules, and synthesis template.
+description: 为给定的研究类查询设计一个主管/编排器-工作者系统，指定引导提示、工作者角色、分解规则和综合模板。
 version: 1.0.0
 phase: 16
 lesson: 05
 tags: [multi-agent, supervisor, orchestrator, anthropic-research, langgraph]
 ---
 
-Given a user query that benefits from parallel subagent research, produce a supervisor-pattern design ready to wire into any framework (LangGraph, OpenAI Agents SDK, CrewAI Hierarchical).
+给定一个受益于并行子智能体研究的用户查询，生成可直接接入任何框架（LangGraph、OpenAI Agents SDK、CrewAI Hierarchical）的主管模式设计。
 
-Produce:
+产出内容：
 
-1. **Complexity estimate.** Is this query simple (1 agent, 3-10 tool calls), medium (2-4 workers), or complex (5+ workers)? Justify in one sentence using Anthropic's scale-effort heuristic.
-2. **Lead system prompt.** Must include: (a) decomposition instructions, (b) synthesis instructions, (c) explicit rule that the lead never reads raw source content, only worker summaries.
-3. **Worker system prompts.** One per role, each naming its narrow scope and the output format the lead expects.
-4. **Sub-question decomposition rules.** How does the lead split the query? Broad-first-then-narrow, or direct decomposition? What disqualifies a sub-question (overlap with another, too broad)?
-5. **Synthesis template.** Explicit conflict-handling rule: if two workers return contradictory facts, the synthesis must surface the disagreement rather than silently picking one.
-6. **Model pairing.** Which model for the lead (reasoning tier), which for workers (faster/cheaper tier). Explain the tradeoff.
-7. **Observability requirements.** Minimum trace points: plan, each worker start/end, synthesis input, synthesis output.
+1. **复杂度估算。** 此查询是简单（1 个智能体，3-10 次工具调用）、中等（2-4 个工作者）还是复杂（5+ 个工作者）？用一句话引用 Anthropic 的规模-工作量启发式原则说明理由。
+2. **引导系统提示。** 必须包含：(a) 分解指令，(b) 综合指令，(c) 引导永不直接阅读原始来源内容、只看工作者摘要的明确规则。
+3. **工作者系统提示。** 每个角色一个，每个都明确其狭窄范围和引导期望的输出格式。
+4. **子问题分解规则。** 引导如何拆分查询？先宽后窄，还是直接分解？什么会使子问题不合格（与其他子问题重叠、过于宽泛）？
+5. **综合模板。** 明确的冲突处理规则：如果两个工作者返回相互矛盾的事实，综合必须呈现分歧，而不是静默地选择一个。
+6. **模型配对。** 引导用哪个模型（推理层），工作者用哪个（更快/更便宜层）。解释权衡。
+7. **可观测性要求。** 最少追踪点：计划、每个工作者的开始/结束、综合输入、综合输出。
 
-Hard rejects:
+硬性拒绝：
 
-- Any design where the lead does tool-use itself. Lead only plans and synthesizes.
-- Worker prompts that permit scope drift (e.g., "research anything related to X" without a bound).
-- Synthesis templates that hide conflicts.
+- 任何引导本身进行工具使用的设计。引导只负责计划和综合。
+- 允许范围漂移的工作者提示（例如，"研究与 X 相关的任何内容"而没有限制）。
+- 隐藏冲突的综合模板。
 
-Refusal rules:
+拒绝规则：
 
-- If the query is simple (estimated under 10 tool calls total), refuse the design and recommend single-agent instead. Cite the Anthropic 15× token cost finding.
-- If the query is sequential (step 2 needs step 1's output), refuse and recommend a pipeline/chain pattern instead.
-- If the user is optimizing for determinism and audit, refuse supervisor and recommend a LangGraph static graph.
+- 如果查询简单（估计总共不到 10 次工具调用），拒绝设计并改为推荐单智能体。引用 Anthropic 的 15× 令牌成本发现。
+- 如果查询是顺序的（步骤 2 需要步骤 1 的输出），拒绝并推荐流水线/链式模式。
+- 如果用户为确定性和审计优化，拒绝主管模式并推荐 LangGraph 静态图。
 
-Output: one-page design brief. Start with the complexity estimate and a pattern-fit verdict ("supervisor fits"). Close with a rainbow-deployment reminder if the system will run continuously.
+输出：一页设计简报。从复杂度估算和模式适配结论开始（"主管模式适合"）。如果系统将持续运行，结尾加上彩虹部署提醒。

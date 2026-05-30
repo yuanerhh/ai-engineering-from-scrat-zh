@@ -1,32 +1,32 @@
 ---
 name: eagle3-rollout
-description: Produce a staged EAGLE-3 speculative-decoding rollout plan that measures acceptance rate alpha on real traffic before shipping.
+description: 生成一个分阶段的 EAGLE-3 推测解码推出计划，在发布之前在真实流量上测量接受率 alpha。
 version: 1.0.0
 phase: 17
 lesson: 05
 tags: [speculative-decoding, eagle-3, vllm, alpha, production-rollout]
 ---
 
-Given a target model, hardware (GPU type and count), traffic description (general chat / code / specialized), concurrency target, and current baseline metrics (TTFT, ITL, throughput), produce a staged EAGLE-3 rollout plan.
+给定目标模型、硬件（GPU 类型和数量）、流量描述（通用聊天 / 代码 / 专业领域）、并发目标和当前基准指标（TTFT、ITL、吞吐量），生成分阶段的 EAGLE-3 推出计划。
 
-Produce:
+产出内容：
 
-1. Baseline measurement plan. Which benchmark (LLMPerf, GenAI-Perf, or production shadow), which prompt distribution, which concurrency point, which metrics to record (TTFT mean/P99, ITL mean/P99, throughput, concurrency).
-2. Draft-head selection. ShareGPT-trained EAGLE-3 for general chat. Domain-trained EAGLE-3 for specialized traffic (code, medical, legal) or the decision to train one before shipping.
-3. Config. Exact vLLM `speculative_config` fields (method, model, num_speculative_tokens). Note the v0.18.0 compatibility: draft-model speculation cannot combine with `--enable-chunked-prefill`; N-gram GPU spec decode in V1 is the exception.
-4. Alpha gate. Target alpha >= 0.55 at production concurrency. Measurement procedure: shadow traffic for 24 hours, log vLLM `spec_decode_metrics`, divide accepted tokens by requested draft length. Kill switch if alpha drops below 0.45 in any 1-hour window.
-5. Tail watch. Plot P99 ITL delta (spec on - spec off). If delta is positive, the rejected-draft two-pass pattern is biting. Reduce K or disable on this workload.
-6. Break-even check. At reported concurrency, compute break-even alpha for current verify overhead. Ship only if measured alpha clears break-even by at least 0.1.
+1. **基准测量计划。** 使用哪个基准（LLMPerf、GenAI-Perf 或生产影子流量），哪种提示分布，哪个并发点，要记录哪些指标（TTFT 均值/P99、ITL 均值/P99、吞吐量、并发）。
+2. **草稿头选择。** 通用聊天使用 ShareGPT 训练的 EAGLE-3。专业领域流量（代码、医疗、法律）使用领域训练的 EAGLE-3，或在发布前训练一个的决定。
+3. **配置。** 精确的 vLLM `speculative_config` 字段（方法、模型、num_speculative_tokens）。注意 v0.18.0 兼容性：草稿模型推测不能与 `--enable-chunked-prefill` 结合；V1 中的 N-gram GPU 推测解码是例外。
+4. **Alpha 门控。** 在生产并发时目标 alpha >= 0.55。测量程序：影子流量 24 小时，记录 vLLM `spec_decode_metrics`，用接受的令牌除以请求的草稿长度。如果 alpha 在任何 1 小时窗口内降至 0.45 以下，触发紧急停止开关。
+5. **尾部观察。** 绘制 P99 ITL 差值（推测开 - 推测关）。如果差值为正，拒绝草稿的两次传递模式正在造成影响。减少 K 或在此工作负载上禁用。
+6. **盈亏平衡检查。** 在报告的并发下，计算当前验证开销的盈亏平衡 alpha。仅在测量的 alpha 比盈亏平衡高至少 0.1 时发布。
 
-Hard rejects:
-- Shipping without measuring alpha on production traffic. Refuse and require a 24-hour shadow measurement.
-- Claiming 2-3x speedup without naming the measured alpha.
-- Enabling speculative decoding for offline batch jobs where latency is not the constraint.
-- Combining draft-model speculation with chunked prefill on vLLM v0.18.0. Hard incompatibility.
+硬性拒绝：
+- 不在生产流量上测量 alpha 就发布。拒绝并要求 24 小时影子测量。
+- 声称 2-3 倍加速而不列出测量的 alpha。
+- 为延迟不是约束的离线批处理作业启用推测解码。
+- 在 vLLM v0.18.0 上将草稿模型推测与分块预填充结合。硬性不兼容。
 
-Refusal rules:
-- If traffic is primarily very short outputs (under 50 tokens mean), refuse. Draft overhead dominates; ship plain target.
-- If hardware is consumer (RTX 4090 / 5090) and batch size stays under 8, recommend plain target — batch-amortization of verify overhead needs concurrency the hardware cannot supply.
-- If the user wants auto-tune of K without a measurement loop, refuse. K is chosen from measured alpha plus verify overhead; no auto-tune replaces measurement.
+拒绝规则：
+- 如果流量主要是非常短的输出（均值低于 50 令牌），拒绝。草稿开销占主导；使用普通目标模型。
+- 如果硬件是消费级（RTX 4090 / 5090）且批量大小保持在 8 以下，推荐普通目标模型——验证开销的批量摊销需要硬件无法提供的并发。
+- 如果用户想在没有测量循环的情况下自动调优 K，拒绝。K 是从测量的 alpha 加上验证开销中选择的；没有任何自动调优可以替代测量。
 
-Output: a one-page staged rollout plan listing baseline → config → alpha gate → tail watch → break-even confirmation. End with a "what to measure next" paragraph naming either domain-specific EAGLE-3 training, lower K, or reverting to plain target depending on the diagnosis.
+输出：一页分阶段推出计划，列出基准 → 配置 → alpha 门控 → 尾部观察 → 盈亏平衡确认。结尾给出"下一步要测量什么"段落，根据诊断列出领域特定的 EAGLE-3 训练、降低 K 或恢复到普通目标模型中的一个。

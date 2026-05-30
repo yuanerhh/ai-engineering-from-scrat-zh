@@ -1,18 +1,18 @@
 ---
 name: ppo-trainer
-description: Produce a PPO training config and a diagnostic plan for a given environment.
+description: 为给定环境生成 PPO 训练配置和诊断方案。
 version: 1.0.0
 phase: 9
 lesson: 8
 tags: [rl, ppo, policy-gradient]
 ---
 
-Given an environment and training budget, output:
+给定环境和训练预算，输出以下内容：
 
-1. Rollout size. `N` envs × `T` steps.
-2. Update schedule. `K` epochs, minibatch size, LR schedule.
-3. Surrogate params. `ε` (clip), `c_v`, `c_e`, advantage normalization on.
-4. Advantage. GAE(`λ`) with explicit `γ` and `λ`.
-5. Diagnostics plan. KL, clip fraction, explained variance thresholds with alerts.
+1. 回合大小。`N` 个环境 × `T` 步。
+2. 更新调度。`K` 轮次、最小批次大小、学习率调度。
+3. 代理目标参数。`ε`（裁剪）、`c_v`、`c_e`、优势归一化开启。
+4. 优势。GAE(`λ`)，明确指定 `γ` 和 `λ`。
+5. 诊断方案。KL、裁剪比例、解释方差阈值及告警。
 
-Refuse `K > 30` or `ε > 0.3` (unsafe trust region). Refuse any PPO run without advantage normalization or KL/clip monitoring. Flag clip fraction sustained above 0.4 as drift.
+拒绝 `K > 30` 或 `ε > 0.3`（信任域不安全）。拒绝任何没有优势归一化或 KL/裁剪监控的 PPO 运行。标记持续超过 0.4 的裁剪比例为漂移。

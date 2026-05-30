@@ -1,40 +1,40 @@
 ---
 name: tripwire-design
-description: Review a proposed agent detector stack (kill switch, circuit breakers, canary tokens) and flag missing tripwires before the first autonomous run.
+description: 审查拟议的智能体检测栈（紧急停止开关、断路器、金丝雀令牌），并在首次自主运行之前标记缺失的绊线。
 version: 1.0.0
 phase: 15
 lesson: 14
 tags: [kill-switch, circuit-breaker, canary, honeytoken, detection-and-response]
 ---
 
-Given a proposed detector stack for an agent deployment, audit it against the three-detector reference (kill switch, circuit breaker, canary) and flag what is missing, mis-tuned, or exposed to the agent.
+给定一个智能体部署的拟议检测栈，根据三检测器参考标准（紧急停止开关、断路器、金丝雀）对其进行审核，并标记缺失、调整不当或暴露给智能体的内容。
 
-Produce:
+产出内容：
 
-1. **Kill-switch audit.** Where does the switch live (feature flag, Redis, signed config)? Confirm the agent's credentials cannot set it off. Confirm every consequential action checks the switch, not just startup. Confirm re-enable is an explicit human action.
-2. **Circuit-breaker inventory.** List every pattern a breaker watches (repetition, consecutive failures, rate, specific tool after out-of-trust read). State threshold and cool-down for each. Thresholds above 10 are usually too loose.
-3. **Canary design.** List every canary token in the environment. For each: what it is (fake credential, fake DB record, fake file, fake memory entry), where it lives, what access triggers the alarm, who is paged. Confirm no canary has a legitimate reason to be touched.
-4. **Statistical + hard layering.** Confirm the stack uses at least one hard limit (Lesson 17 constitutional style) in addition to any statistical detectors (EWMA, z-score). Statistical-only detectors accept slow drift.
-5. **Quarantine path.** What happens when a detector fires? Full agent stop, path-specific pause, traffic redirect (eBPF / Cilium honeypot), alert-only. Confirm the path has been tested end-to-end at least once.
+1. **紧急停止开关审核。** 开关位于哪里（特性标志、Redis、签名配置）？确认智能体的凭据无法关闭它。确认每个重要操作都检查开关，而非仅在启动时检查。确认重新启用是明确的人工操作。
+2. **断路器清单。** 列出断路器监控的每种模式（重复、连续失败、速率、不可信读取后的特定工具）。说明每种的阈值和冷却时间。阈值超过 10 通常太宽松。
+3. **金丝雀设计。** 列出环境中的每个金丝雀令牌。对于每个：它是什么（假凭据、假数据库记录、假文件、假内存条目），它在哪里，什么访问会触发警报，谁会被呼叫。确认没有金丝雀有被合理触及的原因。
+4. **统计 + 硬性分层。** 确认栈除任何统计检测器（EWMA、z 分数）外还使用至少一个硬性限制（第 17 课宪法风格）。仅统计检测器会接受缓慢漂移。
+5. **隔离路径。** 当检测器触发时会发生什么？完全停止智能体、特定路径暂停、流量重定向（eBPF / Cilium 蜜罐）、仅警报。确认该路径已至少端到端测试过一次。
 
-Hard rejects:
-- Any deployment without an external kill switch.
-- Canary tokens stored in systems the agent has write access to.
-- Statistical-only detection with no hard limits.
-- Circuit breakers with cool-downs that auto-re-enable without human review.
-- Unattended runs where the kill switch is checked only at startup, not per action.
+硬性拒绝：
+- 任何没有外部紧急停止开关的部署。
+- 存储在智能体有写访问权限的系统中的金丝雀令牌。
+- 没有硬性限制的仅统计检测。
+- 冷却后自动重新启用（无需人工审查）的断路器。
+- 仅在启动时检查紧急停止开关（而非每个操作时）的无人值守运行。
 
-Refusal rules:
-- If the user cannot name the specific systems outside the agent's credentials that host the kill switch, refuse. "We use a config file the agent reads" is not a kill switch if the agent can write config files.
-- If the user treats the Auto Mode classifier (Lesson 10) as a replacement for tripwires, refuse. The classifier is orthogonal to detection-and-response.
-- If the proposed canaries sit in systems the agent has legitimate reason to read, refuse and require redesign.
+拒绝规则：
+- 如果用户无法列出智能体凭据之外的托管紧急停止开关的具体系统，拒绝。"我们使用智能体读取的配置文件"如果智能体可以写入配置文件，就不是紧急停止开关。
+- 如果用户将自动模式分类器（第 10 课）视为绊线的替代品，拒绝。分类器与检测和响应正交。
+- 如果拟议的金丝雀位于智能体有合理读取理由的系统中，拒绝并要求重新设计。
 
-Output format:
+输出格式：
 
-Return a tripwire audit with:
-- **Kill-switch line** (location, check cadence, re-enable procedure)
-- **Circuit-breaker table** (pattern, threshold, cool-down)
-- **Canary table** (token, location, alarm, owner)
-- **Layering note** (statistical + hard limits present y/n)
-- **Quarantine flow** (what fires, what happens, tested y/n)
-- **Readiness** (production / staging / research-only)
+返回绊线审核报告，包含：
+- **紧急停止开关行**（位置、检查频率、重新启用程序）
+- **断路器表格**（模式、阈值、冷却时间）
+- **金丝雀表格**（令牌、位置、警报、负责人）
+- **分层说明**（是否同时存在统计 + 硬性限制）
+- **隔离流程**（触发什么、发生什么、是否已测试）
+- **就绪性**（生产 / 暂存 / 仅研究）

@@ -1,31 +1,31 @@
 ---
 name: gpu-autoscaler-plan
-description: Design a three-layer GPU autoscaling plan (Karpenter + KAI Scheduler + application signals) for a Kubernetes-based LLM serving cluster. Diagnose DCGM_FI_DEV_GPU_UTIL traps and partial-allocation failures.
+description: 为 Kubernetes 基础的 LLM 服务集群设计三层 GPU 自动扩缩计划（Karpenter + KAI Scheduler + 应用信号）。诊断 DCGM_FI_DEV_GPU_UTIL 陷阱和部分分配失败。
 version: 1.0.0
 phase: 17
 lesson: 03
 tags: [kubernetes, gpu, autoscaling, karpenter, kai-scheduler, hpa, dynamo-planner, llm-d]
 ---
 
-Given cluster topology (nodes, GPU types, NVLink domains), workload shape (TP/PP config, average concurrency, burst factor), and SLO (TTFT P99, goodput), produce a three-layer autoscaling plan.
+给定集群拓扑（节点、GPU 类型、NVLink 域）、工作负载形态（TP/PP 配置、平均并发、突发因子）和 SLO（TTFT P99、有效吞吐量），生成三层自动扩缩计划。
 
-Produce:
+产出内容：
 
-1. Layer 1 — Karpenter NodePool. Specify `instance-type`, `capacity-type` (on-demand / spot / reserved), `consolidationPolicy` (must be `WhenEmpty` with `consolidateAfter: 1h` for GPU pools), taints that exclude non-GPU workloads, and labels for KAI Scheduler selection.
-2. Layer 2 — KAI Scheduler policy. State whether gang scheduling is required (yes for TP/PP > 1). Define topology constraint (NVLink domain, rack, zone). Specify queue hierarchy and preemption rules for production vs training tenants.
-3. Layer 3 — Application autoscaler. Pick the signal: queue depth for prefill-bound workloads, KV cache utilization for decode-bound, composite goodput for mixed. Forbid `DCGM_FI_DEV_GPU_UTIL` and explain why.
-4. Disaggregated split. If using Phase 17 · 17 disaggregated prefill/decode, specify separate HPAs — queue depth signal for prefill pool, KV utilization signal for decode pool.
-5. Warm-pool sizing. Minimum ready replicas for SLO-critical paths, based on P99 TTFT constraint and observed cold-start time (node provision + model load).
-6. Monitoring. Metrics to dashboard: per-replica queue depth, per-replica KV utilization, node provision wait time, gang-scheduling deferral count, Karpenter consolidation events.
+1. **第一层——Karpenter NodePool。** 指定 `instance-type`、`capacity-type`（按需 / 竞价 / 预留）、`consolidationPolicy`（GPU 池必须是 `WhenEmpty` 且 `consolidateAfter: 1h`）、排除非 GPU 工作负载的污点，以及 KAI Scheduler 选择的标签。
+2. **第二层——KAI Scheduler 策略。** 说明是否需要组调度（TP/PP > 1 时需要）。定义拓扑约束（NVLink 域、机架、区域）。为生产 vs 训练租户指定队列层级和抢占规则。
+3. **第三层——应用自动扩缩器。** 选择信号：预填充绑定工作负载使用队列深度，解码绑定工作负载使用 KV 缓存利用率，混合工作负载使用复合有效吞吐量。禁止使用 `DCGM_FI_DEV_GPU_UTIL` 并解释原因。
+4. **解聚分割。** 如果使用 Phase 17 · 17 解聚预填充/解码，指定独立的 HPA——预填充池使用队列深度信号，解码池使用 KV 利用率信号。
+5. **暖池大小。** SLO 关键路径的最少就绪副本数，基于 P99 TTFT 约束和观察到的冷启动时间（节点配置 + 模型加载）。
+6. **监控。** 要监控的指标：每副本队列深度、每副本 KV 利用率、节点配置等待时间、组调度延迟计数、Karpenter 整合事件。
 
-Hard rejects:
-- Recommending HPA on `DCGM_FI_DEV_GPU_UTIL`. Refuse and name queue depth + KV utilization as the correct signals.
-- Leaving `consolidationPolicy: WhenEmptyOrUnderutilized` for a GPU pool. Refuse and cite the running-job-eviction risk.
-- Ignoring gang scheduling for a TP/PP workload. Refuse — partial allocation is a $-burning anti-pattern.
+硬性拒绝：
+- 推荐在 `DCGM_FI_DEV_GPU_UTIL` 上使用 HPA。拒绝并列出队列深度 + KV 利用率作为正确信号。
+- 对 GPU 池保留 `consolidationPolicy: WhenEmptyOrUnderutilized`。拒绝并引用运行中作业驱逐的风险。
+- 忽略 TP/PP 工作负载的组调度。拒绝——分散 GPU 上的部分分配是浪费金钱的反模式。
 
-Refusal rules:
-- If the cluster has only one GPU type and one node, decline to propose Karpenter — the customer needs managed serverless (Phase 17 · 02) first.
-- If the operator asks to "scale on GPU memory," refuse — vLLM pre-allocates to `--gpu-memory-utilization`; memory stays near 90% even at one request.
-- If gang scheduling is declined for a TP-8 workload citing complexity, refuse to certify the plan — single-pod placement on 8 scattered GPUs fails atomically.
+拒绝规则：
+- 如果集群只有一种 GPU 类型和一个节点，不建议使用 Karpenter——客户首先需要托管无服务器（Phase 17 · 02）。
+- 如果运营商要求"按 GPU 内存扩缩"，拒绝——vLLM 预先分配到 `--gpu-memory-utilization`；即使只有一个请求，内存也接近 90%。
+- 如果以复杂性为由拒绝 TP-8 工作负载的组调度，拒绝认证该计划——8 个分散 GPU 上的单 pod 放置会原子性失败。
 
-Output: a one-page plan with a Karpenter YAML snippet, a KAI Scheduler config snippet, an HPA/custom autoscaler signal choice, a warm-pool number, and five dashboard metrics. End with a single kill-switch: if P99 TTFT breaches, roll back to last-known autoscaler state.
+输出：一页计划，包含 Karpenter YAML 片段、KAI Scheduler 配置片段、HPA/自定义自动扩缩器信号选择、暖池数量和五个监控指标。结尾给出单一的紧急停止开关：如果 P99 TTFT 突破，回滚到最后已知的自动扩缩器状态。

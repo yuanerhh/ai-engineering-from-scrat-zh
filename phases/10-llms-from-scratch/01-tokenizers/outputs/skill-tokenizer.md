@@ -1,54 +1,54 @@
 ---
 name: skill-tokenizer
-description: Choosing and building tokenizers for LLM projects
+description: 为 LLM 项目选择和构建分词器
 version: 1.0.0
 phase: 10
 lesson: 1
 tags: [tokenizer, bpe, wordpiece, sentencepiece, llm, nlp]
 ---
 
-# Tokenizer Selection and Implementation
+# 分词器选择与实现
 
-When starting an LLM project, apply this decision framework for tokenizer selection.
+在启动 LLM 项目时，使用以下决策框架选择分词器。
 
-## When to use each tokenizer
+## 各类分词器的适用场景
 
-**Byte-level BPE (tiktoken):** You are building on or fine-tuning GPT-family models. You need guaranteed handling of any input byte sequence. You want no unknown tokens.
+**字节级 BPE（tiktoken）：** 你在基于 GPT 系列模型构建或微调。你需要保证对任意输入字节序列的处理能力。你不希望出现未知 token。
 
-**WordPiece (Hugging Face):** You are working with BERT-family models for classification, NER, or embedding tasks. You need the "##" continuation prefix for downstream tasks that rely on word boundary signals.
+**WordPiece（Hugging Face）：** 你在处理用于分类、NER 或嵌入任务的 BERT 系列模型。你需要"##"续接前缀来满足依赖词边界信号的下游任务。
 
-**SentencePiece (BPE or Unigram):** You are training from scratch. You need language-agnostic tokenization. Your data includes CJK languages, Thai, or other scripts without whitespace word boundaries. LLaMA, T5, and most multilingual models use this.
+**SentencePiece（BPE 或 Unigram）：** 你在从头训练模型。你需要与语言无关的分词。你的数据包含中日韩字符、泰语或其他没有空格词边界的文字。LLaMA、T5 和大多数多语言模型使用这种方案。
 
-## Vocabulary size guidelines
+## 词汇量规模指南
 
-- 32K tokens: good default for single-language models, keeps embedding layer small
-- 50K-64K tokens: better for multilingual or code-heavy models
-- 100K+ tokens: only when you have massive training data and want short sequences
+- 3.2 万 token：适合单语言模型的良好默认值，嵌入层参数较小
+- 5 万-6.4 万 token：适合多语言或代码密集型模型，大多数项目的良好平衡点
+- 10 万以上：仅在拥有海量训练数据且希望缩短序列时使用
 
-Larger vocabulary means shorter sequences (cheaper inference) but more parameters in the embedding matrix. For a 100K vocabulary with 4096-dimensional embeddings, the embedding layer alone is 400M parameters.
+词汇量越大意味着序列越短（推理成本更低），但嵌入矩阵参数更多。对于 10 万词汇量和 4096 维嵌入，仅嵌入层就有 4 亿参数。
 
-## Pre-tokenization rules that matter
+## 关键预分词规则
 
-1. Split on whitespace before BPE to prevent cross-word merges
-2. Separate digits individually if you want the model to learn arithmetic
-3. Normalize Unicode (NFC) before tokenization for consistent behavior
-4. Add special tokens for your use case: `<pad>`, `<eos>`, `<bos>`, `<unk>`, and any task-specific markers
+1. 在 BPE 之前按空格分割，防止跨词合并
+2. 如果希望模型学习算术，对数字单独分割
+3. 在分词之前进行 Unicode NFC 标准化，确保行为一致
+4. 为你的使用场景添加特殊 token：`<pad>`、`<eos>`、`<bos>`、`<unk>` 以及任何任务特定标记
 
-## Red flags in tokenizer behavior
+## 分词器行为的红色警报
 
-- Fertility above 2.0 for your target language: the model wastes context window
-- Common domain words splitting into 3+ tokens: retrain with domain data
-- Inconsistent tokenization of numbers: check digit-splitting rules
-- Large vocabulary with many single-use tokens: reduce vocabulary size
+- 目标语言的繁殖率高于 2.0：模型浪费了上下文窗口
+- 常见领域词被分割成 3+ 个 token：用领域数据重新训练
+- 数字分词不一致：检查数字分割规则
+- 词汇量大但有很多单次使用的 token：减小词汇量
 
-## Building a custom tokenizer - checklist
+## 构建自定义分词器——检查清单
 
-1. Collect representative training data (at least 1GB of text in target domain)
-2. Choose algorithm: BPE for general use, Unigram for multilingual
-3. Set vocabulary size based on guidelines above
-4. Configure pre-tokenization: whitespace splitting, digit handling, punctuation
-5. Add special tokens
-6. Train using Hugging Face tokenizers library (Rust backend, fast)
-7. Validate: check fertility on held-out text across all target languages
-8. Test edge cases: empty string, very long input, binary data, emoji, RTL text
-9. Save and version the tokenizer alongside model checkpoints
+1. 收集有代表性的训练数据（目标领域至少 1GB 文本）
+2. 选择算法：通用场景用 BPE，多语言场景用 Unigram
+3. 根据上述指南设置词汇量
+4. 配置预分词：空格分割、数字处理、标点符号
+5. 添加特殊 token
+6. 使用 Hugging Face tokenizers 库训练（Rust 后端，速度快）
+7. 验证：在所有目标语言的保留文本上检查繁殖率
+8. 测试边界情况：空字符串、超长输入、二进制数据、表情符号、从右到左的文本
+9. 将分词器与模型检查点一起保存并版本化

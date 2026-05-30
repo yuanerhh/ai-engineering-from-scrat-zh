@@ -1,38 +1,38 @@
 ---
 name: case-study-mapper
-description: Map a proposed multi-agent system design to the closest 2026 production reference (Anthropic Research, MetaGPT/ChatDev, or OpenClaw/Moltbook). Surface known trade-offs, recommended framework, and the specific design decisions already tested in production.
+description: 将拟议的多智能体系统设计映射到最接近的 2026 年生产参考（Anthropic 研究、MetaGPT/ChatDev 或 OpenClaw/Moltbook）。呈现已知权衡、推荐框架，以及已在生产中测试的具体设计决策。
 version: 1.0.0
 phase: 16
 lesson: 25
 tags: [multi-agent, case-studies, production, framework-selection, reference-architectures]
 ---
 
-Given a proposed multi-agent system design, pick the closest canonical 2026 case study and adapt.
+给定一个拟议的多智能体系统设计，选择最接近的 2026 年典型案例研究并进行适配。
 
-Produce:
+产出内容：
 
-1. **Design fingerprint.** Task type (research / engineering / population / automation), agent count, verification requirement, runtime duration, role distinctness, user-facing network exposure.
-2. **Closest case study.**
-   - **Anthropic Research** if: research or knowledge-retrieval task, verification mandatory, multi-hour runs, agents differ primarily by context and scope (fresh-context subagents win).
-   - **MetaGPT / ChatDev** if: engineering or structured workflow, roles are clearly distinguishable (planner / coder / reviewer / tester), handoff artifacts are well-typed.
-   - **OpenClaw / Moltbook** if: population-scale, user-facing agent network, prompt-injection is a meaningful threat, emergent economy matters.
-3. **Patterns to copy.** The specific design decisions from the chosen case study that apply: fresh-context subagents, rainbow deploy, communicative dehallucination, DAG routing, unwritable verifier, substrate-level security.
-4. **Framework recommendation.** LangGraph, CrewAI, AG2, Microsoft Agent Framework, OpenAI Agents SDK, Google ADK, Anthropic Claude Agent SDK, or custom. Default to the case study's typical framework; note if a better fit exists for the specific design.
-5. **Anti-patterns from the case.** Things the reference case found NOT to work. Avoid in the new design.
-6. **Cost projection.** Expected token multiplier (Anthropic Research: ~15x; MetaGPT: ~5x; OpenClaw: depends on network effects). Expected wall-clock and dollar cost range.
-7. **Evaluation approach.** Which benchmark (MARBLE, SWE-bench Pro, internal) is relevant; what delta over the case-study baseline is reasonable to target.
+1. **设计指纹。** 任务类型（研究 / 工程 / 群体 / 自动化）、智能体数量、验证要求、运行时长、角色差异性、面向用户的网络暴露。
+2. **最接近的案例研究。**
+   - **Anthropic 研究**，如果：研究或知识检索任务、验证是必须的、多小时运行、智能体主要按上下文和范围区分（新鲜上下文子智能体更有优势）。
+   - **MetaGPT / ChatDev**，如果：工程或结构化工作流、角色清晰可区分（规划者 / 编码者 / 审查者 / 测试者）、交接工件类型良好。
+   - **OpenClaw / Moltbook**，如果：群体规模、面向用户的智能体网络、提示注入是重要威胁、涌现经济很重要。
+3. **可以复制的模式。** 来自所选案例研究的具体设计决策：新鲜上下文子智能体、彩虹部署、通信去幻觉、DAG 路由、不可写验证器、基础设施级安全。
+4. **框架建议。** LangGraph、CrewAI、AG2、Microsoft Agent Framework、OpenAI Agents SDK、Google ADK、Anthropic Claude Agent SDK 或自定义。默认采用案例研究的典型框架；如果有更好的适配，则注明。
+5. **来自该案例的反模式。** 参考案例发现不起作用的事情。在新设计中避免。
+6. **成本预测。** 预期令牌乘数（Anthropic 研究：约 15x；MetaGPT：约 5x；OpenClaw：取决于网络效应）。预期的墙上时间和美元成本范围。
+7. **评估方法。** 哪个基准（MARBLE、SWE-bench Pro、内部）是相关的；针对案例研究基线的合理目标差值是什么。
 
-Hard rejects:
+硬性拒绝：
 
-- Designs that ignore verification when the task has correctness requirements. Every case study pays the verification tax.
-- Designs that claim a new substrate without acknowledging prompt-injection as an attack surface. OpenClaw/Moltbook case shows this is a production concern, not hypothetical.
-- "Revolutionary" claims that do not map to any case study. Multi-agent has been in production since 2024; novel claims need explicit comparison.
-- Designs that skip MCP or A2A adoption without justification. Protocol support is table stakes.
+- 在任务有正确性要求时忽略验证的设计。每个案例研究都为验证付出了代价。
+- 声称新基础设施但不承认提示注入是攻击面的设计。OpenClaw/Moltbook 案例表明这是生产中的现实问题，而非假设。
+- 无法映射到任何案例研究的"革命性"声明。多智能体自 2024 年以来就在生产中；新颖声明需要明确比较。
+- 没有理由就跳过 MCP 或 A2A 采用的设计。协议支持是基本要求。
 
-Refusal rules:
+拒绝规则：
 
-- If the design has no clear task type, recommend scoping the task before picking a case study. "Multi-agent for everything" is not a design.
-- If the design claims production readiness but no failure-mode audit, recommend a MAST-style audit (Lesson 23) before reference mapping.
-- If the design is purely experimental / research, note which aspects would need hardening before adopting any case study's production patterns.
+- 如果设计没有明确的任务类型，建议在选择案例研究之前界定任务范围。"万能多智能体"不是一个设计。
+- 如果设计声称生产就绪但没有失败模式审计，建议在参考映射之前进行 MAST 风格审计（第 23 课）。
+- 如果设计是纯实验性/研究性的，注明在采用任何案例研究的生产模式之前哪些方面需要加固。
 
-Output: a two-page brief. Start with a one-sentence summary ("Closest case study: MetaGPT / ChatDev. Adopt role-SOP decomposition, communicative dehallucination, and structured handoff artifacts; use CrewAI or custom."), then the seven sections above. End with a 90-day adaptation plan: what to copy from the reference, what to customize, and what to validate against benchmarks.
+输出：两页简报。从一句话摘要开始（"最接近的案例研究：MetaGPT / ChatDev。采用角色-SOP 分解、通信去幻觉和结构化交接工件；使用 CrewAI 或自定义。"），然后是以上七个部分。结尾给出 90 天适配计划：从参考中复制什么、定制什么，以及针对基准验证什么。

@@ -1,33 +1,33 @@
 ---
 name: role-designer
-description: Produce a role roster for a multi-agent system, naming the planner/executor/critic/verifier for a given task with explicit I/O schemas.
+description: 为多智能体系统生成角色名册，为给定任务命名规划者/执行者/评审者/验证者，并附上明确的 I/O 模式。
 version: 1.0.0
 phase: 16
 lesson: 08
 tags: [multi-agent, role-specialization, metagpt, chatdev, verification]
 ---
 
-Given a task, produce a specialized role roster with I/O schemas and a deterministic verifier. Ready to map onto CrewAI, LangGraph, AutoGen, or custom loops.
+给定一个任务，生成带有 I/O 模式和确定性验证器的专业角色名册。可直接映射到 CrewAI、LangGraph、AutoGen 或自定义循环。
 
-Produce:
+产出内容：
 
-1. **Role roster.** 3-5 roles. Name each. At minimum: planner, executor, verifier. Critic optional.
-2. **I/O schema per role.** For each role: what it consumes (from upstream role) and what it produces (schema, not prose). Use dataclass-style notation.
-3. **Verifier specification.** Name the deterministic check: test suite, type checker, schema validator, linter. Describe pass/fail criteria.
-4. **Critic specification (optional).** If included, name what subjective quality it judges. Concrete checklist, not "good code."
-5. **Communicative dehallucination rules.** Name the questions each downstream role is allowed to send upstream when a detail is missing, so they do not invent.
-6. **Revision loop budget.** Max rounds before escalation to human. Default 2.
-7. **Framework mapping.** One-line each: how to express this roster in CrewAI, LangGraph, AutoGen.
+1. **角色名册。** 3-5 个角色。各自命名。至少包含：规划者、执行者、验证者。评审者可选。
+2. **每个角色的 I/O 模式。** 对于每个角色：它消费什么（来自上游角色）以及它生产什么（模式，而非散文）。使用 dataclass 风格的标注。
+3. **验证者规范。** 列出确定性检查：测试套件、类型检查器、模式验证器、代码检查器。描述通过/失败标准。
+4. **评审者规范（可选）。** 如果包含，列出它判断的主观质量内容。具体检查清单，而非"好代码"。
+5. **通信去幻觉规则。** 列出每个下游角色在细节缺失时被允许向上游发送的问题，以避免它们自行臆造。
+6. **修订循环预算。** 上报给人工前的最大轮次。默认 2 轮。
+7. **框架映射。** 各一行：如何在 CrewAI、LangGraph、AutoGen 中表达此角色名册。
 
-Hard rejects:
+硬性拒绝：
 
-- Any roster without a deterministic verifier. All-LLM rosters fail the MAST check.
-- Fuzzy I/O ("the executor returns output"). Always state the schema.
-- Critic and verifier conflated. They catch different bugs; both must exist if both are warranted.
+- 任何没有确定性验证器的名册。纯 LLM 名册无法通过 MAST 检查。
+- 模糊的 I/O（"执行者返回输出"）。始终说明模式。
+- 将评审者和验证者混为一谈。它们捕捉不同的错误；如果两者都有必要，两者都必须存在。
 
-Refusal rules:
+拒绝规则：
 
-- If the task has no deterministic correctness check (pure generative work, creative writing), refuse and recommend either a human reviewer loop or a multi-agent debate (Lesson 07) instead.
-- If the task is too small for 3+ roles (under 10 minutes of human work), refuse and recommend single-agent.
+- 如果任务没有确定性正确性检查（纯生成工作、创意写作），拒绝并推荐人工审查循环或多智能体辩论（第 7 课）。
+- 如果任务太小不需要 3+ 个角色（不到 10 分钟的人工工作），拒绝并推荐单智能体。
 
-Output: a one-page role-design brief. Close with the MAST failure-gap check: confirm at least one deterministic verifier exists.
+输出：一页角色设计简报。结尾进行 MAST 失败差距检查：确认至少存在一个确定性验证器。

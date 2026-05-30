@@ -1,110 +1,110 @@
 ---
 name: skill-svm-kernel-chooser
-description: Choose the right SVM kernel and tune C and gamma for your problem
+description: 为你的问题选择合适的 SVM 核函数并调整 C 和 gamma
 version: 1.0.0
 phase: 2
 lesson: 5
 tags: [svm, kernel, classification, hyperparameter-tuning]
 ---
 
-# SVM Kernel Selection Guide
+# SVM 核函数选择指南
 
-SVMs are defined by two choices: the kernel (which determines the shape of the decision boundary) and the regularization parameters (which control the tradeoff between margin width and classification errors). Getting these right is the difference between a useless model and a strong one.
+SVM 由两个关键选择决定：核函数（决定决策边界的形状）和正则化参数（控制间隔宽度与分类错误之间的权衡）。正确选择这两者是模型有用还是无用的关键区别。
 
-## Decision Checklist
+## 决策清单
 
-1. Is the data linearly separable (or close to it)?
-   - Yes: use linear kernel. It is faster and more interpretable.
-   - No: go to step 2.
+1. 数据是否线性可分（或接近线性）？
+   - 是：使用线性核。它更快且更可解释。
+   - 否：转到第 2 步。
 
-2. How many features vs samples?
-   - Features >> samples (e.g., text with TF-IDF): use linear kernel. High-dimensional data is often linearly separable. RBF adds complexity for no gain.
-   - Samples >> features (e.g., tabular data with 10-50 features): RBF kernel is the default choice.
+2. 特征数量与样本数量相比如何？
+   - 特征 >> 样本（如带 TF-IDF 的文本）：使用线性核。高维数据通常是线性可分的。RBF 增加了复杂度却没有收益。
+   - 样本 >> 特征（如有 10-50 个特征的表格数据）：RBF 核是默认选择。
 
-3. Is the decision boundary expected to be smooth?
-   - Smooth, continuous boundary: RBF kernel
-   - Polynomial-shaped boundary: polynomial kernel (start with degree 2 or 3)
-   - Domain knowledge suggests specific interaction terms: polynomial kernel with matching degree
+3. 决策边界是否预期是光滑的？
+   - 光滑、连续边界：RBF 核
+   - 多项式形状边界：多项式核（从 2 或 3 次开始）
+   - 领域知识表明有特定交互项：匹配次数的多项式核
 
-4. How large is the dataset?
-   - Under 10,000 samples: any kernel works, RBF is the safe default
-   - 10,000 to 100,000: linear kernel or LinearSVC (primal formulation, O(n) per epoch)
-   - Over 100,000: do not use kernel SVM. Switch to linear SVM, gradient boosting, or neural networks.
+4. 数据集有多大？
+   - 10,000 样本以下：任何核都可以，RBF 是安全的默认选择
+   - 10,000 到 100,000：线性核或 LinearSVC（原始形式，每轮 O(n)）
+   - 超过 100,000：不要使用核 SVM。切换到线性 SVM、梯度提升或神经网络。
 
-5. Did you scale the features?
-   - SVMs require feature scaling. Always standardize (zero mean, unit variance) before fitting. Unscaled features distort the margin geometry.
+5. 是否对特征进行了缩放？
+   - SVM 需要特征缩放。拟合之前始终标准化（零均值，单位方差）。未缩放的特征会扭曲间隔几何形状。
 
-## Kernel selection flowchart
+## 核函数选择流程图
 
 ```
-Start
+开始
   |
   v
-Features > 1000 or features >> samples?
-  Yes --> Linear kernel (LinearSVC for speed)
-  No  --> Dataset < 10k samples?
-            Yes --> Try RBF first (best general-purpose kernel)
-            No  --> Linear kernel (kernel SVMs are O(n^2) to O(n^3))
+特征 > 1000 或特征 >> 样本？
+  是 --> 线性核（用 LinearSVC 提速）
+  否  --> 数据集 < 1 万样本？
+            是 --> 先尝试 RBF（最好的通用核）
+            否  --> 线性核（核 SVM 复杂度为 O(n^2) 到 O(n^3)）
 ```
 
-If RBF does not work well, try polynomial degree 2-3. If that fails, the problem may not be suited to SVMs.
+如果 RBF 效果不好，尝试 2-3 次多项式。如果仍然失败，问题可能不适合 SVM。
 
-## Tuning C (regularization)
+## 调整 C（正则化）
 
-C controls the penalty for misclassifications. It is inversely related to regularization strength.
+C 控制对误分类的惩罚。它与正则化强度成反比。
 
-| C value | Effect | When to use |
-|---------|--------|-------------|
-| 0.001 - 0.01 | Wide margin, many violations allowed | Noisy data, want generalization |
-| 0.1 - 1.0 | Balanced | Good starting range |
-| 10 - 1000 | Narrow margin, few violations | Clean data, need high accuracy |
+| C 值 | 效果 | 适用场景 |
+|------|------|---------|
+| 0.001 - 0.01 | 宽间隔，允许许多违规 | 噪声数据，需要泛化 |
+| 0.1 - 1.0 | 均衡 | 良好的起始范围 |
+| 10 - 1000 | 窄间隔，很少违规 | 干净数据，需要高准确率 |
 
-Tuning strategy:
-- Start with C=1.0
-- Search on a log scale: [0.001, 0.01, 0.1, 1, 10, 100, 1000]
-- Use cross-validation to pick the best value
-- If best C is at the edge of your range, extend the range in that direction
+调整策略：
+- 从 C=1.0 开始
+- 在对数刻度上搜索：[0.001, 0.01, 0.1, 1, 10, 100, 1000]
+- 使用交叉验证选择最佳值
+- 如果最佳 C 在范围边界处，向该方向扩展范围
 
-## Tuning gamma (RBF kernel)
+## 调整 gamma（RBF 核）
 
-Gamma controls how far the influence of a single training point reaches. It defines the width of the Gaussian.
+Gamma 控制单个训练点的影响范围。它定义了高斯函数的宽度。
 
-| gamma value | Effect | When to use |
-|-------------|--------|-------------|
-| Small (0.001) | Each point influences a large area. Smooth, simple boundary | Underfitting or few features |
-| Medium (auto: 1/n_features) | sklearn default. Reasonable starting point | General use |
-| Large (10+) | Each point influences only nearby points. Complex, wiggly boundary | Risk of overfitting |
+| gamma 值 | 效果 | 适用场景 |
+|---------|------|---------|
+| 小（0.001） | 每个点影响大范围。平滑、简单边界 | 欠拟合或特征少 |
+| 中（auto: 1/n_features） | sklearn 默认值。合理的起始点 | 一般用途 |
+| 大（10+） | 每个点只影响附近的点。复杂、弯曲边界 | 有过拟合风险 |
 
-Tuning strategy:
-- Start with gamma="scale" (1 / (n_features * X.var()), the sklearn default)
-- Search on a log scale: [0.001, 0.01, 0.1, 1, 10]
-- Low gamma + high C tends to overfit
-- High gamma + low C tends to underfit
+调整策略：
+- 从 gamma="scale"（1 / (n_features * X.var())，sklearn 默认值）开始
+- 在对数刻度上搜索：[0.001, 0.01, 0.1, 1, 10]
+- 小 gamma + 大 C 倾向于过拟合
+- 大 gamma + 小 C 倾向于欠拟合
 
-## Joint C and gamma tuning
+## C 和 gamma 联合调整
 
-C and gamma interact. Always tune them together, not independently.
+C 和 gamma 相互作用。始终一起调整，而不是独立调整。
 
-Recommended approach:
-1. Coarse grid search: C in [0.01, 0.1, 1, 10, 100], gamma in [0.001, 0.01, 0.1, 1, 10] (25 combos)
-2. Find the best region
-3. Fine grid search around the best region (e.g., C in [5, 10, 20, 50], gamma in [0.05, 0.1, 0.2])
-4. Use 5-fold cross-validation throughout
+推荐方法：
+1. 粗粒度网格搜索：C 在 [0.01, 0.1, 1, 10, 100]，gamma 在 [0.001, 0.01, 0.1, 1, 10]（25 个组合）
+2. 找到最佳区域
+3. 在最佳区域附近进行细粒度网格搜索（例如 C 在 [5, 10, 20, 50]，gamma 在 [0.05, 0.1, 0.2]）
+4. 全程使用 5 折交叉验证
 
-## Common mistakes
+## 常见错误
 
-- Using RBF kernel on high-dimensional sparse data (linear is better and 100x faster)
-- Forgetting to scale features (the single most common SVM mistake)
-- Setting C too high on noisy data (memorizes noise instead of learning the boundary)
-- Using kernel SVM on datasets over 50k samples (training time is prohibitive)
-- Not tuning C and gamma together (they compensate for each other)
-- Defaulting to polynomial degree 5+ (overfits aggressively, try 2 or 3 first)
+- 在高维稀疏数据上使用 RBF 核（线性核更好且速度快 100 倍）
+- 忘记缩放特征（SVM 最常见的单一错误）
+- 在噪声数据上将 C 设得太高（记住噪声而不是学习边界）
+- 在超过 5 万样本的数据集上使用核 SVM（训练时间过长）
+- 不一起调整 C 和 gamma（它们会相互补偿）
+- 默认使用 5 次以上的多项式（过拟合严重，先试 2 或 3 次）
 
-## Quick reference
+## 快速参考
 
-| Kernel | When to use | Key parameters | Training complexity |
-|--------|------------|----------------|-------------------|
-| Linear | Text/TF-IDF, many features, large data | C only | O(n) per epoch |
-| RBF | General-purpose, under 10k samples | C, gamma | O(n^2) to O(n^3) |
-| Polynomial | Known polynomial relationships | C, degree, coef0 | O(n^2) to O(n^3) |
-| Sigmoid | Rarely useful (equivalent to two-layer neural net) | C, gamma, coef0 | O(n^2) to O(n^3) |
+| 核函数 | 适用场景 | 关键参数 | 训练复杂度 |
+|--------|---------|---------|-----------|
+| 线性 | 文本/TF-IDF，多特征，大数据 | 仅 C | 每轮 O(n) |
+| RBF | 通用，10k 样本以下 | C, gamma | O(n^2) 到 O(n^3) |
+| 多项式 | 已知多项式关系 | C, degree, coef0 | O(n^2) 到 O(n^3) |
+| Sigmoid | 极少有用（等价于两层神经网络） | C, gamma, coef0 | O(n^2) 到 O(n^3) |

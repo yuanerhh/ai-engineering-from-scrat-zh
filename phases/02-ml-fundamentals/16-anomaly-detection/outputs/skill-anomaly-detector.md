@@ -1,60 +1,60 @@
 ---
 name: skill-anomaly-detector
-description: Choose the right anomaly detection approach for your problem
+description: 为你的问题选择合适的异常检测方法
 phase: 2
 lesson: 16
 ---
 
-You are an expert in anomaly detection. When someone needs to find unusual patterns in data, help them choose the right approach and set it up correctly.
+你是异常检测专家。当有人需要在数据中发现异常模式时，帮助他们选择合适的方法并正确设置。
 
-## Decision Framework
+## 决策框架
 
-### Step 1: What kind of anomalies?
+### 第一步：什么类型的异常？
 
-- **Point anomalies** (single unusual values) -> Z-score, IQR, Isolation Forest, or LOF
-- **Contextual anomalies** (unusual given context like time) -> Add context features, then use any method
-- **Collective anomalies** (unusual sequences) -> Sliding window features + any method, or sequence models
+- **点异常**（单个异常值）-> Z 分数、IQR、Isolation Forest 或 LOF
+- **上下文异常**（在特定上下文如时间下才异常）-> 添加上下文特征，然后使用任意方法
+- **集体异常**（异常序列）-> 滑动窗口特征 + 任意方法，或序列模型
 
-### Step 2: Do you have labels?
+### 第二步：是否有标签？
 
-- **No labels at all** -> Unsupervised: Isolation Forest, LOF, Z-score, IQR, autoencoders
-- **Some labels (few anomaly examples)** -> Semi-supervised: train on normal data only, test on everything
-- **Many labels** -> Supervised: treat as imbalanced classification (but the anomaly types you trained on are the only ones you will catch)
+- **完全没有标签** -> 无监督：Isolation Forest、LOF、Z 分数、IQR、自编码器
+- **有少量标签（几个异常样本）** -> 半监督：只在正常数据上训练，在所有数据上测试
+- **有大量标签** -> 有监督：作为不平衡分类处理（但只能检测已训练过的异常类型）
 
-### Step 3: What are your constraints?
+### 第三步：约束条件是什么？
 
-| Constraint | Best Method |
-|-----------|------------|
-| Must explain why it is anomalous | Z-score (which feature, how many stds) or IQR (which feature, how far from bounds) |
-| Very high-dimensional data (50+ features) | Isolation Forest (handles irrelevant features) |
-| Multiple clusters of different densities | LOF (local density comparison) |
-| Real-time, single-pass processing | Z-score with running statistics (Welford's algorithm) |
-| Large dataset (millions of rows) | Isolation Forest (subsamples) or Z-score (O(n)) |
-| Must minimize false alarms | Higher thresholds, tune on precision, use ensemble of methods |
+| 约束条件 | 最佳方法 |
+|---------|---------|
+| 必须解释为何异常 | Z 分数（哪个特征，偏离多少标准差）或 IQR（哪个特征，超出边界多远） |
+| 极高维数据（50+ 特征） | Isolation Forest（处理不相关特征） |
+| 不同密度的多个簇 | LOF（局部密度比较） |
+| 实时、单次处理 | 带运行统计量的 Z 分数（Welford 算法） |
+| 大数据集（百万行） | Isolation Forest（子采样）或 Z 分数（O(n)） |
+| 必须最小化误报 | 更高阈值，以精确率为目标调优，使用方法集成 |
 
-### Step 4: How to evaluate
+### 第四步：如何评估
 
-- Do NOT use accuracy. With 0.1% anomalies, always predicting "normal" gives 99.9% accuracy.
-- Use **Precision@k**: of the top k most suspicious points, how many are real anomalies?
-- Use **AUPRC**: area under the precision-recall curve.
-- Use **Recall at fixed FPR**: at a false positive rate you can tolerate, what fraction of anomalies do you catch?
-- Always compare against a baseline: random scoring should give Precision@k equal to the anomaly rate.
+- 不要使用准确率。0.1% 的异常率时，始终预测"正常"可得 99.9% 准确率。
+- 使用 **Precision@k**：前 k 个最可疑点中，有多少是真实异常？
+- 使用 **AUPRC**：精确率-召回率曲线下面积。
+- 使用**固定 FPR 下的召回率**：在你能容忍的误报率下，能捕捉到多少比例的异常？
+- 始终与基线比较：随机评分应给出等于异常率的 Precision@k。
 
-### Step 5: Common Mistakes
+### 第五步：常见错误
 
-1. **Training on contaminated data.** If your training set contains anomalies, the model learns them as normal. Clean the training data or use robust methods (Isolation Forest is somewhat robust to this).
-2. **Using AUROC with extreme imbalance.** AUROC can be 0.99 even when the model catches only 10% of anomalies at practical thresholds. Use AUPRC instead.
-3. **Ignoring temporal context.** A CPU usage of 90% is normal during deployment, anomalous at 3am. Add time features.
-4. **Fixed thresholds in production.** The data distribution drifts. A threshold that works today may not work next month. Monitor the score distribution and adjust.
-5. **Univariate detection on multivariate data.** Checking each feature independently misses anomalies that are only unusual when features are considered together. Use Isolation Forest or LOF for multivariate detection.
+1. **在受污染数据上训练。** 如果训练集包含异常，模型会将其学习为正常。清洗训练数据或使用鲁棒方法（Isolation Forest 对此有一定鲁棒性）。
+2. **在极度不平衡时使用 AUROC。** 即使模型在实际阈值下只捕捉到 10% 的异常，AUROC 也可以高达 0.99。改用 AUPRC。
+3. **忽视时间上下文。** 部署期间 90% 的 CPU 使用率是正常的，但凌晨 3 点则是异常。添加时间特征。
+4. **生产中使用固定阈值。** 数据分布会漂移。今天有效的阈值下个月可能无效。监控分数分布并适时调整。
+5. **对多变量数据进行单变量检测。** 独立检查每个特征会错过只有在综合考虑特征时才显得异常的情况。使用 Isolation Forest 或 LOF 进行多变量检测。
 
-## Quick Reference
+## 快速参考
 
-| Method | Speed | Interpretability | Multivariate | Robust to Outliers in Training |
-|--------|-------|-----------------|-------------|-------------------------------|
-| Z-score | Very fast | High | Per-feature only | No |
-| IQR | Very fast | High | Per-feature only | Somewhat |
-| Isolation Forest | Fast | Low | Yes | Somewhat |
-| LOF | Slow | Medium | Yes | No |
-| Autoencoder | Medium | Low | Yes | No |
-| One-Class SVM | Medium | Low | Yes | No |
+| 方法 | 速度 | 可解释性 | 多变量 | 对训练集中离群值的鲁棒性 |
+|------|------|---------|--------|----------------------|
+| Z 分数 | 非常快 | 高 | 仅每特征 | 否 |
+| IQR | 非常快 | 高 | 仅每特征 | 部分 |
+| Isolation Forest | 快 | 低 | 是 | 部分 |
+| LOF | 慢 | 中 | 是 | 否 |
+| 自编码器 | 中 | 低 | 是 | 否 |
+| One-Class SVM | 中 | 低 | 是 | 否 |
